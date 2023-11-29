@@ -15,9 +15,6 @@ COPY . .
 # Build the application.
 RUN yarn build
 
-# Uninstall the dependencies not required to run the built application.
-RUN yarn prune --production
-
 # Initiate a new container to run the application in.
 FROM node:latest
   ENV NODE_ENV=production
