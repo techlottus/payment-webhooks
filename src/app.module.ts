@@ -11,11 +11,11 @@ import { RouterModule } from '@nestjs/core';
     InscriptionsModule,
     RouterModule.register([
       {
-        path: 'stripe',
+        path: '/',
         module: StripeModule,
       },
       {
-        path: 'inscriptions',
+        path: '/',
         module: InscriptionsModule,
       },
     ])
