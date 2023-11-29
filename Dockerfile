@@ -7,7 +7,7 @@ WORKDIR /
 COPY package*.json ./
 
 # Install the dependencies required to build the application.
-RUN yarn && yarn global add @nest/cli 
+RUN yarn && yarn global add @nestjs/cli
 
 # Copy the application source into the container.
 COPY . .
