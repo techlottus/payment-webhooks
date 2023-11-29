@@ -6,6 +6,7 @@ const stripe = require('stripe')(env.STRIPE_API_KEY);
 export class StripeService {
   async populateStrapi(request: any, response: any) {
     const sig = request.headers['stripe-signature'];
+    console.log('env.STRIPE_API_KEY: ', env.STRIPE_API_KEY);
     console.log('env.WEBHOOK_SECRET: ', env.WEBHOOK_SECRET);
 
     let event;
