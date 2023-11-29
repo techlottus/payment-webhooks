@@ -4,15 +4,16 @@ import { env } from 'process';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
 export class StripeService {
-  async populateStrapi(request: any) {
+  async populateStrapi(request: any, response: any) {
     const sig = request.headers['stripe-signature'];
+    console.log('env.WEBHOOK_SECRET: ', env.WEBHOOK_SECRET);
 
     let event;
   
     try {
       event = stripe.webhooks.constructEvent(request.body, sig, env.WEBHOOK_SECRET);
     } catch (err) {
-      // response.status(400).send(`Webhook Error: ${err.message}`);
+      response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
     console.log('event: ', event);
