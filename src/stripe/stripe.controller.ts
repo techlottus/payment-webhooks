@@ -1,10 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
+import { StripeService } from './stripe.service';
 
 @Controller('stripe')
 export class StripeController {
+  constructor(private readonly stripeService: StripeService) {}
   @Post('/new')
-  create(@Body() body ) {
-    console.log("body: ", body);
+  create(@Req() request: any ) {
+    // console.log("request: ", request);
+    this.stripeService.populateStrapi(request)
     
   }
 }
