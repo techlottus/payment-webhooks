@@ -6,6 +6,9 @@ WORKDIR /
 # Copy the package.json into the container.
 COPY package*.json ./
 
+# Copy the tsconfig.json into the container.
+COPY tsconfig.json ./
+
 # Install the dependencies required to build the application.
 RUN yarn && yarn global add @nestjs/cli
 
