@@ -6,8 +6,8 @@ const stripe = require('stripe')(env.STRIPE_API_KEY);
 export class StripeService {
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
     console.log('request: ', request);
-    const sig =  JSON.parse((request.rawBody).toString('utf-8')).headers['stripe-signature'];
-    // const sig = request.headers['stripe-signature'];
+    // const sig =  JSON.parse((request.rawBody).toString('utf-8')).headers['stripe-signature'];
+    const sig = request.headers['stripe-signature'];
     let event;
   
     try {
