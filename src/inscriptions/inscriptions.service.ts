@@ -4,11 +4,12 @@ export class InscriptionsService {
   populateStrapi(request: any, response: any) {
     const formResponse = request.body.form_response
     console.log('formResponse: ', formResponse);
-    const cs_id = formResponse.hidden?.checkout_session_id || null
+    console.log('formResponse.hidden.checkout_session_id: ', formResponse.hidden.checkout_session_id);
+    const cs_id = formResponse.hidden.checkout_session_id || null
+    console.log('cs_id: ', cs_id);
 
-    if (!!cs_id) {
+    if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
-  
     } else {
       const answers = formResponse.definition.fields.reduce((acc, field, index) => {
         const { title, type, id, ref } = field
@@ -21,6 +22,7 @@ export class InscriptionsService {
       }, {})
       console.log('answers: ', answers);
     }
+
     response.send();
     
   }
