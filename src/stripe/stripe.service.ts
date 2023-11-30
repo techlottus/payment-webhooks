@@ -11,7 +11,7 @@ export class StripeService {
     let event;
   
     try {
-      event = stripe.webhooks.constructEvent(request.body, sig, env.WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(request.rawBody, sig, env.WEBHOOK_SECRET);
     } catch (err) {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
