@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
-
 @Injectable()
 export class InscriptionsService {
   populateStrapi(request: any, response: any) {
@@ -12,17 +10,17 @@ export class InscriptionsService {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
   
     } else {
-      const answers = formResponse.definition.fields.map((field, index) => {
-        const { title, type, id } = field
+      const answers = formResponse.definition.fields.reduce((acc, field, index) => {
+        const { title, type, id, ref } = field
         const rawAnswer = formResponse.answers[index]
         const answer = rawAnswer[rawAnswer.type]
-        const answerField =  { id, title, type, answer: type === "multiple_choice" ? answer.label : answer }
-        
-      console.log('answerField: ', answerField);
-        return answerField
-      })
+        // const answerField =  { id, title, ref, answer: type === "multiple_choice" ? answer.label : answer }
+        acc = { ...acc, [ref]: type === "multiple_choice" ? answer.label : answer }
+        console.log('acc: ', acc);
+        return acc
+      }, {})
+      console.log('answers: ', answers);
     }
-    // console.log('answers: ', answers);
     response.send();
     
   }
