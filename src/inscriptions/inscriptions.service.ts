@@ -6,7 +6,9 @@ export class InscriptionsService {
     const formResponse = request.body.form_response
     console.log('formResponse: ', formResponse);
     const answers = formResponse.definition.fields.map((field, index) => {
-      const answerField =  { ...field, answer: formResponse.answers[index]}
+      const { title, type, id } = field
+      const answer = formResponse.answers[index][formResponse.answers[index].type]
+      const answerField =  { id, title, type, answer: type === "multiple_choice" ? answer.label : answer }
       console.log('answerField: ', answerField);
       
       return answerField
