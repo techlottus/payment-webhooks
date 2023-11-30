@@ -1,5 +1,5 @@
-import { Body, Injectable, Post, Req } from '@nestjs/common';
-import { throwError } from 'rxjs';
+import { Injectable } from '@nestjs/common';
+
 
 @Injectable()
 export class InscriptionsService {
@@ -18,6 +18,7 @@ export class InscriptionsService {
         const answer = rawAnswer[rawAnswer.type]
         const answerField =  { id, title, type, answer: type === "multiple_choice" ? answer.label : answer }
         
+      console.log('answerField: ', answerField);
         return answerField
       })
     }
