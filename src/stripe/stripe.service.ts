@@ -72,6 +72,8 @@ export class StripeService {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
+    response.send();
+
   }
   // server.js
 //
@@ -107,7 +109,6 @@ export class StripeService {
   
 
   // Return a 200 response to acknowledge receipt of the event
-  // response.send();
 // });
 // app.use(express.json())
 // app.listen(4242, () => console.log('Running on port 4242'));
