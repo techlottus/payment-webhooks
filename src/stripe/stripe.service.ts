@@ -6,7 +6,6 @@ const stripe = require('stripe')(env.STRIPE_API_KEY);
 export class StripeService {
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
     console.log('request: ', request);
-    // const sig =  JSON.parse((request.rawBody).toString('utf-8')).headers['stripe-signature'];
     const sig = request.headers['stripe-signature'];
     let event;
   
@@ -26,7 +25,7 @@ export class StripeService {
         const session = await stripe.checkout.sessions.retrieve(
           event.data.object.id,
           {
-            expand: ['customer', 'line_items', 'line_items.product', 'payment_intent', 'subscription', 'subscription.latest_invoice', 'invoice'],
+            expand: ['customer', 'line_items', 'line_items.data.product', 'payment_intent', 'subscription', 'subscription.latest_invoice', 'invoice'],
           }
         );
         const checkoutSessionCompleted = event.data.object;
