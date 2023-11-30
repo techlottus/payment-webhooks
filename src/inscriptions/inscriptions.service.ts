@@ -3,23 +3,29 @@ import { Injectable } from '@nestjs/common';
 export class InscriptionsService {
   populateStrapi(request: any, response: any) {
     const formResponse = request.body.form_response
-    console.log('formResponse: ', formResponse);
-    console.log('formResponse.hidden.checkout_session_id: ', formResponse.hidden.checkout_session_id);
     const cs_id = formResponse.hidden.checkout_session_id || null
-    console.log('cs_id: ', cs_id);
 
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
     } else {
-      const answers = formResponse.definition.fields.reduce((acc, field, index) => {
+      const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
         const { title, type, id, ref } = field
         const rawAnswer = formResponse.answers[index]
         const answer = rawAnswer[rawAnswer.type]
-        // const answerField =  { id, title, ref, answer: type === "multiple_choice" ? answer.label : answer }
-        acc = { ...acc, [ref]: type === "multiple_choice" ? answer.label : answer }
-        console.log('acc: ', acc);
+        const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
+        if(ref === 'need_invoice') {
+          acc.needInvoiceIndex = index;
+          acc.needInvoice = answer
+        }
+        if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
+          acc.inscription = { ...acc.inscription, ...strapiField }
+        } else if (index > acc.needInvoiceIndex) {
+          acc.invoice = { ...acc.invoice, ...strapiField }
+        }
+        console.log('acc.inscription: ', acc.inscription);
+        console.log('acc.invoice: ', acc.invoice);
         return acc
-      }, {})
+      }, {inscription: {}, invoice: {}, needInvoiceIndex: null, needInvoice: false })
       console.log('answers: ', answers);
     }
 
