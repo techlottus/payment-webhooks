@@ -5,7 +5,9 @@ const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
 export class StripeService {
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
+    console.log('request: ', request);
     const sig = request.headers['stripe-signature'];
+    // const sig = request.headers['stripe-signature'];
     let event;
   
     try {
