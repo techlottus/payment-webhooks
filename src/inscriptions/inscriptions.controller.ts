@@ -1,10 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { InscriptionsService } from './inscriptions.service';
 
 @Controller('inscriptions')
 export class InscriptionsController {
+  constructor(private readonly inscriptionsService: InscriptionsService) {}
+
   @Post('/new')
-  create(@Body() body ) {
-    console.log("body: ", body);
-    
+  webhook(@Req() request: any, @Res() response: any ) {
+    console.log("request: ", request);
+    this.inscriptionsService.populateStrapi(request, response)
   }
 }

@@ -22,39 +22,9 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         // stripe.  
-        const session = await stripe.checkout.sessions.retrieve(
-          event.data.object.id,
-          {
-            expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'invoice'],
-          }
-        );
-        const checkoutSessionCompleted = event.data.object;
-        const {
-          id,
-          payment_intent,
-          created,
-          subscription,
-          payment_status,
-          amount_total,
-          customer_details: { email },
-          metadata,
-          payment_method_types
-        } = checkoutSessionCompleted
-        const request = {
-          checkout_session_id: id,
-          payment_intent_id: payment_intent,
-          payment_date: new Date(created),
-          subscription_id: subscription,
-          status: payment_status,
-          amount: amount_total / 100,
-          email,
-          metadata,
-          payment_method_types
-        }
-        console.log('request: ', request , '\n');
-        console.log('session: ', session , '\n');
-        console.log('session.subscription.latest_invoice: ', session.subscription.latest_invoice , '\n');
-        console.log('session.line_items.data[0]: ', session.line_items.data[0] , '\n');
+        const req = await this.checkoutSessionCompleted(event)
+        console.log('req: ', req);
+
         // Then define and call a function to handle the event checkout.session.completed
         break;
       case 'checkout.session.expired':
@@ -73,43 +43,41 @@ export class StripeService {
         console.log(`Unhandled event type ${event.type}`);
     }
     response.send();
-
   }
-  // server.js
-//
-// Use this sample code to handle webhook events in your integration.
-//
-// 1) Paste this code into a new file (server.js)
-//
-// 2) Install dependencies
-//   npm install stripe
-//   npm install express
-//
-// 3) Run the server on http://localhost:4242
-//   node server.js
 
-// The library needs to be configured with your account's secret key.
-// Ensure the key is kept out of any version control system you might be using.
-
-
-
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
-// const endpointSecret = ;
-// app.use(
-//   ( req, res, next ) => {
-//     if (req.originalUrl === '/webhook') {
-//       next();
-//     } else {
-//       express.json()(req, res, next);
-//     }
-//   }
-// );
-
-// app.post('/webhook', express.raw({type: '*/*'}), async (request, response) => {
-  
-
-  // Return a 200 response to acknowledge receipt of the event
-// });
-// app.use(express.json())
-// app.listen(4242, () => console.log('Running on port 4242'));
+  async checkoutSessionCompleted(event: any) {
+    const session = await stripe.checkout.sessions.retrieve(
+      event.data.object.id,
+      {
+        expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'invoice'],
+      }
+    );
+    const checkoutSessionCompleted = event.data.object;
+    const {
+      id,
+      payment_intent,
+      created,
+      subscription,
+      payment_status,
+      amount_total,
+      customer_details: { email },
+      metadata,
+      payment_method_types
+    } = checkoutSessionCompleted
+    const request = {
+      checkout_session_id: id,
+      payment_intent_id: payment_intent,
+      payment_date: new Date(created),
+      subscription_id: subscription,
+      status: payment_status,
+      amount: amount_total / 100,
+      email,
+      metadata,
+      payment_method_types
+    }
+    console.log('session: ', session , '\n');
+    console.log('session.subscription.latest_invoice: ', session.subscription.latest_invoice , '\n');
+    console.log('session.line_items.data[0]: ', session.line_items.data[0] , '\n');
+    return request
+  }
 }
