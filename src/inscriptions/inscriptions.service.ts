@@ -12,14 +12,17 @@ export class InscriptionsService {
         const { title, type, id, ref } = field
         const rawAnswer = formResponse.answers[index]
         const answer = rawAnswer[rawAnswer.type]
-        const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
         if(ref === 'need_invoice') {
           acc.needInvoiceIndex = index;
           acc.needInvoice = answer
         }
         if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
+          const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
           acc.inscription = { ...acc.inscription, ...strapiField }
         } else if (index > acc.needInvoiceIndex) {
+          const [ _first, rest ] = ref.split('_')
+          const key = rest.join('_')
+          const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
           acc.invoice = { ...acc.invoice, ...strapiField }
         }
         console.log('acc.inscription: ', acc.inscription);
