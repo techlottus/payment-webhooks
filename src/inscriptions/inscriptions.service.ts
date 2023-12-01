@@ -20,7 +20,7 @@ export class InscriptionsService {
           const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
           acc.inscription = { ...acc.inscription, ...strapiField }
         } else if (index > acc.needInvoiceIndex) {
-          const [ _first, rest ] = ref.split('_')
+          const [ _first, ...rest ] = ref.split('_')
           const key = rest.join('_')
           const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
           acc.invoice = { ...acc.invoice, ...strapiField }
