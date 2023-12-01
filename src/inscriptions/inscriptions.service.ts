@@ -46,21 +46,13 @@ export class InscriptionsService {
       console.log('answers: ', answers);
       try {
         const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        // call strapi to invoice and inscription post answers to endpoints
-        forkJoin([inscriptionObs, invoiceObs])
-          .subscribe((responses) => {
-            const status = responses.reduce((acc, res) => {
-              console.log('res: ', res);
-              console.log('res.status: ', res.status);
-              console.log('res.request.path: ', res.request.path);
-              acc = [ ...acc, { code: res.status, message: res.statusText} ] 
-              return acc
-            }, [])
-            response.status(status[0].code).send(status[0].message)
-            response.send();
-          })
-          
+        inscriptionObs.subscribe((res) => response.status(res.status).send(res.statusText))
+        
+        if (answers.need_invoice) {
+          const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+          invoiceObs.subscribe()
+        }
+        
       } catch (error) {
         response.status(error.status).send(error.message);
         response.send();
