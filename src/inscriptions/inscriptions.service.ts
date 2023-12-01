@@ -46,14 +46,15 @@ export class InscriptionsService {
       console.log('answers: ', answers);
       try {
         const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        inscriptionObs.subscribe((res) => response.status(res.status))
+        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         
-        if (answers.need_invoice) {
-          const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-          invoiceObs.subscribe()
-        }
+        inscriptionObs.subscribe((res) => response.status(res.status)).add(() => {
+          if (answers.need_invoice) invoiceObs.subscribe()
+          response.send()
+        })
+        
 
-        response.send()
+        // forkJoin([inscriptionObs, invoiceObs]). response.send()
         
       } catch (error) {
         response.status(error.status).send(error.message);
