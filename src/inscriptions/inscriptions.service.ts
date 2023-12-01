@@ -45,8 +45,8 @@ export class InscriptionsService {
       }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
       console.log('answers: ', answers);
       try {
-        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, answers.inscription, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, answers.invoice, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         // call strapi to invoice and inscription post answers to endpoints
         forkJoin([inscriptionObs, invoiceObs])
           .subscribe((res) => {
