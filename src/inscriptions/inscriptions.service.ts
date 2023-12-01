@@ -47,9 +47,9 @@ export class InscriptionsService {
       try {
         const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        if (answers.need_invoice) invoiceObs.subscribe()
         
         inscriptionObs.subscribe((res) => {
-          if (answers.need_invoice) invoiceObs.subscribe()
           response.status(res.status) 
         }).add(() => {
           
