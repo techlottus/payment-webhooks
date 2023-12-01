@@ -49,11 +49,17 @@ export class InscriptionsService {
         const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         // call strapi to invoice and inscription post answers to endpoints
         forkJoin([inscriptionObs, invoiceObs])
-          .subscribe((res) => {
-            console.log('res: ', res);
-            response.send();
-          })
+          .subscribe((responses) => {
+            responses.forEach((res) => {
+              console.log('res: ', res);
+              console.log('res.status: ', res.status);
+              console.log('res: ', res);
+              // response.status(res.status).send(res.message);
+              response.send();
 
+            })
+          })
+          
       } catch (error) {
         response.status(error.status).send(error.message);
         response.send();
