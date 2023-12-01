@@ -50,6 +50,9 @@ export class InscriptionsService {
     
         
          iif(() => answers.need_invoice, [inscriptionObs, invoiceObs], [inscriptionObs]).subscribe((res) => {
+          console.log(res);
+          console.log(res[0]);
+          
           response.status(res[0].status) 
           response.send()
         })
