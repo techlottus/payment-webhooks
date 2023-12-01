@@ -22,12 +22,15 @@ export class InscriptionsService {
           acc.inscription = { ...acc.inscription, ...strapiField }
         } else if (index > acc.needInvoiceIndex) {
 
-          const [ _first, ...rest ] = ref.split('_')
+          let [ _first, ...rest ] = ref.split('_')
           const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
           console.log('rest: ', rest);
           
-          const key = hasRepeatedField.includes(true) ? (rest.pop() as Array<string>).join('_') : rest.join('_');
-
+          // hasRepeatedField.includes(true) ? (rest.pop() as Array<string>).join('_') : rest.join('_');
+          if (hasRepeatedField.includes(true)) rest = rest.pop()
+          console.log('rest: ', rest);
+          
+          const key = rest.join('_')
           const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
           acc.invoice = { ...acc.invoice, ...strapiField }
         }
