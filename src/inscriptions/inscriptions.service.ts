@@ -1,13 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import {  Injectable } from '@nestjs/common';
+require('dotenv').config();
+import { env } from 'process';
+import { forkJoin } from 'rxjs';
+
 @Injectable()
 export class InscriptionsService {
+  
+  constructor(private readonly http: HttpService) {}
   populateStrapi(request: any, response: any) {
+
     const formResponse = request.body.form_response
     const cs_id = formResponse.hidden.checkout_session_id || null
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
 
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
+      response.send();
     } else {
       const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
         const { type, ref } = field
@@ -24,24 +33,34 @@ export class InscriptionsService {
 
           let [ _first, ...rest ] = ref.split('_')
           const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
-          console.log('rest: ', rest);
-          
-          // hasRepeatedField.includes(true) ? (rest.pop() as Array<string>).join('_') : rest.join('_');
+
           if (hasRepeatedField.includes(true)) rest.pop()
-          console.log('rest: ', rest);
           
           const key = rest.join('_')
           const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
           acc.invoice = { ...acc.invoice, ...strapiField }
         }
-        console.log('acc.inscription: ', acc.inscription);
-        console.log('acc.invoice: ', acc.invoice);
         return acc
-      }, {inscription: {}, invoice: {}, needInvoiceIndex: null, needInvoice: false })
+      }, { inscription: {}, invoice: {}, needInvoiceIndex: null, needInvoice: false })
       console.log('answers: ', answers);
+      try {
+        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { cs_id, submitted_at: formResponse.submitted_at , ...answers.inscription}, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { cs_id, submitted_at: formResponse.submitted_at , ...answers.invoice}, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        // call strapi to invoice and inscription post answers to endpoints
+        forkJoin([inscriptionObs, invoiceObs])
+        .subscribe((res) => {
+          console.log('res: ', res);
+          
+        })
+        // response.send();
+        
+      } catch (error) {
+        response.status(error.status).send(error.message);
+        response.send();
+      }
     }
 
-    response.send();
+
     
   }
 }
