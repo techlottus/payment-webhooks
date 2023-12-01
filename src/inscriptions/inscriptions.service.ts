@@ -24,7 +24,9 @@ export class InscriptionsService {
 
           const [ _first, ...rest ] = ref.split('_')
           const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
-          const key = hasRepeatedField.includes(true) ? rest.pop().join('_') : rest.join('_');
+          console.log('rest: ', rest);
+          
+          const key = hasRepeatedField.includes(true) ? (rest.pop() as Array<string>).join('_') : rest.join('_');
 
           const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
           acc.invoice = { ...acc.invoice, ...strapiField }
