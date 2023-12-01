@@ -50,14 +50,15 @@ export class InscriptionsService {
         // call strapi to invoice and inscription post answers to endpoints
         forkJoin([inscriptionObs, invoiceObs])
           .subscribe((responses) => {
-            responses.forEach((res) => {
+            const status = responses.reduce((acc, res) => {
               console.log('res: ', res);
               console.log('res.status: ', res.status);
-              console.log('res: ', res);
-              // response.status(res.status).send(res.message);
-              response.send();
-
-            })
+              console.log('res.request.path: ', res.request.path);
+              acc = [ ...acc, { code: res.status, message: res.statusText} ] 
+              return acc
+            }, [])
+            response.status(status[0].code).send(status[0].message)
+            response.send();
           })
           
       } catch (error) {
