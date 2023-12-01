@@ -18,6 +18,7 @@ export class InscriptionsService {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
       response.send();
     } else {
+      const submitted_at = formResponse.submitted_at
       const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
         const { type, ref } = field
         const rawAnswer = formResponse.answers[index]
@@ -41,18 +42,18 @@ export class InscriptionsService {
           acc.invoice = { ...acc.invoice, ...strapiField }
         }
         return acc
-      }, { inscription: {}, invoice: {}, needInvoiceIndex: null, needInvoice: false })
+      }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
       console.log('answers: ', answers);
       try {
-        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { cs_id, submitted_at: formResponse.submitted_at , ...answers.inscription}, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { cs_id, submitted_at: formResponse.submitted_at , ...answers.invoice}, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, answers.inscription, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, answers.invoice, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         // call strapi to invoice and inscription post answers to endpoints
         forkJoin([inscriptionObs, invoiceObs])
           .subscribe((res) => {
             console.log('res: ', res);
-            
             response.send();
           })
+
       } catch (error) {
         response.status(error.status).send(error.message);
         response.send();
