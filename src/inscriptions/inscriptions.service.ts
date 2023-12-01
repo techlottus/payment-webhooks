@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import {  Injectable } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
-import { forkJoin, iif } from 'rxjs';
+import { EMPTY, forkJoin, iif } from 'rxjs';
 
 @Injectable()
 export class InscriptionsService {
@@ -49,7 +49,7 @@ export class InscriptionsService {
         const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
     
         
-        forkJoin([inscriptionObs, iif(() => answers.need_invoice, invoiceObs, null) ]).subscribe((res) => {
+        forkJoin([inscriptionObs, iif(() => answers.need_invoice, invoiceObs, EMPTY) ]).subscribe((res) => {
           response.status(res[0].status) 
           response.send()
         })
