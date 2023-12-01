@@ -10,7 +10,7 @@ export class InscriptionsService {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
     } else {
       const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
-        const { title, type, id, ref } = field
+        const { type, ref } = field
         const rawAnswer = formResponse.answers[index]
         const answer = rawAnswer[rawAnswer.type]
         if(ref === 'need_invoice') {
@@ -27,7 +27,7 @@ export class InscriptionsService {
           console.log('rest: ', rest);
           
           // hasRepeatedField.includes(true) ? (rest.pop() as Array<string>).join('_') : rest.join('_');
-          if (hasRepeatedField.includes(true)) rest = rest.pop()
+          if (hasRepeatedField.includes(true)) rest.pop()
           console.log('rest: ', rest);
           
           const key = rest.join('_')
