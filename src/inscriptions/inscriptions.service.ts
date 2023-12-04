@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import {  Injectable } from '@nestjs/common';
 import { forkJoin } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
@@ -6,7 +5,7 @@ import { UtilsService } from 'src/utils/utils.service';
 @Injectable()
 export class InscriptionsService {
   
-  constructor(private readonly http: HttpService, private utilsService: UtilsService) {}
+  constructor(private utilsService: UtilsService) {}
   async populateStrapi(request: any, response: any) {
 
     const formResponse = request.body.form_response

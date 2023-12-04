@@ -5,7 +5,7 @@ import { env } from 'process';
 
 @Injectable()
 export class UtilsService {
-  constructor(private readonly http: HttpService) {}
+  constructor(public readonly http: HttpService) {}
 
   async postStrapi (endpoint: string, data: any) {
     return this.http.post(`${env.STRAPI_TRACKING_API}/${endpoint}`, { data }, { headers: { Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}` }})
