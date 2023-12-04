@@ -22,7 +22,7 @@ import { UtilsModule } from './utils/utils.module';
     ]),
     UtilsModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [ AppController ],
+  providers: [ AppService ],
 })
 export class AppModule {}

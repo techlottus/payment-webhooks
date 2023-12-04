@@ -5,8 +5,8 @@ import { UtilsService } from 'src/utils/utils.service';
 import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
-  imports: [UtilsModule],
-  controllers: [InscriptionsController],
-  providers: [InscriptionsService, UtilsService]
+  imports: [ UtilsModule ],
+  controllers: [ InscriptionsController ],
+  providers: [ InscriptionsService, UtilsService ]
 })
 export class InscriptionsModule {}
