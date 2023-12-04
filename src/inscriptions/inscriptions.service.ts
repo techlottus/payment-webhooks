@@ -52,9 +52,12 @@ export class InscriptionsService {
         interval(100).pipe(mergeMap(v =>
           iif(() => answers.need_invoice, invoice, inscription)
         )).subscribe((res) => {
-          console.log('res: ', res);
-          
-          response.status(res[0].status) 
+          res.subscribe(data => {
+            console.log('data: ', data);
+            
+            response.status(data[0].status) 
+
+          })
         })
         
       } catch (error) {
