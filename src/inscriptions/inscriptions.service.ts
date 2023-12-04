@@ -55,7 +55,6 @@ export class InscriptionsService {
         
       } catch (error) {
         response.status(error.status).send(error.message);
-        // response.send();
       }
       response.send()
     }

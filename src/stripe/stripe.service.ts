@@ -15,8 +15,8 @@ export class StripeService {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    console.log('event: ', event);
-    console.log('event.data.object: ', event.data.object);
+    // console.log('event: ', event);
+    // console.log('event.data.object: ', event.data.object);
     // Handle the event
   
     switch (event.type) {
@@ -29,12 +29,12 @@ export class StripeService {
         break;
       case 'checkout.session.expired':
         const checkoutSessionExpired = event.data.object;
-        console.log('checkoutSessionExpired: ', checkoutSessionExpired);
+        // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
       // Then define and call a function to handle the event checkout.session.expired
       break;
       case 'subscription_schedule.updated':
         const subscriptionScheduleUpdated = event.data.object;
-        console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
+        // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
   
         // Then define and call a function to handle the event subscription_schedule.updated
         break;
@@ -49,7 +49,7 @@ export class StripeService {
     const session = await stripe.checkout.sessions.retrieve(
       event.data.object.id,
       {
-        expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'invoice'],
+        expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'subscription.latest_invoice.charge', 'invoice'],
       }
     );
     const checkoutSessionCompleted = event.data.object;
@@ -58,16 +58,22 @@ export class StripeService {
       payment_intent,
       created,
       subscription,
+      subscription: { latest_invoice: { charge }},
       payment_status,
       amount_total,
-      customer_details: { email },
+      customer_details: { email, phone },
       metadata,
-      payment_method_types
+      payment_method_types,
+      customer
     } = checkoutSessionCompleted
     const request = {
-      checkout_session_id: id,
-      payment_intent_id: payment_intent,
-      payment_date: new Date(created),
+      cs_id: id,
+      payment_id: payment_intent,
+      product_name: session.line_items.data[0].description,
+      phone,
+      customer_id: customer,
+      order_id: '',
+      date: new Date(created),
       subscription_id: subscription,
       status: payment_status,
       amount: amount_total / 100,
@@ -76,6 +82,7 @@ export class StripeService {
       payment_method_types
     }
     console.log('session: ', session , '\n');
+    console.log('charge: ', charge , '\n');
     console.log('session.subscription.latest_invoice: ', session.subscription.latest_invoice , '\n');
     console.log('session.line_items.data[0]: ', session.line_items.data[0] , '\n');
     return request
