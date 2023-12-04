@@ -1,6 +1,7 @@
 import { Injectable, RawBodyRequest } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
+import { catchError } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
@@ -25,15 +26,12 @@ export class StripeService {
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
 
-        this.utilsService.postStrapi('track-payments', strapiReq).subscribe(
+        this.utilsService.postStrapi('track-payments', strapiReq).pipe(catchError(error => response.status(error.status).send(`Webhook Error: ${error.message}`))).subscribe(
           res => {
 
-          console.log('res: ', res);
-          response.status(res.status).send('created succesfully');
+            console.log('res: ', res);
+            response.send('created succesfully');
 
-          },
-          error => {
-            response.status(error.status).send(`Webhook Error: ${error.message}`);
           }
         )
         // Then define and call a function to handle the event checkout.session.completed
