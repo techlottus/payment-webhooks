@@ -1,12 +1,11 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, RawBodyRequest } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
-import { AppService } from 'src/app.service';
+import { UtilsService } from 'src/utils/utils.service';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
 export class StripeService {
-  constructor(private mainService: AppService) {}
+  constructor(private utilsService: UtilsService) {}
 
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
     console.log('request: ', request);
@@ -27,7 +26,7 @@ export class StripeService {
       case 'checkout.session.completed':
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
-        const strapiRes = await this.mainService.postStrapi('tracking-payment', strapiReq)
+        const strapiRes = await this.utilsService.postStrapi('tracking-payment', strapiReq)
         console.log('strapiRes: ', strapiRes);
         // Then define and call a function to handle the event checkout.session.completed
         break;

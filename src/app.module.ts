@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { StripeModule } from './stripe/stripe.module';
 import { InscriptionsModule } from './inscriptions/inscriptions.module';
 import { RouterModule } from '@nestjs/core';
+import { UtilsService } from './utils/utils.service';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { RouterModule } from '@nestjs/core';
     ])
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, UtilsService],
 })
 export class AppModule {}
