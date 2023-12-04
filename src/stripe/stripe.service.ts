@@ -29,7 +29,7 @@ export class StripeService {
         this.utilsService.postStrapi('track-payments', strapiReq).pipe(catchError(err => {
           console.error(err);
           
-          response.status(err.status).send(`Webhook Error: ${err.message}`)
+          response.status(err.response.status).send(`Webhook Error: ${err.response.message}`)
           return err
         })).subscribe(res => {
 
