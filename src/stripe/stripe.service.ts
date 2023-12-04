@@ -8,7 +8,6 @@ export class StripeService {
   constructor(private utilsService: UtilsService) {}
 
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
-    console.log('request: ', request);
     const sig = request.headers['stripe-signature'];
     let event;
   
@@ -26,8 +25,11 @@ export class StripeService {
       case 'checkout.session.completed':
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
-        const strapiRes = (await this.utilsService.postStrapi('tracking-payment', strapiReq)).subscribe()
-        console.log('strapiRes: ', strapiRes);
+        const strapiRes = (await this.utilsService.postStrapi('tracking-payment', strapiReq))
+        strapiRes.subscribe(res => {
+
+          console.log('res: ', res);
+        })
         // Then define and call a function to handle the event checkout.session.completed
         break;
       case 'checkout.session.expired':
