@@ -48,7 +48,7 @@ export class InscriptionsService {
         const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
         const sources = [inscriptionObs]
-        if (answers.need_invoice) {
+        if (answers.needInvoice) {
           sources.push(invoiceObs)
         }
         forkJoin(sources).subscribe(data => {
