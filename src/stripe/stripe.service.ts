@@ -46,19 +46,19 @@ export class StripeService {
   }
 
   async checkoutSessionCompleted(event: any) {
-    const session = await stripe.checkout.sessions.retrieve(
+    const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       event.data.object.id,
       {
         expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'subscription.latest_invoice.charge', 'invoice'],
       }
     );
-    const checkoutSessionCompleted = event.data.object;
     const {
       id,
       payment_intent,
       created,
       subscription,
-      subscription: { latest_invoice },
+      subscription: { latest_invoice, latest_invoice: { charge } },
+      line_items,
       payment_status,
       amount_total,
       customer_details: { email, phone },
@@ -69,7 +69,7 @@ export class StripeService {
     const request = {
       cs_id: id,
       payment_id: payment_intent,
-      product_name: session.line_items.data[0].description,
+      product_name: line_items.data[0].description,
       phone,
       customer_id: customer,
       order_id: '',
@@ -81,10 +81,10 @@ export class StripeService {
       metadata,
       payment_method_types
     }
-    console.log('session: ', session , '\n');
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
+    console.log('charge: ', charge , '\n');
     console.log('latest_invoice: ', latest_invoice , '\n');
-    console.log('latest_invoice.charge: ', latest_invoice.charge , '\n');
-    console.log('session.line_items.data[0]: ', session.line_items.data[0] , '\n');
+    console.log('line_items.data[0]: ', line_items.data[0] , '\n');
     return request
   }
 }
