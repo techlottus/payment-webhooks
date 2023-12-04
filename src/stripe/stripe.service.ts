@@ -26,7 +26,7 @@ export class StripeService {
       case 'checkout.session.completed':
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
-        const strapiRes = await this.utilsService.postStrapi('tracking-payment', strapiReq)
+        const strapiRes = (await this.utilsService.postStrapi('tracking-payment', strapiReq)).subscribe()
         console.log('strapiRes: ', strapiRes);
         // Then define and call a function to handle the event checkout.session.completed
         break;
