@@ -3,12 +3,13 @@ import {  Injectable } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
 import { forkJoin } from 'rxjs';
+import { AppService } from 'src/app.service';
 
 @Injectable()
 export class InscriptionsService {
   
-  constructor(private readonly http: HttpService) {}
-  populateStrapi(request: any, response: any) {
+  constructor(private readonly http: HttpService, private mainService: AppService) {}
+  async populateStrapi(request: any, response: any) {
 
     const formResponse = request.body.form_response
     const cs_id = formResponse.hidden.checkout_session_id || null
@@ -45,8 +46,8 @@ export class InscriptionsService {
       }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
 
       try {
-        const inscriptionObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-inscriptions`, { data: answers.inscription }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
-        const invoiceObs = this.http.post(`${env.STRAPI_TRACKING_API}/track-invoices`, { data: answers.invoice }, { headers:{Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}`}})
+        const inscriptionObs = await this.mainService.postStrapi('track-inscriptions', answers.inscription)
+        const invoiceObs = await this.mainService.postStrapi('track-invoices', answers.invoice)
 
         const sources = [ inscriptionObs ]
         if (answers.needInvoice) sources.push(invoiceObs)

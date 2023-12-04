@@ -1,9 +1,13 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, RawBodyRequest } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
+import { AppService } from 'src/app.service';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
 export class StripeService {
+  constructor(private mainService: AppService) {}
+
   async populateStrapi(request: RawBodyRequest<Request>, response: any) {
     console.log('request: ', request);
     const sig = request.headers['stripe-signature'];
@@ -23,8 +27,8 @@ export class StripeService {
       case 'checkout.session.completed':
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
-        console.log('strapiReq: ', strapiReq);
-
+        const strapiRes = await this.mainService.postStrapi('tracking-payment', strapiReq)
+        console.log('strapiRes: ', strapiRes);
         // Then define and call a function to handle the event checkout.session.completed
         break;
       case 'checkout.session.expired':
@@ -55,13 +59,14 @@ export class StripeService {
     const {
       id: cs_id,
       created,
-      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id, payment_method_types } } },
+      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id } } },
       line_items,
       payment_status: status,
       amount_total,
       customer_details: { email, phone },
       metadata,
-      customer: { id: customer_id}
+      customer: { id: customer_id},
+      payment_method_types
     } = checkoutSessionCompleted
     const request = {
       cs_id,
