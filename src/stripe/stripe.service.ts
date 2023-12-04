@@ -58,7 +58,7 @@ export class StripeService {
       payment_intent,
       created,
       subscription,
-      subscription: { latest_invoice: { charge }},
+      subscription: { latest_invoice },
       payment_status,
       amount_total,
       customer_details: { email, phone },
@@ -82,8 +82,8 @@ export class StripeService {
       payment_method_types
     }
     console.log('session: ', session , '\n');
-    console.log('charge: ', charge , '\n');
-    console.log('session.subscription.latest_invoice: ', session.subscription.latest_invoice , '\n');
+    console.log('latest_invoice: ', latest_invoice , '\n');
+    console.log('latest_invoice.charge: ', latest_invoice.charge , '\n');
     console.log('session.line_items.data[0]: ', session.line_items.data[0] , '\n');
     return request
   }
