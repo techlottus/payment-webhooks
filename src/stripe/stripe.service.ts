@@ -25,7 +25,7 @@ export class StripeService {
         case 'checkout.session.completed':
           // stripe.  
           const strapiReq = await this.checkoutSessionCompleted(event)
-          this.utilsService.postStrapi('tracking-payment', strapiReq).subscribe(res => {
+          this.utilsService.postStrapi('tracking-payments', strapiReq).subscribe(res => {
   
             console.log('res: ', res);
             response.status(res.status);
