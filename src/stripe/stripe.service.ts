@@ -20,36 +20,36 @@ export class StripeService {
     // console.log('event: ', event);
     // console.log('event.data.object: ', event.data.object);
     // Handle the event
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          // stripe.  
-          const strapiReq = await this.checkoutSessionCompleted(event)
-          this.utilsService.postStrapi('tracking-payments', strapiReq).subscribe(res => {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        // stripe.  
+        const strapiReq = await this.checkoutSessionCompleted(event)
+        try {
+          this.utilsService.postStrapi('track-payments', strapiReq).subscribe(res => {
   
             console.log('res: ', res);
             response.status(res.status);
   
           })
-          // Then define and call a function to handle the event checkout.session.completed
-          break;
-        case 'checkout.session.expired':
-          const checkoutSessionExpired = event.data.object;
-          // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
-        // Then define and call a function to handle the event checkout.session.expired
+        } catch (error) {
+          response.status(error.status).send(`Webhook Error: ${error.message}`);
+        }
+        // Then define and call a function to handle the event checkout.session.completed
         break;
-        case 'subscription_schedule.updated':
-          const subscriptionScheduleUpdated = event.data.object;
-          // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
-    
-          // Then define and call a function to handle the event subscription_schedule.updated
-          break;
-        // ... handle other event types
-        default:
-          console.log(`Unhandled event type ${event.type}`);
-      }
-    } catch (error) {
-      response.status(error.status).send(`Webhook Error: ${error.message}`);
+      case 'checkout.session.expired':
+        const checkoutSessionExpired = event.data.object;
+        // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
+      // Then define and call a function to handle the event checkout.session.expired
+      break;
+      case 'subscription_schedule.updated':
+        const subscriptionScheduleUpdated = event.data.object;
+        // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
+  
+        // Then define and call a function to handle the event subscription_schedule.updated
+        break;
+      // ... handle other event types
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
   
     response.send();
