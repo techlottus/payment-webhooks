@@ -51,9 +51,9 @@ export class InscriptionsService {
 
           console.log('res.data: ', res.data)
         })
-        inscriptionObs.subscribe((res) => {
-          response.status(res.status) 
-        })
+        // inscriptionObs.subscribe((res) => {
+        //   response.status(res.status) 
+        // })
         
       } catch (error) {
         response.status(error.status).send(error.message);
