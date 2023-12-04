@@ -26,15 +26,15 @@ export class StripeService {
         // stripe.  
         const strapiReq = await this.checkoutSessionCompleted(event)
 
-        this.utilsService.postStrapi('track-payments', strapiReq).pipe(catchError((err, caught) => {
-          console.error(err);
-          
-          response.status(err.response.status).send(`Webhook Error: ${err.response.message}`)
-          return caught
-        })).subscribe(res => {
+        this.utilsService.postStrapi('track-payments', strapiReq).subscribe(res => {
+            if (res.data.data) {
+              console.log('res.data.data: ', res.data.data);
+              response.send();
+            } else if (res.data.error) {
+              console.error(res.data.error);
+              response.status(res.data.error.status).send(`Webhook Error: ${res.data.error.message}`)
 
-            console.log('res: ', res);
-            response.send();
+            }
 
         })
         // Then define and call a function to handle the event checkout.session.completed
