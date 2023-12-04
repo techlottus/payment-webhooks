@@ -92,7 +92,7 @@ export class StripeService {
       amount: amount_total / 100,
       email,
       metadata,
-      payment_method_types
+      payment_method_type: payment_method_types[0]
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
     // console.log('charge: ', charge , '\n');
