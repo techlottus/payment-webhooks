@@ -29,7 +29,7 @@ export class StripeService {
           res => {
 
           console.log('res: ', res);
-          response.status(res.status);
+          response.status(res.status).send('created succesfully');
 
           },
           error => {
@@ -54,7 +54,7 @@ export class StripeService {
         console.log(`Unhandled event type ${event.type}`);
     }
   
-    response.send();
+    // response.send();
   }
 
   async checkoutSessionCompleted(event: any) {
