@@ -55,7 +55,7 @@ export class InscriptionsService {
           res.subscribe(data => {
             console.log('data: ', data);
             
-            response.status(data[0].status) 
+            response.status(data.status) 
 
           })
         })
