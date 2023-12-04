@@ -24,14 +24,15 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         // stripe.  
-        const strapiReq = await this.checkoutSessionCompleted(event)
         try {
+          const strapiReq = await this.checkoutSessionCompleted(event)
           
           this.utilsService.postStrapi('track-payments', strapiReq).subscribe(res => {
+            console.log('res: ', res);
             if (res.data.data) {
               console.log('res.data.data: ', res.data.data);
               response.send();
-            }            
+            }
           })
         } catch (error) {
           response.status(error.status).send(`Webhook Error: ${error.message}`)

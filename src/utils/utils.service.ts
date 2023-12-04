@@ -8,7 +8,10 @@ export class UtilsService {
   constructor(private readonly http: HttpService) {}
 
   postStrapi (endpoint: string, data: any) {
-    return this.http.post(`${env.STRAPI_TRACKING_API}/${endpoint}`, { data }, { headers: { Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}` }})
+    const request = { data }
+    console.log(request);
+    
+    return this.http.post(`${env.STRAPI_TRACKING_API}/${endpoint}`, request, { headers: { Authorization: `Bearer ${env.STRAPI_TRACKING_TOKEN}` }})
   }
 
 }
