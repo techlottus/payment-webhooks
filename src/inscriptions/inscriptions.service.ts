@@ -43,8 +43,8 @@ export class InscriptionsService {
       }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
 
       try {
-        const inscriptionObs = await this.utilsService.postStrapi('track-inscriptions', answers.inscription)
-        const invoiceObs = await this.utilsService.postStrapi('track-invoices', answers.invoice)
+        const inscriptionObs = this.utilsService.postStrapi('track-inscriptions', answers.inscription)
+        const invoiceObs = this.utilsService.postStrapi('track-invoices', answers.invoice)
 
         const sources = [ inscriptionObs ]
         if (answers.needInvoice) sources.push(invoiceObs)
