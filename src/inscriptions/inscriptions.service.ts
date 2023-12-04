@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import {  Injectable } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
-import { EMPTY, forkJoin, iif, interval, mergeMap } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 @Injectable()
 export class InscriptionsService {
