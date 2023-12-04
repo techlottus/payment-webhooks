@@ -22,8 +22,8 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         // stripe.  
-        const req = await this.checkoutSessionCompleted(event)
-        console.log('req: ', req);
+        const strapiReq = await this.checkoutSessionCompleted(event)
+        console.log('strapiReq: ', strapiReq);
 
         // Then define and call a function to handle the event checkout.session.completed
         break;
@@ -53,38 +53,35 @@ export class StripeService {
       }
     );
     const {
-      id,
-      payment_intent,
+      id: cs_id,
       created,
-      subscription,
-      subscription: { latest_invoice, latest_invoice: { charge } },
+      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id, payment_method_types } } },
       line_items,
-      payment_status,
+      payment_status: status,
       amount_total,
       customer_details: { email, phone },
       metadata,
-      payment_method_types,
-      customer
+      customer: { id: customer_id}
     } = checkoutSessionCompleted
     const request = {
-      cs_id: id,
-      payment_id: payment_intent,
+      cs_id,
+      payment_id,
       product_name: line_items.data[0].description,
       phone,
-      customer_id: customer,
-      order_id: '',
+      customer_id,
+      order_id,
       date: new Date(created),
-      subscription_id: subscription,
-      status: payment_status,
+      subscription_id,
+      status,
       amount: amount_total / 100,
       email,
       metadata,
       payment_method_types
     }
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
-    console.log('charge: ', charge , '\n');
-    console.log('latest_invoice: ', latest_invoice , '\n');
-    console.log('line_items.data[0]: ', line_items.data[0] , '\n');
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
+    // console.log('charge: ', charge , '\n');
+    // console.log('latest_invoice: ', latest_invoice , '\n');
+    // console.log('line_items.data[0]: ', line_items.data[0] , '\n');
     return request
   }
 }
