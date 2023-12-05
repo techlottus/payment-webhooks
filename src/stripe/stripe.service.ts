@@ -26,8 +26,9 @@ export class StripeService {
         // stripe.  
         try {
           const strapiReq = await this.checkoutSessionCompleted(event)
+          const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
           
-          this.utilsService.postStrapi('track-payments', strapiReq).subscribe(res => {
+          paymentObs.subscribe(res => {
             console.log('res: ', res);
             if (res.data.data) {
               console.log('res.data.data: ', res.data.data);
