@@ -31,13 +31,13 @@ export class StripeService {
             console.log('res: ', res);
             if (res.data.data) {
               console.log('res.data.data: ', res.data.data);
-              response.send();
             }
+            // response.send();
           })
         } catch (error) {
+          console.error(error.message);
           response.status(error.status).send(`Webhook Error: ${error.message}`)
           
-          console.error(error);
         }
         // Then define and call a function to handle the event checkout.session.completed
         break;
@@ -57,7 +57,7 @@ export class StripeService {
         console.log(`Unhandled event type ${event.type}`);
     }
   
-    // response.send();
+    response.send();
   }
 
   async checkoutSessionCompleted(event: any) {
@@ -91,7 +91,7 @@ export class StripeService {
       status,
       amount: amount_total / 100,
       email,
-      metadata: JSON.stringify(metadata, null, 2),
+      metadata: JSON.stringify(metadata),
       payment_method_type: payment_method_types[0]
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
