@@ -91,7 +91,7 @@ export class StripeService {
       status,
       amount: amount_total / 100,
       email,
-      metadata,
+      metadata: JSON.stringify(metadata, null, 2),
       payment_method_type: payment_method_types[0]
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
