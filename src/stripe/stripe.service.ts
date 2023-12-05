@@ -90,12 +90,12 @@ export class StripeService {
       phone,
       customer_id,
       order_id,
-      date: new Date().toLocaleDateString(),
+      date: new Date().toISOString(),
       subscription_id,
       status,
       amount: `${amount_total / 100}`,
       email,
-      metadata: JSON.stringify(metadata),
+      metadata: metadata,
       payment_method_type: payment_method_types[0]
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
