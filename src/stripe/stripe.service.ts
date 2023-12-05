@@ -1,4 +1,4 @@
-import { Injectable, RawBodyRequest } from '@nestjs/common';
+import { HttpException, Injectable, RawBodyRequest } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
 import { catchError } from 'rxjs';
@@ -32,6 +32,10 @@ export class StripeService {
             console.log('res: ', res);
             if (res.data.data) {
               console.log('res.data.data: ', res.data.data);
+            } else {
+              throw new HttpException({
+                message: res.data.error.message
+              }, res.data.error.status);
             }
             // response.send();
           })
