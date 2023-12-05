@@ -91,7 +91,7 @@ export class StripeService {
       phone,
       customer_id,
       order_id,
-      date: new Date(subscription.created),
+      date: new Date().setMilliseconds(event.created),
       subscription_id,
       status,
       amount: `${amount_total / 100}`,
