@@ -1,7 +1,6 @@
 import { HttpException, Injectable, RawBodyRequest } from '@nestjs/common';
 require('dotenv').config();
 import { env } from 'process';
-import { catchError } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 @Injectable()
