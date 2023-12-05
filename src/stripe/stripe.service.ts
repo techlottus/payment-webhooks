@@ -90,7 +90,7 @@ export class StripeService {
       phone,
       customer_id,
       order_id,
-      date: new Date().toISOString,
+      date: new Date().toISOString(),
       subscription_id,
       status,
       amount: amount_total / 100,
