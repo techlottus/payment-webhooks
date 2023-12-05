@@ -29,20 +29,15 @@ export class StripeService {
           const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
           
           paymentObs.subscribe(res => {
-            console.log('res: ', res);
-            if (res.data.data) {
-              console.log('res.data.data: ', res.data.data);
-            } else {
+            if (!res.data.data) {
               throw new HttpException({
                 message: res.data.error.message
               }, res.data.error.status);
             }
-            // response.send();
           })
         } catch (error) {
           console.error(error.message);
           response.status(error.status).send(`Webhook Error: ${error.message}`)
-          
         }
         // Then define and call a function to handle the event checkout.session.completed
         break;
