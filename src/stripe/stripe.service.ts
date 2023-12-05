@@ -74,6 +74,7 @@ export class StripeService {
     );
     const {
       id: cs_id,
+      subscription,
       subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id } } },
       line_items,
       payment_status: status,
@@ -90,7 +91,7 @@ export class StripeService {
       phone,
       customer_id,
       order_id,
-      date: new Date(event.created),
+      date: new Date(subscription.created),
       subscription_id,
       status,
       amount: `${amount_total / 100}`,
