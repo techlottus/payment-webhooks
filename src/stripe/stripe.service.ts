@@ -82,7 +82,8 @@ export class StripeService {
     } = checkoutSessionCompleted
 
     console.log('after_completion[type].url: ', after_completion[type].url);
-    console.log('after_completion[type].url.replace({CHECKOUT_SESSION_ID}): ', after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id));
+    const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
+    console.log('typeform_url: ', typeform_url);
     
 
     const request = {
@@ -97,7 +98,7 @@ export class StripeService {
       status,
       amount: `${amount_total / 100}`,
       email,
-      metadata: metadata,
+      metadata: { ...metadata, typeform_url },
       payment_method_type: payment_method_types[0]
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
