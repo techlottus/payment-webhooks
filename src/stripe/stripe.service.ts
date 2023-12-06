@@ -78,10 +78,11 @@ export class StripeService {
       metadata,
       customer: { id: customer_id},
       payment_method_types,
-      payment_link
+      payment_link: { after_completion, after_completion: { type } }
     } = checkoutSessionCompleted
 
-    console.log('payment_link.after_completion[payment_link.after_completion.type]: ', payment_link.after_completion[payment_link.after_completion.type]);
+    console.log('after_completion[type].url: ', after_completion[type].url);
+    console.log('after_completion[type].url.replace({CHECKOUT_SESSION_ID}): ', after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id));
     
 
     const request = {
