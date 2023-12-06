@@ -77,8 +77,13 @@ export class StripeService {
       customer_details: { email, phone },
       metadata,
       customer: { id: customer_id},
-      payment_method_types
+      payment_method_types,
+      payment_link
     } = checkoutSessionCompleted
+
+    console.log('payment_link.after_completion[payment_link.after_completion.type]: ', payment_link.after_completion[payment_link.after_completion.type]);
+    
+
     const request = {
       cs_id,
       payment_id,
