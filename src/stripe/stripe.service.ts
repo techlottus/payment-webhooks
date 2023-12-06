@@ -66,6 +66,8 @@ export class StripeService {
         expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'subscription.latest_invoice.charge', 'invoice'],
       }
     );
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    
     const {
       id: cs_id,
       subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id } } },
