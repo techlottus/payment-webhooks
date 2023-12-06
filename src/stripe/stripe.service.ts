@@ -63,7 +63,7 @@ export class StripeService {
     const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       event.data.object.id,
       {
-        expand: ['customer', 'line_items',  'payment_intent', 'subscription', 'subscription.latest_invoice', 'subscription.latest_invoice.charge', 'invoice'],
+        expand: ['customer', 'line_items',  'payment_intent', 'payment_link', 'subscription', 'subscription.latest_invoice', 'subscription.latest_invoice.charge', 'invoice'],
       }
     );
     console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
