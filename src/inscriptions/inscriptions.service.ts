@@ -49,7 +49,9 @@ export class InscriptionsService {
         const sources = [ inscriptionObs ]
         if (answers.needInvoice) sources.push(invoiceObs)
 
-        forkJoin(sources).subscribe(data => response.status(data[0].status))
+        forkJoin(sources).subscribe(data => {
+          response.status(data[0].status)
+        })
         
       } catch (error) {
         response.status(error.status).send(error.message);
