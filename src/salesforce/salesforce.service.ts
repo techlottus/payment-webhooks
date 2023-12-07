@@ -271,14 +271,19 @@ export class SalesforceService {
     this.fetchData(cs_id)
   }
   fetchData(cs_id: string) {
-    const routes = ['track-invoces', 'track-payments', 'track-inscriptions' ]
-    const $observables = routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))
-    forkJoin($observables).subscribe(responses => {
-      console.log('responses: ', responses);
-      responses.map(res => {
-        console.log('res: ', res);
-        
+    try {
+      const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
+
+      forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).subscribe(responses => {
+        console.log('responses: ', responses);
+        responses.map(res => {
+          console.log('res: ', res);
+          
+        })
       })
-    })
+      
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
