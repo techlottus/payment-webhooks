@@ -11,6 +11,7 @@ import { SalesforceModule } from './salesforce/salesforce.module';
   imports: [
     StripeModule,
     InscriptionsModule,
+    SalesforceModule,
     RouterModule.register([
       {
         path: '/',
