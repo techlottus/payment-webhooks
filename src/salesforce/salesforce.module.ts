@@ -6,7 +6,7 @@ import { UtilsService } from 'src/utils/utils.service';
 
 @Module({
   imports: [UtilsModule],
-  providers: [SalesforceService],
-  controllers: [SalesforceController, UtilsService]
+  providers: [SalesforceService, UtilsService],
+  controllers: [SalesforceController]
 })
 export class SalesforceModule {}
