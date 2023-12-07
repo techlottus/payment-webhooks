@@ -11,7 +11,7 @@ export class UtilsService {
   postStrapi (endpoint: string, data: any) {
     return this.http.post(`${env.STRAPI_TRACKING_API}/${endpoint}`, { data }, this.config)
   }
-  fetchStrapi = async (model: string, params: string[] ) => {
+  fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_API}/${model}${!!params.length && '?' + params.join('&')}`, this.config)
   }
 
