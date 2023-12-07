@@ -7,6 +7,8 @@ export class SalesforceController {
 
   @Post('/inscription')
   inscription(@Body() body: any) {
+    console.log("body");
+    
     this.salesforceService.createInscription(body.cs_id)
   }
 }

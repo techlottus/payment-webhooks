@@ -266,6 +266,8 @@ export class SalesforceService {
     // post to strapi to patch inscription status or enrollment, check use cases for errors and how to communicate them
   }
   createInscription(cs_id: string) {
+    console.log('cs_id: ', cs_id);
+    
     this.fetchData(cs_id)
   }
   fetchData(cs_id: string) {
