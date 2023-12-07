@@ -20,9 +20,13 @@ import { SalesforceModule } from './salesforce/salesforce.module';
         path: '/',
         module: InscriptionsModule,
       },
+      {
+        path: '/',
+        module: SalesforceModule,
+      },
     ]),
     UtilsModule,
-    SalesforceModule
+    
   ],
   controllers: [ AppController ],
   providers: [ AppService ],
