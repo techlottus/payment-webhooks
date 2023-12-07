@@ -277,7 +277,7 @@ export class SalesforceService {
       forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).subscribe(responses => {
         console.log('responses: ', responses);
         responses.map(res => {
-          console.log('res: ', res);
+          console.log('res.data.data: ', res.data.data);
           
         })
       })
