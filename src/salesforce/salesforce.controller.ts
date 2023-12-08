@@ -6,9 +6,7 @@ export class SalesforceController {
   constructor(private readonly salesforceService: SalesforceService) {}
 
   @Post('/inscription')
-  inscription(@Body() body: any) {
-    console.log("body");
-    
+  inscription(@Body() body: any) {    
     this.salesforceService.createInscription(body.cs_id)
   }
 }

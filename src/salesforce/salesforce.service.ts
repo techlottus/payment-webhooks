@@ -275,13 +275,17 @@ export class SalesforceService {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
 
       forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).subscribe(responses => {
-        console.log('responses: ', responses);
-        responses.map(res => {
-          console.log('res.data.data: ', res.data.data);
-          
-        })
+        const data = responses.reduce((acc, res, i) => {
+          acc = { ...acc, [routes[i]]: res.data.data[0] }
+          return acc
+        }, {})
+        console.log(`data: `, data);
+        console.log(`data[${routes[0]}]: `, data[routes[0]]);
+        console.log(`data[${routes[1]}]: `, data[routes[1]]);
+        console.log(`data[${routes[2]}]: `, data[routes[2]]);
+
+
       })
-      
     } catch (error) {
       console.error(error)
     }
