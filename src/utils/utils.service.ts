@@ -13,11 +13,13 @@ export class UtilsService {
   }
   fetchStrapi = (model: string, params: string[] ) => {
     try {
-      
       return this.http.get(`${env.STRAPI_TRACKING_API}/${model}${!!params.length && '?' + params.join('&')}`, this.config)
     } catch (error) {
       console.log(error)
     }
+  }
+  callSFWebhook(cs_id: string) {
+    return this.http.post(`${env.SELF_URL}/salesforce`, { data: { cs_id } })
   }
 
 }

@@ -51,6 +51,7 @@ export class InscriptionsService {
 
         forkJoin(sources).subscribe(data => {
           response.status(data[0].status)
+          this.utilsService.callSFWebhook(cs_id)
         })
         
       } catch (error) {
