@@ -268,7 +268,9 @@ export class SalesforceService {
   createInscription(cs_id: string) {
     console.log('cs_id: ', cs_id);
     
-    this.fetchData(cs_id)
+    const data = this.fetchData(cs_id)
+    console.log(`data: `, data);
+
   }
   fetchData(cs_id: string) {
     try {
@@ -279,16 +281,17 @@ export class SalesforceService {
           acc = { ...acc, [routes[i]]: res.data.data[0] }
           return acc
         }, {})
-        console.log(`data: `, data);
-        console.log(`data[${routes[0]}]: `, data[routes[0]]);
-        console.log(`data[${routes[1]}]: `, data[routes[1]]);
-        console.log(`data[${routes[2]}]: `, data[routes[2]]);
+        // console.log(`data: `, data);
+        // console.log(`data[${routes[0]}]: `, data[routes[0]]);
+        // console.log(`data[${routes[1]}]: `, data[routes[1]]);
+        // console.log(`data[${routes[2]}]: `, data[routes[2]]);
         return  data
 
       })
 
     } catch (error) {
       console.error(error)
+      return error
     }
   }
 }
