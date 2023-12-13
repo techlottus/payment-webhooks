@@ -93,7 +93,11 @@ export class StripeService {
 
     const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
 
-    const payment_intent = await stripe.paymentIntents.retrieve(payment_id)
+    const payment_intent = await stripe.paymentIntents.retrieve(payment_id, {
+      expand: [
+        'payment_method'
+      ]
+    })
 
     console.log('payment_intent: ', payment_intent);
     console.log('payment_intent.payment_method: ', payment_intent.payment_method);
