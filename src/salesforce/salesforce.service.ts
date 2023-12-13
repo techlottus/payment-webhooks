@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { catchError, forkJoin, of, take } from 'rxjs';
+import { Injectable, Response } from '@nestjs/common';
+import { catchError, forkJoin, of, take, throwError } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
 let inputData;
@@ -192,7 +192,7 @@ export class SalesforceService {
     // maybe patch enrollment 
     // post to strapi to patch inscription status or enrollment, check use cases for errors and how to communicate them
   }
-  createInscription(cs_id: string) {
+  createInscription(cs_id: string, res: Response) {
     console.log('cs_id: ', cs_id);
     try {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
@@ -202,7 +202,7 @@ export class SalesforceService {
           acc = { ...acc, [routes[i].replace('-', '_')]: res.data.data[0] }
           return acc
         }, {})
-        // console.log(`data: `, data);
+        console.log(`data: `, data);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
@@ -335,7 +335,10 @@ export class SalesforceService {
             }
           )
          
+        }else {
+          throw new Error('student already enrrolled')
         }
+        
 
       })
 

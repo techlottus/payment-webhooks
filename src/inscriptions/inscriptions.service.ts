@@ -52,7 +52,7 @@ export class InscriptionsService {
 
         forkJoin(sources).subscribe(data => {
           response.status(data[0].status)
-          this.utilsService.callSFWebhook(cs_id).subscribe(res => console.log(res))
+          this.utilsService.callSFWebhook(cs_id).subscribe()
           // guardar need invoice data
         })
         
