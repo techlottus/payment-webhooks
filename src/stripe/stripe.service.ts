@@ -76,7 +76,6 @@ export class StripeService {
       }
     );
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
-    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     
     const {
       id: cs_id,
@@ -98,10 +97,6 @@ export class StripeService {
         'payment_method'
       ]
     })
-
-    console.log('payment_intent: ', payment_intent);
-    console.log('payment_intent.payment_method: ', payment_intent.payment_method);
-    console.log('payment_intent.payment_method.card.funding: ', payment_intent.payment_method.card.funding);
 
     const request = {
       cs_id,

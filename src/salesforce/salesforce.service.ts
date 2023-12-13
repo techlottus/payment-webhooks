@@ -247,9 +247,9 @@ export class SalesforceService {
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
-        const enrrollments = [ data.track_inscriptions.attributes.enrollment === null,  data.track_payments.attributes.enrollment === null,  data.track_invoices.attributes.enrollment === null ]
-        console.log('enrrollments: ', enrrollments);
-        console.log('enrrollments: ', enrrollments);
+        const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null,  data.track_invoices?.attributes?.enrollment === null ]
+        // console.log('enrrollments: ', enrrollments);
+        // console.log('enrrollments: ', enrrollments);
         
         if (!enrrollments.includes(false)) {
           this.utilsService.authSF().pipe(
@@ -263,7 +263,7 @@ export class SalesforceService {
               this.utilsService.getSFOffer(res.data.access_token, res.data.token_type, data.track_payments.attributes.metadata.SFline, data.track_payments.attributes.metadata.SFcampus)
               .pipe(
                 catchError((err) => {
-                  // console.log(err)
+                  console.log(err.response.data)
                   return of(err)
                 }))
               .subscribe(res => {
@@ -329,12 +329,10 @@ export class SalesforceService {
                   estadoCivilEstudiante: data.track_inscriptions.attributes.civil_status,
                   curpEstudiante: data.track_inscriptions.attributes.CURP,
                   emailEstudiante: data.track_inscriptions.attributes.email,
-                  // deseaFactura: data.track_inscriptions.attributes.need_invoice, falta este dato de guardar
-                  deseaFactura: true,
+                  deseaFactura: data.track_inscriptions.attributes.need_invoice,
     
-                  claveCargoBanner: 1007,
-                  // tipoTarjeta: falta sacar este dato
-                  tipoTarjeta: 'debito',
+                  claveCargoBanner: 1007, // revisar clave cargo banner
+                  tipoTarjeta: data.track_payments.attributes.card_type,
                   montoPago: data.track_payments.attributes.amount,
                   tipoPago: data.track_payments.attributes.payment_method_type,
                   fechaPago: data.track_payments.attributes.date,
@@ -359,9 +357,19 @@ export class SalesforceService {
                   coloniaFacturacion: data.track_invoices.attributes.suburb,
                   ciudadFacturacion: data.track_invoices.attributes.city,
                 }
+                console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
-                console.log('finalData: ', finalData);
-                
+                // console.log('finalData: ', finalData);
+                this.utilsService.postSFInscription(finalData, res.data.access_token, res.data.token_type)
+                .pipe(
+                  catchError((err) => {
+                    console.log(err.response.data)
+                    return of(err)
+                  }))
+                .subscribe(res => {
+                  // console.log('res: ', res);
+                  
+                })
     
               })
             }
