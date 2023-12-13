@@ -49,37 +49,6 @@ export class SalesforceService {
       "Persona moral": "Moral"
     };
 
-    const tipoPersona = tiposPersona?.[data?.tipoPersona];
-
-    // Format CFDI
-    let cfdi = "";
-
-    if (tipoPersona === "Fisica") {
-      cfdi = data?.cfdiPersonaFisica?.split(" ")?.[0];
-    } else {
-      cfdi = data?.cfdiPersonaMoral?.split(" ")?.[0];
-    }
-
-    // Format regimenFiscal
-    let regimenFiscal = "";
-    if (tipoPersona === "Fisica") {
-      if (cfdi === "D10") {
-        regimenFiscal = data?.regimenFiscalD10PersonaFisica?.split(" ")?.[0];
-      } else {
-        regimenFiscal = data?.regimenFiscalG03PersonaFisica?.split(" ")?.[0];
-      }
-    } else {
-      regimenFiscal = data?.regimenFiscalPersonaMoral?.split(" ")?.[0];
-    }
-
-    // Format RFC
-    let rfc = "";
-
-    if (tipoPersona === "Fisica") {
-      rfc = data?.rfcPersonaFisica;
-    } else {
-      rfc = data?.rfcPersonaMoral;
-    }
 
     // Format estadoFacturacion
     const estadosFacturacion = {
@@ -156,18 +125,9 @@ export class SalesforceService {
       codigoDetalle = "4158";
     }
 
-    // Format monto de pago
-
-    let montoPago;
-    if (data?.montoPago) {
-      montoPago = data?.montoPago;
-    } else if (data?.totalAmountShopify) {
-      montoPago = data?.totalAmountShopify;
-    }
-
     // Format request body
 
-    const requestData = JSON.stringify({
+    const requestData = {
       "nombre": data?.nombreEstudiante,
       "apellidos": data?.apellidoEstudiante,
       "nacionalidad": data?.nacionalidadEstudiante,
@@ -184,25 +144,25 @@ export class SalesforceService {
       "programa": data?.programa,
       "periodo": data?.periodo,
       "lineaNegocio": data?.lineaNegocio,
-      "monto": montoPago,
+      "monto": data?.montoPago,
       "fechaPago": fechaPago,
       "tipoPago": tipoPago,
       "claveCargoBanner": "1007",
       "codigoDetalle": codigoDetalle,
       "folioPago": data?.folioPago,
       "deseaFactura": data?.deseaFactura,
-      "rfc": rfc,
-      "tipoPersona": tipoPersona,
+      "rfc": data.rfc,
+      "tipoPersona": tiposPersona?.[data?.tipoPersona],
       "razonSocial": data?.razonSocial,
-      "regimenFiscal": regimenFiscal,
+      "regimenFiscal": data.regimenFiscal?.split(" ")?.[0],
       "cpFacturacion": data?.cpFacturacion,
       "correoFacturacion": data?.emailFacturacion,
-      "cfdi": cfdi,
+      "cfdi": data.cfdi?.split(" ")?.[0],
       "calleFacturacion": data?.calleFacturacion,
       "coloniaFacturacion": data?.coloniaFacturacion,
       "ciudadFacturacion": data?.ciudadFacturacion,
       "estadoFacturacion": estadoFacturacion
-    });
+    };
 
     return requestData;
   }
@@ -258,9 +218,9 @@ export class SalesforceService {
               // console.log(err)
               return of(err.response)
             })
-          ).subscribe(res => {
-              // console.log('res.data: ', res.data);
-              this.utilsService.getSFOffer(res.data.access_token, res.data.token_type, data.track_payments.attributes.metadata.SFline, data.track_payments.attributes.metadata.SFcampus)
+          ).subscribe(authResponse => {
+              // console.log('authResponse.data: ', authResponse.data);
+              this.utilsService.getSFOffer(authResponse.data.access_token, authResponse.data.token_type, data.track_payments.attributes.metadata.SFline, data.track_payments.attributes.metadata.SFcampus)
               .pipe(
                 catchError((err) => {
                   console.log(err.response.data)
@@ -347,7 +307,7 @@ export class SalesforceService {
                   estadoFacturacion: data.track_invoices.attributes.state,
                   rfc: data.track_invoices.attributes.RFC,
                   regimenFiscal: data.track_invoices.attributes.tax_regime,
-                  cfdi: data.track_invoices.attributes.tax_person,
+                  cfdi: data.track_invoices.attributes.CFDI_use,
                   folioPago: data.track_payments.attributes.payment_id,
                   razonSocial: data.track_invoices.attributes.full_name,
                   cpFacturacion: data.track_invoices.attributes.zip_code,
@@ -357,17 +317,17 @@ export class SalesforceService {
                   coloniaFacturacion: data.track_invoices.attributes.suburb,
                   ciudadFacturacion: data.track_invoices.attributes.city,
                 }
-                console.log('prefilledData: ', prefilledData);
+                // console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
                 // console.log('finalData: ', finalData);
-                this.utilsService.postSFInscription(finalData, res.data.access_token, res.data.token_type)
+                this.utilsService.postSFInscription(finalData, authResponse.data.access_token, authResponse.data.token_type)
                 .pipe(
                   catchError((err) => {
                     console.log(err.response.data)
                     return of(err)
                   }))
                 .subscribe(res => {
-                  // console.log('res: ', res);
+                  console.log('res.data: ', res.data);
                   
                 })
     

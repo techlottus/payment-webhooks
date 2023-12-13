@@ -24,6 +24,6 @@ export class UtilsService {
     return this.http.post(`${env.SF_AUTH_ENDPOINT}?client_id=${env.SF_CLIENT_ID}&client_secret=${env.SF_CLIENT_SECRET}&username=${env.SF_USERNAME}&password=${env.SF_PASSWORD}&grant_type=${env.SF_GRANT_TYPE}`)
   }
   postSFInscription(data: any, token:string, token_type:string) {
-    return this.http.post(`${env.SF_INSCRIPTION_ENDPOINT}`, { data }, { headers: { Authorization: `${token_type} ${token}` }})
+    return this.http.post(`${env.SF_INSCRIPTION_ENDPOINT}`, data, { headers: { Authorization: `${token_type} ${token}` }})
   }
 }
