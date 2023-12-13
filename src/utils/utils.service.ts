@@ -15,7 +15,7 @@ export class UtilsService {
     return this.http.get(`${env.STRAPI_TRACKING_API}/${model}${!!params.length && '?' + params.join('&')}`, this.Strapiconfig)
   }
   callSFWebhook(cs_id: string) {
-    return this.http.post(`${env.SELF_URL}/salesforce/inscription`, { data: { cs_id } })
+    return this.http.post(`${env.SELF_URL}/salesforce/inscription`, { cs_id })
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
     return this.http.get(`${env.SF_OFFER_ENDPOINT}?linea=${brand}&campus=${campus}`, { headers: { Authorization: `${token_type} ${token}` }})
