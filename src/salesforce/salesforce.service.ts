@@ -192,7 +192,7 @@ export class SalesforceService {
     // maybe patch enrollment 
     // post to strapi to patch inscription status or enrollment, check use cases for errors and how to communicate them
   }
-  createInscription(cs_id: string, res: Response) {
+  createInscription(cs_id: string) {
     console.log('cs_id: ', cs_id);
     try {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
@@ -202,13 +202,12 @@ export class SalesforceService {
           acc = { ...acc, [routes[i].replace('-', '_')]: res.data.data[0] }
           return acc
         }, {})
-        console.log(`data: `, data);
+        // console.log(`data: `, data);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
-        const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null,  data.track_invoices?.attributes?.enrollment === null ]
-        // console.log('enrrollments: ', enrrollments);
+        const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null, data.track_inscriptions.attributes.need_invoice ? data.track_invoices?.attributes?.enrollment === null : true ]
         // console.log('enrrollments: ', enrrollments);
         
         if (!enrrollments.includes(false)) {
@@ -233,51 +232,10 @@ export class SalesforceService {
                 // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
                 
                 const offerMatch = offerData?.find((offer) => {
-                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram 
-                  // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
+                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                 })
                 // console.log('offerMatch: ', offerMatch);
-                 // <-- payments example -->
-                  // payment_id: 'pi_3OKTyLF5JHugNzfe1MdVimCG',
-                  // date: '2023-12-06T22:53:46.000Z',
-                  // status: 'paid',
-                  // amount: '399',
-                  // email: 'alanllamasg@gmail.com',
-                  // metadata: {
-                  //   SFline: 'UTC',
-                  //   SFcampus: 'UTC A TU RITMO',
-                  //   SFprogram: 'LRMERC',
-                  //   typeform_url: 'https://lottus.typeform.com/to/r79Ip0ty#checkout_session_id=cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8';
-                  // },
-                  // createdAt: '2023-12-06T22:53:48.113Z',
-                  // updatedAt: '2023-12-06T22:53:48.113Z',
-                  // product_name: 'Mercadotecnia',
-                  // cs_id: 'cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8',
-                  // subscription_id: 'sub_1OKTyKF5JHugNzfegvLviKxr',
-                  // phone: '+525539687470',
-                  // enrollment: null,
-                  // customer_id: 'cus_P8lVkYR5EM5W0l',
-                  // order_id: 'ch_3OKTyLF5JHugNzfe1PxcoVg2',
-                  // payment_method_type: 'card'
-                  
-                  // <-- invoice example -->
-                  // full_name: 'test',
-                  // email: 'test@test.test',              
-                  // address: 'test',              
-                  // city: 'test',              
-                  // state: 'Aguascalientes',              
-                  // zip_code: 'test',              
-                  // tax_person: 'Persona física',              
-                  // RFC: 'test',              
-                  // CFDI_use: 'D10 - Pagos por servicios educativos (colegiaturas)',              
-                  // tax_regime: '605 | Sueldos y Salarios e Ingresos Asimilados a Salarios',              
-                  // createdAt: '2023-12-06T22:55:05.452Z',              
-                  // updatedAt: '2023-12-06T22:55:05.452Z',              
-                  // publishedAt: '2023-12-06T22:55:05.448Z',              
-                  // cs_id: 'cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8',              
-                  // suburb: 'test',              
-                  // enrollment: null
-                  // birth_entity: 'Aguascalientes', no se envia birth_entity
+                // birth_entity: 'Aguascalientes', no se envia birth_entity
                 
                 const prefilledData = {
                   nombreEstudiante: data.track_inscriptions.attributes.name,
@@ -297,25 +255,25 @@ export class SalesforceService {
                   tipoPago: data.track_payments.attributes.payment_method_type,
                   fechaPago: data.track_payments.attributes.date,
 
-                  modalidad: offerMatch.modalidad,
-                  nivel: offerMatch.nivel,
-                  campus: offerMatch.idCampus,
-                  programa: offerMatch.idOfertaPrograma,
-                  periodo: offerMatch.idPeriodo,
-                  lineaNegocio: offerMatch.lineaNegocio,
+                  modalidad: offerMatch?.modalidad,
+                  nivel: offerMatch?.nivel,
+                  campus: offerMatch?.idCampus,
+                  programa: offerMatch?.idOfertaPrograma,
+                  periodo: offerMatch?.idPeriodo,
+                  lineaNegocio: offerMatch?.lineaNegocio,
     
-                  estadoFacturacion: data.track_invoices.attributes.state,
-                  rfc: data.track_invoices.attributes.RFC,
-                  regimenFiscal: data.track_invoices.attributes.tax_regime,
-                  cfdi: data.track_invoices.attributes.CFDI_use,
+                  estadoFacturacion: data.track_invoices?.attributes?.state,
+                  rfc: data.track_invoices?.attributes?.RFC,
+                  regimenFiscal: data.track_invoices?.attributes?.tax_regime,
+                  cfdi: data.track_invoices?.attributes?.CFDI_use,
                   folioPago: data.track_payments.attributes.payment_id,
-                  razonSocial: data.track_invoices.attributes.full_name,
-                  cpFacturacion: data.track_invoices.attributes.zip_code,
-                  tipoPersona: data.track_invoices.attributes.tax_person,
-                  emailFacturacion: data.track_invoices.attributes.email,
-                  calleFacturacion: data.track_invoices.attributes.address,
-                  coloniaFacturacion: data.track_invoices.attributes.suburb,
-                  ciudadFacturacion: data.track_invoices.attributes.city,
+                  razonSocial: data.track_invoices?.attributes?.full_name,
+                  cpFacturacion: data.track_invoices?.attributes?.zip_code,
+                  tipoPersona: data.track_invoices?.attributes?.tax_person,
+                  emailFacturacion: data.track_invoices?.attributes?.email,
+                  calleFacturacion: data.track_invoices?.attributes?.address,
+                  coloniaFacturacion: data.track_invoices?.attributes?.suburb,
+                  ciudadFacturacion: data.track_invoices?.attributes?.city,
                 }
                 // console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
