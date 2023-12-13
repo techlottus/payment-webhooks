@@ -101,6 +101,7 @@ export class StripeService {
 
     console.log('payment_intent: ', payment_intent);
     console.log('payment_intent.payment_method: ', payment_intent.payment_method);
+    console.log('payment_intent.payment_method.card.funding: ', payment_intent.payment_method.card.funding);
 
     const request = {
       cs_id,
@@ -115,7 +116,8 @@ export class StripeService {
       amount: `${amount_total / 100}`,
       email,
       metadata: { ...metadata, typeform_url },
-      payment_method_type: payment_method_types[0]
+      payment_method_type: payment_method_types[0],
+      card_type: payment_intent.payment_method.card.funding
     }
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
     // console.log('charge: ', charge , '\n');
