@@ -24,6 +24,7 @@ export class InscriptionsService {
         if(ref === 'need_invoice') {
           acc.needInvoiceIndex = index;
           acc.needInvoice = answer
+          acc.inscription = { ...acc.inscription, [ref]: answer }
         }
         if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
           const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
@@ -52,6 +53,7 @@ export class InscriptionsService {
         forkJoin(sources).subscribe(data => {
           response.status(data[0].status)
           this.utilsService.callSFWebhook(cs_id)
+          // guardar need invoice data
         })
         
       } catch (error) {

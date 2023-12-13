@@ -67,10 +67,11 @@ export class StripeService {
       }
     );
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     
     const {
       id: cs_id,
-      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id } } },
+      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: { id: payment_id } } } },
       line_items,
       payment_status: status,
       amount_total,

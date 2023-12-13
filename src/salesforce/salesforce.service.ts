@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of, take } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
 let inputData;
@@ -7,54 +7,30 @@ let inputData;
 export class SalesforceService {
   constructor(private utilsService: UtilsService) {}
 
-  formatPhone () {
-    // this is wrapped in an `async` function
-    // you can use await throughout the function
-    let formattedPhone = inputData?.phone;
+  formatPhone (phone: string) {
+    let formattedPhone = phone;
 
-    if (inputData?.phone?.length === 13) {
-      formattedPhone = inputData?.phone?.slice(3);
-    } else if (inputData?.phone?.length === 12) {
-      formattedPhone = inputData?.phone?.slice(2);
+    if (phone?.length === 13) {
+      formattedPhone = phone?.slice(3);
+    } else if (phone?.length === 12) {
+      formattedPhone = phone?.slice(2);
     }
+    return formattedPhone
 
-    // output = {formattedPhone};
   }
-  getOffer() {
-    // https://lottus.my.salesforce.com/services/apexrest/ofertas_manhattan
-    // {
-    //   linea : 'UTC'
-    //   campus: 'UTC A TU RITMO'
-    // }
-  }
-  getEnrollOffer() {
-    // this is wrapped in an `async` function
-    // you can use await throughout the function
 
-    // Convert response to object
-    const parsedOfferData = JSON.parse(inputData?.offerData);
+  validateOfferPeriod = (periodStartDate, periodExpireDate) => {
+    const formatedStartDate = new Date(periodStartDate);
+    const formatedExpireDate = new Date(periodExpireDate);
+    const formatedPaymentDate = new Date(inputData?.paymentDate);
 
-    // Validate offer period
-    const validateOfferPeriod = (periodStartDate, periodExpireDate) => {
-      const formatedStartDate = new Date(periodStartDate);
-      const formatedExpireDate = new Date(periodExpireDate);
-      const formatedPaymentDate = new Date(inputData?.paymentDate);
+    formatedStartDate?.setHours(0,0,0);
+    formatedExpireDate?.setHours(23,59,59);
 
-      formatedStartDate?.setHours(0,0,0);
-      formatedExpireDate?.setHours(23,59,59);
-
-      return formatedPaymentDate?.getTime() >= formatedStartDate?.getTime() && formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime();
-    };
-
-    // Get the associated offer (match by bnrProgramCode & fechaInicio & fecha Vencimiento)
-    const offerMatch = parsedOfferData?.find((offer) => {
-      return String(offer?.bnrProgramCode) === String(inputData?.program) && validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
-    })
-
-    // Return corresponding offer
-    // output = offerMatch
-  }
-  formatEnrollRequest() {
+    return formatedPaymentDate?.getTime() >= formatedStartDate?.getTime() && formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime();
+  };
+  
+  formatEnrollRequest(data: any) {
     // this is wrapped in an `async` function
     // you can use await throughout the function
 
@@ -65,16 +41,7 @@ export class SalesforceService {
       "Otro": "Otro"
     };
 
-    const generoEstudiante = generos?.[inputData?.generoEstudiante];
-
-    // Format telefonoEstudiante
-    let telefonoEstudiante = inputData?.telefonoEstudiante;
-
-    if (inputData?.telefonoEstudiante?.length === 13) {
-      telefonoEstudiante = inputData?.telefonoEstudiante?.slice(3);
-    } else if (inputData?.telefonoEstudiante?.length === 12) {
-      telefonoEstudiante = inputData?.telefonoEstudiante?.slice(2);
-    }
+    const generoEstudiante = generos?.[data?.generoEstudiante];
 
     // Format tipoPersona
     const tiposPersona = {
@@ -82,36 +49,36 @@ export class SalesforceService {
       "Persona moral": "Moral"
     };
 
-    const tipoPersona = tiposPersona?.[inputData?.tipoPersona];
+    const tipoPersona = tiposPersona?.[data?.tipoPersona];
 
     // Format CFDI
     let cfdi = "";
 
     if (tipoPersona === "Fisica") {
-      cfdi = inputData?.cfdiPersonaFisica?.split(" ")?.[0];
+      cfdi = data?.cfdiPersonaFisica?.split(" ")?.[0];
     } else {
-      cfdi = inputData?.cfdiPersonaMoral?.split(" ")?.[0];
+      cfdi = data?.cfdiPersonaMoral?.split(" ")?.[0];
     }
 
     // Format regimenFiscal
     let regimenFiscal = "";
     if (tipoPersona === "Fisica") {
       if (cfdi === "D10") {
-        regimenFiscal = inputData?.regimenFiscalD10PersonaFisica?.split(" ")?.[0];
+        regimenFiscal = data?.regimenFiscalD10PersonaFisica?.split(" ")?.[0];
       } else {
-        regimenFiscal = inputData?.regimenFiscalG03PersonaFisica?.split(" ")?.[0];
+        regimenFiscal = data?.regimenFiscalG03PersonaFisica?.split(" ")?.[0];
       }
     } else {
-      regimenFiscal = inputData?.regimenFiscalPersonaMoral?.split(" ")?.[0];
+      regimenFiscal = data?.regimenFiscalPersonaMoral?.split(" ")?.[0];
     }
 
     // Format RFC
     let rfc = "";
 
     if (tipoPersona === "Fisica") {
-      rfc = inputData?.rfcPersonaFisica;
+      rfc = data?.rfcPersonaFisica;
     } else {
-      rfc = inputData?.rfcPersonaMoral;
+      rfc = data?.rfcPersonaMoral;
     }
 
     // Format estadoFacturacion
@@ -153,28 +120,28 @@ export class SalesforceService {
     };
 
     let estadoFacturacion = "00";
-    if (!!inputData?.nacionalidadEstudiante && inputData?.nacionalidadEstudiante !== "Nacional") {
+    if (!!data?.nacionalidadEstudiante && data?.nacionalidadEstudiante !== "Nacional") {
       estadoFacturacion = "33";
-    } else if(inputData?.estadoFacturacion?.toUpperCase()?.includes("SUR")) {
+    } else if(data?.estadoFacturacion?.toUpperCase()?.includes("SUR")) {
       estadoFacturacion = "03";
     } else {
-      estadoFacturacion = estadosFacturacion?.[inputData?.estadoFacturacion?.toUpperCase()];
+      estadoFacturacion = estadosFacturacion?.[data?.estadoFacturacion?.toUpperCase()];
     }
 
-    if (!estadoFacturacion && inputData?.deseaFactura === "true") {
+    if (!estadoFacturacion && data?.deseaFactura === "true") {
       estadoFacturacion = "00";
     }
 
     // Format fechaPago
-    const fechaPago = new Date(inputData?.fechaPago)?.toLocaleDateString('en-GB');
+    const fechaPago = new Date(data?.fechaPago)?.toLocaleDateString('en-GB');
 
     // Format fechaNacimiento
-    const fechaNacimiento = new Date(inputData?.fechaNacimientoEstudiante);
+    const fechaNacimiento = new Date(data?.fechaNacimientoEstudiante);
     // Format tipoDePago
     let tipoPago = "Otro";
 
-    if (inputData?.tipoPago === "card") {
-      if (inputData?.tipoTarjeta === "credit") {
+    if (data?.tipoPago === "card") {
+      if (data?.tipoTarjeta === "credit") {
         tipoPago = "Credito";
       } else {
         tipoPago = "Debito";
@@ -192,52 +159,52 @@ export class SalesforceService {
     // Format monto de pago
 
     let montoPago;
-    if (inputData?.montoPago) {
-    montoPago = inputData?.montoPago;
-    } else if (inputData?.totalAmountShopify) {
-    montoPago = inputData?.totalAmountShopify;
+    if (data?.montoPago) {
+      montoPago = data?.montoPago;
+    } else if (data?.totalAmountShopify) {
+      montoPago = data?.totalAmountShopify;
     }
 
     // Format request body
 
     const requestData = JSON.stringify({
-      "nombre": inputData?.nombreEstudiante,
-      "apellidos": inputData?.apellidoEstudiante,
-      "nacionalidad": inputData?.nacionalidadEstudiante,
+      "nombre": data?.nombreEstudiante,
+      "apellidos": data?.apellidoEstudiante,
+      "nacionalidad": data?.nacionalidadEstudiante,
       "fechaNacimiento": fechaNacimiento?.toLocaleDateString('en-GB'),
       "genero": generoEstudiante,
-      "estadoCivil": inputData?.estadoCivilEstudiante,
-      "curp": inputData?.curpEstudiante?.toUpperCase(),
-      "telefono": telefonoEstudiante,
-      "celular": telefonoEstudiante,
-      "email": inputData?.emailEstudiante,
-      "modalidad": inputData?.modalidad,
-      "nivel": inputData?.nivel,
-      "campus": inputData?.campus,
-      "programa": inputData?.programa,
-      "periodo": inputData?.periodo,
-      "lineaNegocio": inputData?.lineaNegocio,
+      "estadoCivil": data?.estadoCivilEstudiante,
+      "curp": data?.curpEstudiante?.toUpperCase(),
+      "telefono": data.telefonoEstudiante,
+      "celular": data.telefonoEstudiante,
+      "email": data?.emailEstudiante,
+      "modalidad": data?.modalidad,
+      "nivel": data?.nivel,
+      "campus": data?.campus,
+      "programa": data?.programa,
+      "periodo": data?.periodo,
+      "lineaNegocio": data?.lineaNegocio,
       "monto": montoPago,
       "fechaPago": fechaPago,
       "tipoPago": tipoPago,
       "claveCargoBanner": "1007",
       "codigoDetalle": codigoDetalle,
-      "folioPago": inputData?.folioPago,
-      "deseaFactura": inputData?.deseaFactura,
+      "folioPago": data?.folioPago,
+      "deseaFactura": data?.deseaFactura,
       "rfc": rfc,
       "tipoPersona": tipoPersona,
-      "razonSocial": inputData?.razonSocial,
+      "razonSocial": data?.razonSocial,
       "regimenFiscal": regimenFiscal,
-      "cpFacturacion": inputData?.cpFacturacion,
-      "correoFacturacion": inputData?.emailFacturacion,
+      "cpFacturacion": data?.cpFacturacion,
+      "correoFacturacion": data?.emailFacturacion,
       "cfdi": cfdi,
-      "calleFacturacion": inputData?.calleFacturacion,
-      "coloniaFacturacion": inputData?.coloniaFacturacion,
-      "ciudadFacturacion": inputData?.ciudadFacturacion,
+      "calleFacturacion": data?.calleFacturacion,
+      "coloniaFacturacion": data?.coloniaFacturacion,
+      "ciudadFacturacion": data?.ciudadFacturacion,
       "estadoFacturacion": estadoFacturacion
     });
 
-    // output = {requestData};
+    return requestData;
   }
   parseEnrollmentStatus(data) {
     // https://lottus.my.salesforce.com/services/apexrest/manhattan_inscripcion
@@ -267,25 +234,140 @@ export class SalesforceService {
   }
   createInscription(cs_id: string) {
     console.log('cs_id: ', cs_id);
-    
-    const data = this.fetchData(cs_id)
-    console.log(`data: `, data);
-
-  }
-  fetchData(cs_id: string) {
     try {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
 
-      return forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).subscribe(responses => {
-        const data = responses.reduce((acc, res, i) => {
-          acc = { ...acc, [routes[i]]: res.data.data[0] }
+      forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).pipe(take(1)).subscribe(responses => {
+        const data: any = responses.reduce((acc, res, i) => {
+          acc = { ...acc, [routes[i].replace('-', '_')]: res.data.data[0] }
           return acc
         }, {})
         // console.log(`data: `, data);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
-        return  data
+
+        const enrrollments = [ data.track_inscriptions.attributes.enrollment === null,  data.track_payments.attributes.enrollment === null,  data.track_invoices.attributes.enrollment === null ]
+        console.log('enrrollments: ', enrrollments);
+        console.log('enrrollments: ', enrrollments);
+        
+        if (!enrrollments.includes(false)) {
+          this.utilsService.authSF().pipe(
+            take(1), 
+            catchError((err) => {
+              // console.log(err)
+              return of(err.response)
+            })
+          ).subscribe(res => {
+              // console.log('res.data: ', res.data);
+              this.utilsService.getSFOffer(res.data.access_token, res.data.token_type, data.track_payments.attributes.metadata.SFline, data.track_payments.attributes.metadata.SFcampus)
+              .pipe(
+                catchError((err) => {
+                  // console.log(err)
+                  return of(err)
+                }))
+              .subscribe(res => {
+                const offerData = res.data
+                // console.log('offerData: ', offerData);
+                // console.log('data.track_payments.attributes: ', data.track_payments.attributes);
+                // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
+                
+                const offerMatch = offerData?.find((offer) => {
+                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram 
+                  // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
+                })
+                // console.log('offerMatch: ', offerMatch);
+                 // <-- payments example -->
+                  // payment_id: 'pi_3OKTyLF5JHugNzfe1MdVimCG',
+                  // date: '2023-12-06T22:53:46.000Z',
+                  // status: 'paid',
+                  // amount: '399',
+                  // email: 'alanllamasg@gmail.com',
+                  // metadata: {
+                  //   SFline: 'UTC',
+                  //   SFcampus: 'UTC A TU RITMO',
+                  //   SFprogram: 'LRMERC',
+                  //   typeform_url: 'https://lottus.typeform.com/to/r79Ip0ty#checkout_session_id=cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8';
+                  // },
+                  // createdAt: '2023-12-06T22:53:48.113Z',
+                  // updatedAt: '2023-12-06T22:53:48.113Z',
+                  // product_name: 'Mercadotecnia',
+                  // cs_id: 'cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8',
+                  // subscription_id: 'sub_1OKTyKF5JHugNzfegvLviKxr',
+                  // phone: '+525539687470',
+                  // enrollment: null,
+                  // customer_id: 'cus_P8lVkYR5EM5W0l',
+                  // order_id: 'ch_3OKTyLF5JHugNzfe1PxcoVg2',
+                  // payment_method_type: 'card'
+                  
+                  // <-- invoice example -->
+                  // full_name: 'test',
+                  // email: 'test@test.test',              
+                  // address: 'test',              
+                  // city: 'test',              
+                  // state: 'Aguascalientes',              
+                  // zip_code: 'test',              
+                  // tax_person: 'Persona física',              
+                  // RFC: 'test',              
+                  // CFDI_use: 'D10 - Pagos por servicios educativos (colegiaturas)',              
+                  // tax_regime: '605 | Sueldos y Salarios e Ingresos Asimilados a Salarios',              
+                  // createdAt: '2023-12-06T22:55:05.452Z',              
+                  // updatedAt: '2023-12-06T22:55:05.452Z',              
+                  // publishedAt: '2023-12-06T22:55:05.448Z',              
+                  // cs_id: 'cs_test_a1R2qJLnxhskxNJamgXaGuymhkcl7qxBy4E19JRuB6EvLVcGoMLFUTgFl8',              
+                  // suburb: 'test',              
+                  // enrollment: null
+                  // birth_entity: 'Aguascalientes', no se envia birth_entity
+                
+                const prefilledData = {
+                  nombreEstudiante: data.track_inscriptions.attributes.name,
+                  apellidoEstudiante: data.track_inscriptions.attributes.last_name,
+                  fechaNacimientoEstudiante: data.track_inscriptions.attributes.birthdate,
+                  generoEstudiante: data.track_inscriptions.attributes.gender,
+                  telefonoEstudiante: this.formatPhone(data.track_inscriptions.attributes.phone),
+                  nacionalidadEstudiante: data.track_inscriptions.attributes.residence,
+                  estadoCivilEstudiante: data.track_inscriptions.attributes.civil_status,
+                  curpEstudiante: data.track_inscriptions.attributes.CURP,
+                  emailEstudiante: data.track_inscriptions.attributes.email,
+                  // deseaFactura: data.track_inscriptions.attributes.need_invoice, falta este dato de guardar
+                  deseaFactura: true,
+    
+                  claveCargoBanner: 1007,
+                  // tipoTarjeta: falta sacar este dato
+                  tipoTarjeta: 'debito',
+                  montoPago: data.track_payments.attributes.amount,
+                  tipoPago: data.track_payments.attributes.payment_method_type,
+                  fechaPago: data.track_payments.attributes.date,
+
+                  modalidad: offerMatch.modalidad,
+                  nivel: offerMatch.nivel,
+                  campus: offerMatch.idCampus,
+                  programa: offerMatch.idOfertaPrograma,
+                  periodo: offerMatch.idPeriodo,
+                  lineaNegocio: offerMatch.lineaNegocio,
+    
+                  estadoFacturacion: data.track_invoices.attributes.state,
+                  rfc: data.track_invoices.attributes.RFC,
+                  regimenFiscal: data.track_invoices.attributes.tax_regime,
+                  cfdi: data.track_invoices.attributes.tax_person,
+                  folioPago: data.track_payments.attributes.payment_id,
+                  razonSocial: data.track_invoices.attributes.full_name,
+                  cpFacturacion: data.track_invoices.attributes.zip_code,
+                  tipoPersona: data.track_invoices.attributes.tax_person,
+                  emailFacturacion: data.track_invoices.attributes.email,
+                  calleFacturacion: data.track_invoices.attributes.address,
+                  coloniaFacturacion: data.track_invoices.attributes.suburb,
+                  ciudadFacturacion: data.track_invoices.attributes.city,
+                }
+                const finalData = this.formatEnrollRequest(prefilledData)
+                console.log('finalData: ', finalData);
+                
+    
+              })
+            }
+          )
+         
+        }
 
       })
 
@@ -293,5 +375,7 @@ export class SalesforceService {
       console.error(error)
       return error
     }
+
   }
+
 }
