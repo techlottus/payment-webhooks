@@ -5,6 +5,6 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true })
   app.useBodyParser('text');
-  await app.listen(3000);
+  await app.listen(process.env.HOST_PORT);
 }
 bootstrap();
