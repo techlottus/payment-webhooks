@@ -4,7 +4,7 @@ module.exports = {
   apps : [
     {
       name: env.NAME1,
-      script: 'yarn',
+      script: env.SCRIPT,
       args: env.ARGS,
       env: {
         NODE_ENV: env.NAME1,
@@ -26,7 +26,7 @@ module.exports = {
     },
     {
       name: env.NAME2,
-      script: 'yarn',
+      script: env.SCRIPT,
       args: env.ARGS,
       env: {
         NODE_ENV: env.NAME2,
@@ -48,7 +48,7 @@ module.exports = {
     },
     {
       name: env.NAME3,
-      script: 'yarn',
+      script: env.SCRIPT,
       args: env.ARGS,
       env: {
         NODE_ENV: env.NAME3,
@@ -70,7 +70,7 @@ module.exports = {
     },
     {
       name: env.NAME4,
-      script: 'yarn',
+      script: env.SCRIPT,
       args: env.ARGS,
       env: {
         NODE_ENV: env.NAME4,
