@@ -287,27 +287,29 @@ export class SalesforceService {
                   }))
                   .subscribe(res => {
                     if (res.Exitoso === 'False') {
-                        const labels = {
-                          email: 'Correo electrónico',
-                          name: 'Nombres',
-                          phone: 'Teléfono',
-                          last_name: 'Apellidos',
-                          cs_id: 'Checkout Session Id'
-                        }
-                        const fields = {
-                          cs_id: data.track_payments.attributes.cs_id,
-                          name: data.track_inscriptions.attributes.name,
-                          last_name: data.track_inscriptions.attributes.last_name,
-                          phone: data.track_inscriptions.attributes.phone,
-                          email: data.track_inscriptions.attributes.email,
-                        }
-                        const metadata = {
-                          error: res.data.Error,
-                          inscriptionsID: data.track_payments.id,
-                          paymentsID: data.track_payments.id,
-                          invoicesID: data.track_payments.id,
-                        }
+                      const labels = {
+                        email: 'Correo electrónico',
+                        name: 'Nombres',
+                        phone: 'Teléfono',
+                        last_name: 'Apellidos',
+                        cs_id: 'Checkout Session Id'
+                      }
+                      const fields = {
+                        cs_id: data.track_payments.attributes.cs_id,
+                        name: data.track_inscriptions.attributes.name,
+                        last_name: data.track_inscriptions.attributes.last_name,
+                        phone: data.track_inscriptions.attributes.phone,
+                        email: data.track_inscriptions.attributes.email,
+                      }
+                      const metadata = {
+                        error: res.data.Error,
+                        inscriptionsID: data.track_payments.id,
+                        paymentsID: data.track_payments.id,
+                        invoicesID: data.track_payments.id,
+                      }
                       const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
+                      console.log('slackMessage: ', slackMessage);
+                      
                       this.utilsService.postSlackMessage(slackMessage).subscribe(data => console.log(data))
                       
                     } else {
