@@ -22,7 +22,7 @@ module.exports = {
         SF_USERNAME: env.SF_USERNAME1, 
         SF_PASSWORD: env.SF_PASSWORD1, 
         SF_GRANT_TYPE: env.SF_GRANT_TYPE1,
-        WEBHOOK_SLACK: WEBHOOK_SLACK1
+        WEBHOOK_SLACK: env.WEBHOOK_SLACK1
       }
     },
     {
@@ -45,7 +45,7 @@ module.exports = {
         SF_USERNAME: env.SF_USERNAME2, 
         SF_PASSWORD: env.SF_PASSWORD2, 
         SF_GRANT_TYPE: env.SF_GRANT_TYPE2,
-        WEBHOOK_SLACK: WEBHOOK_SLACK2 
+        WEBHOOK_SLACK: env.WEBHOOK_SLACK2 
       }
     },
     {
@@ -68,7 +68,7 @@ module.exports = {
         SF_USERNAME: env.SF_USERNAME3, 
         SF_PASSWORD: env.SF_PASSWORD3, 
         SF_GRANT_TYPE: env.SF_GRANT_TYPE3,
-        WEBHOOK_SLACK: WEBHOOK_SLACK3 
+        WEBHOOK_SLACK: env.WEBHOOK_SLACK3 
       }
     },
     {
@@ -91,7 +91,7 @@ module.exports = {
         SF_USERNAME: env.SF_USERNAME4,
         SF_PASSWORD: env.SF_PASSWORD4,
         SF_GRANT_TYPE: env.SF_GRANT_TYPE4,
-        WEBHOOK_SLACK: WEBHOOK_SLACK4
+        WEBHOOK_SLACK: env.WEBHOOK_SLACK4
       }
     },
   ]
