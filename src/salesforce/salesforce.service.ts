@@ -286,7 +286,7 @@ export class SalesforceService {
                     return of(err)
                   }))
                   .subscribe(res => {
-                    if (res.Exitoso === 'False') {
+                    if (res.data.Exitoso === 'False') {
                       const labels = {
                         email: 'Correo electrónico',
                         name: 'Nombres',
