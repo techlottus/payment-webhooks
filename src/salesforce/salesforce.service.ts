@@ -194,7 +194,7 @@ export class SalesforceService {
     // post to strapi to patch inscription status or enrollment, check use cases for errors and how to communicate them
   }
   createInscription(cs_id: string) {
-    console.log('cs_id: ', cs_id);
+    // console.log('cs_id: ', cs_id);
     try {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
 
@@ -208,7 +208,7 @@ export class SalesforceService {
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
-        const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null, data.track_inscriptions.attributes.need_invoice ? data.track_invoices?.attributes?.enrollment === null : true ]
+        const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null, data.track_inscriptions?.attributes.need_invoice ? data.track_invoices?.attributes?.enrollment === null : true ]
         // console.log('enrrollments: ', enrrollments);
         
         if (!enrrollments.includes(false)) {
@@ -308,7 +308,7 @@ export class SalesforceService {
                         invoicesID: data.track_invoices?.id,
                       }
                       const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-                      console.log('slackMessage: ', slackMessage);
+                      // console.log('slackMessage: ', slackMessage);
                       
                       this.utilsService.postSlackMessage(slackMessage).subscribe()
                       

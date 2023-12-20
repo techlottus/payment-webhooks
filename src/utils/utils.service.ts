@@ -30,11 +30,11 @@ export class UtilsService {
     
     const fields = [];
     
-    let section = { type: "section", fields: [] };
+    let section = { type: "section", text: {} };
     Object.keys(data).forEach((key, index) => {
-      section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:* ${data[key]}` });
+      section.text = { type: "mrkdwn", text: `*${labels[key]}:* ${data[key]}` };
       fields.push(section);
-      section = { type: "section", fields: [] }; // resetting section
+      section = { type: "section", text: {}  }; // resetting section
     });
     const headerBlock = {
       "type": "header",
@@ -52,6 +52,63 @@ export class UtilsService {
         "emoji": true
       }
     }
+    const buttons = [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Acceso a track inscriptions"
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Navegar a strapi",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
+          "action_id": "button-action"
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Acceso a track payments"
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Navegar a strapi",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-payment.track-payment/${metadata.paymentsID}`,
+          "action_id": "button-action"
+        }
+      }
+    ]
+    const invoiceButton = {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Acceso a track invoices"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Navegar a strapi",
+          "emoji": true
+        },
+        "value": "click_me_123",
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-invoice.track-invoice/${metadata.invoicesID}`,
+        "action_id": "button-action"
+      }
+    }
+    if (metadata.invoicesID) buttons.push(invoiceButton)
   
     // Block template for Slack notification
     const notificationBlock = {
@@ -78,60 +135,7 @@ export class UtilsService {
         {
           "type": "divider"
         },
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "Acceso a track inscriptions"
-          },
-          "accessory": {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Navegar a strapi",
-              "emoji": true
-            },
-            "value": "click_me_123",
-            "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
-            "action_id": "button-action"
-          }
-        },
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "Acceso a track payments"
-          },
-          "accessory": {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Navegar a strapi",
-              "emoji": true
-            },
-            "value": "click_me_123",
-            "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-payment.track-payment/${metadata.paymentsID}`,
-            "action_id": "button-action"
-          }
-        },
-        metadata.invoicesID ? {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "Acceso a track invoices"
-          },
-          "accessory": {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Navegar a strapi",
-              "emoji": true
-            },
-            "value": "click_me_123",
-            "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-invoice.track-invoice/${metadata.invoicesID}`,
-            "action_id": "button-action"
-          }
-        } : {},
+        ...buttons,
         {
           "type": "divider"
         },
