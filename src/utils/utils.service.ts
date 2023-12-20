@@ -114,7 +114,7 @@ export class UtilsService {
             "action_id": "button-action"
           }
         },
-        {
+        metadata.invoicesID ? {
           "type": "section",
           "text": {
             "type": "mrkdwn",
@@ -131,7 +131,7 @@ export class UtilsService {
             "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-invoice.track-invoice/${metadata.invoicesID}`,
             "action_id": "button-action"
           }
-        },
+        } : {},
         {
           "type": "divider"
         },

@@ -305,7 +305,7 @@ export class SalesforceService {
                         error: res.data.Error,
                         inscriptionsID: data.track_inscriptions.id,
                         paymentsID: data.track_payments.id,
-                        invoicesID: data.track_invoices.id,
+                        invoicesID: data.track_invoices?.id,
                       }
                       const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
                       console.log('slackMessage: ', slackMessage);
