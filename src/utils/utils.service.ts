@@ -32,7 +32,7 @@ export class UtilsService {
     
     let section = { type: "section", fields: [] };
     Object.keys(data).forEach((key, index) => {
-      section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:*\n ${data[key]}` });
+      section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:* ${data[key]}` });
       fields.push(section);
       section = { type: "section", fields: [] }; // resetting section
     });
