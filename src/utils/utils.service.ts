@@ -32,13 +32,9 @@ export class UtilsService {
     
     let section = { type: "section", fields: [] };
     Object.keys(data).forEach((key, index) => {
-      if ((index + 1) % 2 == 0) {
-        section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:*\n ${data[key]}` });
-        fields.push(section);
-        section = { type: "section", fields: [] }; // resetting section
-      } else {
-        section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:*\n ${data[key]}` });
-      }
+      section.fields.push({ type: "mrkdwn", text: `*${labels[key]}:*\n ${data[key]}` });
+      fields.push(section);
+      section = { type: "section", fields: [] }; // resetting section
     });
     const headerBlock = {
       "type": "header",

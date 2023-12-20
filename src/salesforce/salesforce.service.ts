@@ -308,7 +308,7 @@ export class SalesforceService {
                         invoicesID: data.track_invoices.id,
                       }
                       const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-                      // console.log('slackMessage: ', slackMessage);
+                      console.log('slackMessage: ', slackMessage);
                       
                       this.utilsService.postSlackMessage(slackMessage).subscribe()
                       
