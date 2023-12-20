@@ -152,7 +152,7 @@ export class UtilsService {
   
   }
   postSlackMessage(message: any) {
-    return this.http.post(env.WEBHOOK_STRIPE_SLACK, message)
+    return this.http.post(env.WEBHOOK_SLACK, message)
   }
 
   
