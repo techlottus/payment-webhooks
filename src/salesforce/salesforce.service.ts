@@ -303,18 +303,19 @@ export class SalesforceService {
                       }
                       const metadata = {
                         error: res.data.Error,
-                        inscriptionsID: data.track_payments.id,
+                        inscriptionsID: data.track_inscriptions.id,
                         paymentsID: data.track_payments.id,
-                        invoicesID: data.track_payments.id,
+                        invoicesID: data.track_invoices.id,
                       }
                       const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-                      console.log('slackMessage: ', slackMessage);
+                      // console.log('slackMessage: ', slackMessage);
                       
-                      this.utilsService.postSlackMessage(slackMessage).subscribe(data => console.log(data))
+                      this.utilsService.postSlackMessage(slackMessage).subscribe()
                       
-                    } else {
-                      console.log('res.data: ', res.data);
                     }
+                    //  else {
+                    //   console.log('res.data: ', res.data);
+                    // }
                 })
     
               })
