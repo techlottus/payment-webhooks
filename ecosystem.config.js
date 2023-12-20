@@ -7,7 +7,7 @@ module.exports = {
       script: env.SCRIPT,
       args: env.ARGS,
       env: {
-        NODE_ENV: env.NAME1,
+        NODE_ENV: env.NODE_ENV,
         HOST_PORT: env.HOST_PORT_TEST1,
         STRIPE_API_KEY: env.STRIPE_API_KEY1, 
         WEBHOOK_SECRET: env.WEBHOOK_SECRET1, 
@@ -29,7 +29,7 @@ module.exports = {
       script: env.SCRIPT,
       args: env.ARGS,
       env: {
-        NODE_ENV: env.NAME2,
+        NODE_ENV: env.NODE_ENV,
         HOST_PORT: env.HOST_PORT_TEST2,
         STRIPE_API_KEY: env.STRIPE_API_KEY2, 
         WEBHOOK_SECRET: env.WEBHOOK_SECRET2, 
@@ -51,7 +51,7 @@ module.exports = {
       script: env.SCRIPT,
       args: env.ARGS,
       env: {
-        NODE_ENV: env.NAME3,
+        NODE_ENV: env.NODE_ENV,
         HOST_PORT: env.HOST_PORT_TEST3,
         STRIPE_API_KEY: env.STRIPE_API_KEY3, 
         WEBHOOK_SECRET: env.WEBHOOK_SECRET3, 
@@ -73,7 +73,7 @@ module.exports = {
       script: env.SCRIPT,
       args: env.ARGS,
       env: {
-        NODE_ENV: env.NAME4,
+        NODE_ENV: env.NODE_ENV,
         HOST_PORT: env.HOST_PORT_TEST4,
         STRIPE_API_KEY: env.STRIPE_API_KEY4, 
         WEBHOOK_SECRET: env.WEBHOOK_SECRET4,
