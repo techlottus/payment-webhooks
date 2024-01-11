@@ -60,6 +60,9 @@ export class StripeService {
   }
 
   async checkoutSessionCompleted(event: any) {
+    console.log('event.data.object: ', event.data.object);
+    console.log('event.data.object.id: ', event.data.object.id);
+
     const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       event.data.object.id,
       {
