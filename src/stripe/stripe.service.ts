@@ -17,8 +17,8 @@ export class StripeService {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    // console.log('event: ', event);
-    // console.log('event.data.object: ', event.data.object);
+    console.log('event: ', event);
+    console.log('event.data.object: ', event.data.object);
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
