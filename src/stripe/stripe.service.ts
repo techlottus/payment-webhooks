@@ -73,7 +73,7 @@ export class StripeService {
         ],
       }
     );
-    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     
     const {
       id: cs_id,
@@ -85,7 +85,7 @@ export class StripeService {
       customer: { id: customer_id},
       payment_method_types,
       payment_link: { after_completion, after_completion: { type } }
-    } = checkoutSessionCompleted
+    } = await checkoutSessionCompleted
     console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
     const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : null
