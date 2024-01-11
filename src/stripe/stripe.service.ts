@@ -78,11 +78,11 @@ export class StripeService {
         ],
       }
     );
-    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     
     const {
       id: cs_id,
-      subscription: { id: subscription_id, latest_invoice: { charge: { id: order_id, payment_intent: payment_id } } },
       line_items,
       payment_status: status,
       amount_total,
@@ -92,6 +92,9 @@ export class StripeService {
       payment_method_types,
       payment_link: { after_completion, after_completion: { type } }
     } = checkoutSessionCompleted
+    const payment_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.payment_intent : checkoutSessionCompleted.payment_intent.id
+    const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.id : ''
+    const subscription_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.id : null
 
     const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
 
