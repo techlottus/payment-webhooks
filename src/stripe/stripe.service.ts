@@ -26,7 +26,7 @@ export class StripeService {
           const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
           
           paymentObs.subscribe(res => {
-            if (!res.data.data) {
+            if (!!res.data.error) {
               throw new HttpException({
                 message: res.data.error.message
               }, res.data.error.status);
