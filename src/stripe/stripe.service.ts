@@ -97,6 +97,7 @@ export class StripeService {
     const metadata = checkoutSessionCompleted.metadata
     console.log('metadata: ', metadata);
     
+    console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer.id
     console.log('customer_id: ', customer_id);
     
