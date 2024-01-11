@@ -59,7 +59,19 @@ export class StripeService {
 
   async checkoutSessionCompleted(event: any) {
     const checkout_session_id = event.data.object.id
-    const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
+    const {
+      id: cs_id,
+      line_items,
+      payment_intent: payment_intent_id,
+      payment_status: status,
+      amount_total,
+      customer_details: { email, phone },
+      metadata,
+      customer: { id: customer_id},
+      payment_method_types,
+      subscription,
+      payment_link: { after_completion, after_completion: { type } }
+    } = await stripe.checkout.sessions.retrieve(
       checkout_session_id,
       {
         expand: [
@@ -73,22 +85,25 @@ export class StripeService {
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('cs_id: ', cs_id);
     
-    const {
-      id: cs_id,
-      line_items,
-      payment_status: status,
-      amount_total,
-      customer_details: { email, phone },
-      metadata,
-      customer: { id: customer_id},
-      payment_method_types,
-      payment_link: { after_completion, after_completion: { type } }
-    } = await checkoutSessionCompleted
-    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
-    const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
-    const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : null
+    // const {
+    //   id: cs_id,
+    //   line_items,
+    //   payment_status: status,
+    //   amount_total,
+    //   customer_details: { email, phone },
+    //   metadata,
+    //   customer: { id: customer_id},
+    //   payment_method_types,
+    //   payment_link: { after_completion, after_completion: { type } }
+    // } = checkoutSessionCompleted
+
+    
+
+    console.log('checkoutSessionCompleted.payment_intent: ', payment_intent_id);
+    const payment_id = !!subscription ? subscription?.latest_invoice?.charge?.payment_intent : payment_intent_id
+    const subscription_id = !!subscription ? subscription?.latest_invoice?.charge?.id : null
 
     console.log('payment_id: ', payment_id);
     const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
@@ -99,7 +114,7 @@ export class StripeService {
       ]
     })
     console.log('payment_intent: ', payment_intent);
-    const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
+    const order_id = !!subscription ? subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     console.log('order_id: ', order_id);
 
     const request = {
