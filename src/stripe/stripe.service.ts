@@ -17,8 +17,6 @@ export class StripeService {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    console.log('event: ', event);
-    console.log('event.data.object: ', event.data.object);
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
@@ -60,8 +58,6 @@ export class StripeService {
   }
 
   async checkoutSessionCompleted(event: any) {
-    console.log('event.data.object: ', event.data.object);
-    console.log('event.data.object.id: ', event.data.object.id);
     const checkout_session_id = event.data.object.id
     const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       checkout_session_id,
@@ -78,8 +74,8 @@ export class StripeService {
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
-    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    // console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     
     const {
       id: cs_id,
@@ -92,9 +88,9 @@ export class StripeService {
       payment_method_types,
       payment_link: { after_completion, after_completion: { type } }
     } = checkoutSessionCompleted
-    const payment_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.payment_intent : checkoutSessionCompleted.payment_intent.id
-    const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.id : ''
-    const subscription_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted.subscription.latest_invoice.charge.id : null
+    const payment_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent.id
+    const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : checkoutSessionCompleted.payment_intent.latest_charge
+    const subscription_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : null
 
     const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
 
