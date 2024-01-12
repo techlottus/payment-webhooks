@@ -1,5 +1,5 @@
 import {  Injectable } from '@nestjs/common';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
@@ -53,7 +53,10 @@ export class InscriptionsService {
         const sources = [ inscriptionObs ]
         if (answers.needInvoice) sources.push(invoiceObs)
 
-        forkJoin(sources).subscribe(data => {
+        forkJoin(sources).pipe(catchError((err) => {
+          console.log(err)
+          return of(err)
+        })).subscribe(data => {
           response.status(data[0].status)
           this.utilsService.callSFWebhook(cs_id).subscribe()
           // guardar need invoice data
