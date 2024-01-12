@@ -73,52 +73,52 @@ export class StripeService {
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     
     
     const cs_id = checkoutSessionCompleted.id
-    console.log('cs_id: ', cs_id);
+    // console.log('cs_id: ', cs_id);
     
     const line_items = checkoutSessionCompleted.line_items
-    console.log('line_items: ', line_items);
+    // console.log('line_items: ', line_items);
     
     const status = checkoutSessionCompleted.payment_status
-    console.log('status: ', status);
+    // console.log('status: ', status);
     
     const amount_total = checkoutSessionCompleted.amount_total
-    console.log('amount_total: ', amount_total);
+    // console.log('amount_total: ', amount_total);
     
     const email = checkoutSessionCompleted.customer_details.email
-    console.log('email: ', email);
+    // console.log('email: ', email);
     
     const phone = checkoutSessionCompleted.customer_details.phone
-    console.log('phone: ', phone);
+    // console.log('phone: ', phone);
     
     const metadata = checkoutSessionCompleted.metadata
-    console.log('metadata: ', metadata);
+    // console.log('metadata: ', metadata);
     
-    console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
+    // console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
-    console.log('customer_id: ', customer_id);
+    // console.log('customer_id: ', customer_id);
     
     const payment_method_types = checkoutSessionCompleted.payment_method_types
-    console.log('payment_method_types: ', payment_method_types);
+    // console.log('payment_method_types: ', payment_method_types);
     
     const after_completion = checkoutSessionCompleted.payment_link.after_completion
-    console.log('after_completion: ', after_completion);
+    // console.log('after_completion: ', after_completion);
     
     const type = after_completion.type
-    console.log('type: ', type);
+    // console.log('type: ', type);
     
-    console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
+    // console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
     
     const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
-    console.log('payment_id: ', payment_id);
+    // console.log('payment_id: ', payment_id);
     
     const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : null
-    console.log('subscription_id: ', subscription_id);
+    // console.log('subscription_id: ', subscription_id);
 
-    console.log('payment_id: ', payment_id);
+    // console.log('payment_id: ', payment_id);
     const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
     
     const payment_intent = await stripe.paymentIntents.retrieve(payment_id, {
@@ -126,9 +126,9 @@ export class StripeService {
         'payment_method'
       ]
     })
-    console.log('payment_intent: ', payment_intent);
+    // console.log('payment_intent: ', payment_intent);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
-    console.log('order_id: ', order_id);
+    // console.log('order_id: ', order_id);
 
     const request = {
       cs_id,
@@ -146,7 +146,7 @@ export class StripeService {
       payment_method_type: payment_method_types[0],
       card_type: payment_intent.payment_method.card.funding
     }
-    console.log('request: ', request);
+    // console.log('request: ', request);
 
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted , '\n');
     // console.log('charge: ', charge , '\n');
