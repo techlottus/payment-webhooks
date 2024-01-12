@@ -73,7 +73,7 @@ export class StripeService {
         ],
       }
     );
-    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     
     
     const cs_id = checkoutSessionCompleted.id
@@ -95,7 +95,7 @@ export class StripeService {
     // console.log('phone: ', phone);
     
     const metadata = checkoutSessionCompleted.metadata
-    // console.log('metadata: ', metadata);
+    console.log('metadata: ', metadata);
     
     // console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
