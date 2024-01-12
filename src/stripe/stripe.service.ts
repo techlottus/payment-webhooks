@@ -98,7 +98,7 @@ export class StripeService {
     console.log('metadata: ', metadata);
     
     console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
-    const customer_id = checkoutSessionCompleted.customer.id
+    const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
     console.log('customer_id: ', customer_id);
     
     const payment_method_types = checkoutSessionCompleted.payment_method_types
