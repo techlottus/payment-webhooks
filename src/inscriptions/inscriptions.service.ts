@@ -8,10 +8,7 @@ export class InscriptionsService {
   constructor(private utilsService: UtilsService) {}
   async populateStrapi(request: any, response: any) {
 
-    const formResponse = request.body.form_response
-    console.log('formResponse: ', formResponse);
-    console.log('formResponse.hidden: ', formResponse.hidden);
-    
+    const formResponse = request.body.form_response    
     const cs_id = formResponse.hidden?.checkout_session_id || null
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
 
