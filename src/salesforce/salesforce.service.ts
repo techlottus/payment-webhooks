@@ -195,7 +195,7 @@ export class SalesforceService {
   }
   createInscription(cs_id: string) {
     // console.log('cs_id: ', cs_id);
-
+    try {
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
 
       forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${cs_id}`]))).pipe(take(1)).subscribe(responses => {
@@ -322,7 +322,7 @@ export class SalesforceService {
             }
           )
          
-        
+        }
         
 
       })
