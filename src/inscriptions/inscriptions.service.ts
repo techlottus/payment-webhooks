@@ -12,7 +12,7 @@ export class InscriptionsService {
     console.log('formResponse: ', formResponse);
     console.log('formResponse.hidden: ', formResponse.hidden);
     
-    const cs_id = formResponse.hidden.checkout_session_id || null
+    const cs_id = formResponse.hidden?.checkout_session_id || null
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
 
     if (!cs_id) {
