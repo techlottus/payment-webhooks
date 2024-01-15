@@ -251,7 +251,7 @@ export class SalesforceService {
                   emailEstudiante: data.track_inscriptions.attributes.email,
                   deseaFactura: data.track_inscriptions.attributes.need_invoice,
     
-                  claveCargoBanner: data.metadata.BNRcharge,
+                  claveCargoBanner: data.track_payments.attributes.metadata.BNRcharge,
                   tipoTarjeta: data.track_payments.attributes.card_type,
                   montoPago: data.track_payments.attributes.amount,
                   tipoPago: data.track_payments.attributes.payment_method_type,
