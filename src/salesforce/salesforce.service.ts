@@ -121,9 +121,9 @@ export class SalesforceService {
     let codigoDetalle;
 
     if (tipoPago === "Credito") {
-      codigoDetalle = "4157";
+      codigoDetalle = data.metadata.SFcreditCode;
     } else {
-      codigoDetalle = "4158";
+      codigoDetalle = data.metadata.SFdebitCode;
     }
 
     // Format request body
@@ -148,7 +148,7 @@ export class SalesforceService {
       "monto": data?.montoPago,
       "fechaPago": fechaPago,
       "tipoPago": tipoPago,
-      "claveCargoBanner": "1007",
+      "claveCargoBanner": data.claveCargoBanner,
       "codigoDetalle": codigoDetalle,
       "folioPago": data?.folioPago,
       "deseaFactura": data?.deseaFactura,
@@ -233,6 +233,7 @@ export class SalesforceService {
                 // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
                 
                 const offerMatch = offerData?.find((offer) => {
+                  // return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                   return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                 })
                 // console.log('offerMatch: ', offerMatch);
@@ -250,11 +251,13 @@ export class SalesforceService {
                   emailEstudiante: data.track_inscriptions.attributes.email,
                   deseaFactura: data.track_inscriptions.attributes.need_invoice,
     
-                  claveCargoBanner: 1007, // revisar clave cargo banner
+                  claveCargoBanner: data.metadata.BNRcharge,
                   tipoTarjeta: data.track_payments.attributes.card_type,
                   montoPago: data.track_payments.attributes.amount,
                   tipoPago: data.track_payments.attributes.payment_method_type,
                   fechaPago: data.track_payments.attributes.date,
+
+                  metadata: data.track_payments.attributes.metadata,
 
                   modalidad: offerMatch?.modalidad,
                   nivel: offerMatch?.nivel,
