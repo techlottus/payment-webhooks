@@ -233,8 +233,11 @@ export class SalesforceService {
                 // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
                 
                 const offerMatch = offerData?.find((offer) => {
-                  // return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
-                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
+                  const newOffer  = offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
+                  console.log(newOffer);
+                  
+                  return newOffer
+                  // return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                 })
                 // console.log('offerMatch: ', offerMatch);
                 // birth_entity: 'Aguascalientes', no se envia birth_entity
