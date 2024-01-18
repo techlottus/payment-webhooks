@@ -228,7 +228,7 @@ export class SalesforceService {
                 }))
               .subscribe(res => {
                 const offerData = res.data
-                // console.log('offerData: ', offerData);
+                console.log('offerData: ', offerData);
                 // console.log('data.track_payments.attributes: ', data.track_payments.attributes);
                 // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
                 
