@@ -3,7 +3,6 @@ import { subscribe } from 'diagnostics_channel';
 import { catchError, forkJoin, of, take, throwError } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
-let inputData;
 @Injectable()
 export class SalesforceService {
   constructor(private utilsService: UtilsService) {}
@@ -20,13 +19,18 @@ export class SalesforceService {
 
   }
 
-  validateOfferPeriod = (periodStartDate, periodExpireDate) => {
+  validateOfferPeriod = (periodStartDate, periodExpireDate, paymentDate) => {
     const formatedStartDate = new Date(periodStartDate);
     const formatedExpireDate = new Date(periodExpireDate);
-    const formatedPaymentDate = new Date(inputData?.paymentDate);
+    const formatedPaymentDate = new Date(paymentDate);
 
     formatedStartDate?.setHours(0,0,0);
     formatedExpireDate?.setHours(23,59,59);
+    // console.log('formatedPaymentDate: ',formatedPaymentDate );
+    // console.log('formatedExpireDate: ',formatedExpireDate );
+    // console.log('formatedStartDate: ',formatedStartDate );
+    // console.log('formatedPaymentDate?.getTime() >= formatedStartDate?.getTime(): ',formatedPaymentDate?.getTime() >= formatedStartDate?.getTime() );
+    // console.log('formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime(): ',formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime() );
 
     return formatedPaymentDate?.getTime() >= formatedStartDate?.getTime() && formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime();
   };
@@ -174,7 +178,7 @@ export class SalesforceService {
     // this is wrapped in an `async` function
     // you can use await throughout the function
 
-    const enrollmentData = JSON.parse(inputData?.enrollmentResponse)
+    const enrollmentData = JSON.parse(data?.enrollmentResponse)
     let enrollmentStatus = "ERROR";
 
     // Error enrollment
@@ -228,12 +232,17 @@ export class SalesforceService {
                 }))
               .subscribe(res => {
                 const offerData = res.data
-                console.log('offerData: ', offerData);
+                // console.log('offerData: ', offerData);
+                // console.log('offerData: ', offerData.filter(data => data.anioPeriodo === "2024"));
+                
                 // console.log('data.track_payments.attributes: ', data.track_payments.attributes);
                 // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
                 
                 const offerMatch = offerData?.find((offer) => {
-                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
+                  // console.log('offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram: ', offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram);
+                  // console.log('offer?.bnrProgramCode: ', offer?.bnrProgramCode);
+                  // console.log('data.track_payments.attributes.metadata.SFprogram: ', data.track_payments.attributes.metadata.SFprogram);
+                  return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento, data.track_payments.attributes.date);
                   // return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                 })
                 console.log('offerMatch: ', offerMatch);
