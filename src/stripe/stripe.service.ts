@@ -95,7 +95,10 @@ export class StripeService {
     // console.log('phone: ', phone);
     
     const metadata = checkoutSessionCompleted.metadata
-    console.log('metadata: ', metadata);
+    // console.log('metadata: ', metadata);
+    
+    const extra_fields = checkoutSessionCompleted.custom_fields
+    // console.log('extra_fields: ', extra_fields);
     
     // console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
@@ -144,7 +147,8 @@ export class StripeService {
       email,
       metadata: { ...metadata, typeform_url },
       payment_method_type: payment_method_types[0],
-      card_type: payment_intent.payment_method.card.funding
+      card_type: payment_intent.payment_method.card.funding,
+      extra_fields
     }
     // console.log('request: ', request);
 
