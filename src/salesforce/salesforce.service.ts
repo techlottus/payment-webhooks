@@ -285,7 +285,7 @@ export class SalesforceService {
                   calleFacturacion: data.track_invoices?.attributes?.address,
                   coloniaFacturacion: data.track_invoices?.attributes?.suburb,
                   ciudadFacturacion: data.track_invoices?.attributes?.city,
-                  checkoutSessionID: data.track_payments.attributes.cs_id
+                  // checkoutSessionID: data.track_payments.attributes.cs_id
                 }
                 // console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
