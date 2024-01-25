@@ -18,7 +18,6 @@ export class SalesforceService {
     return formattedPhone
 
   }
-
   validateOfferPeriod = (periodStartDate, periodExpireDate, paymentDate) => {
     const formatedStartDate = new Date(periodStartDate);
     const formatedExpireDate = new Date(periodExpireDate);
@@ -34,7 +33,6 @@ export class SalesforceService {
 
     return formatedPaymentDate?.getTime() >= formatedStartDate?.getTime() && formatedPaymentDate?.getTime() <= formatedExpireDate?.getTime();
   };
-  
   formatEnrollRequest(data: any) {
     // this is wrapped in an `async` function
     // you can use await throughout the function
@@ -287,6 +285,7 @@ export class SalesforceService {
                   calleFacturacion: data.track_invoices?.attributes?.address,
                   coloniaFacturacion: data.track_invoices?.attributes?.suburb,
                   ciudadFacturacion: data.track_invoices?.attributes?.city,
+                  checkoutSessionID: data.track_payments.attributes.cs_id
                 }
                 // console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
