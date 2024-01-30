@@ -6,6 +6,7 @@ import { InscriptionsModule } from './inscriptions/inscriptions.module';
 import { RouterModule } from '@nestjs/core';
 import { UtilsModule } from './utils/utils.module';
 import { SalesforceModule } from './salesforce/salesforce.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SalesforceModule } from './salesforce/salesforce.module';
       },
     ]),
     UtilsModule,
+    EnrollmentModule,
     
   ],
   controllers: [ AppController ],

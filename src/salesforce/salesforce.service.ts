@@ -285,7 +285,7 @@ export class SalesforceService {
                   calleFacturacion: data.track_invoices?.attributes?.address,
                   coloniaFacturacion: data.track_invoices?.attributes?.suburb,
                   ciudadFacturacion: data.track_invoices?.attributes?.city,
-                  // checkoutSessionID: data.track_payments.attributes.cs_id
+                  checkoutSessionID: data.track_payments.attributes.cs_id
                 }
                 // console.log('prefilledData: ', prefilledData);
                 const finalData = this.formatEnrollRequest(prefilledData)
@@ -295,54 +295,51 @@ export class SalesforceService {
                   catchError((err) => {
                     // console.log(err.response.data)
                     return of(err)
-                  }))
-                  .subscribe(res => {
-                    if (res.data.Exitoso === 'False') {
-                      const labels = {
-                        email: 'Correo electrónico',
-                        name: 'Nombres',
-                        phone: 'Teléfono',
-                        last_name: 'Apellidos',
-                        cs_id: 'Checkout Session Id'
-                      }
-                      const fields = {
-                        cs_id: data.track_payments.attributes.cs_id,
-                        name: data.track_inscriptions.attributes.name,
-                        last_name: data.track_inscriptions.attributes.last_name,
-                        phone: data.track_inscriptions.attributes.phone,
-                        email: data.track_inscriptions.attributes.email,
-                      }
-                      const metadata = {
-                        error: res.data.Error,
-                        inscriptionsID: data.track_inscriptions.id,
-                        paymentsID: data.track_payments.id,
-                        invoicesID: data.track_invoices?.id,
-                      }
-                      const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-                      // console.log('slackMessage: ', slackMessage);
-                      
-                      this.utilsService.postSlackMessage(slackMessage).subscribe()
-                      
+                  })
+                ).subscribe(res => {
+                  if (res.data.Exitoso === 'False') {
+                    const labels = {
+                      email: 'Correo electrónico',
+                      name: 'Nombres',
+                      phone: 'Teléfono',
+                      last_name: 'Apellidos',
+                      cs_id: 'Checkout Session Id',
                     }
-                    //  else {
-                    //   console.log('res.data: ', res.data);
-                    // }
+                    const fields = {
+                      cs_id: data.track_payments.attributes.cs_id,
+                      name: data.track_inscriptions.attributes.name,
+                      last_name: data.track_inscriptions.attributes.last_name,
+                      phone: data.track_inscriptions.attributes.phone,
+                      email: data.track_inscriptions.attributes.email,
+                    }
+                    const metadata = {
+                      scope: 'Salesforce',
+                      product_name: data.track_payments.attributes.product_name,
+                      error: res.data.Error,
+                      inscriptionsID: data.track_inscriptions.id,
+                      paymentsID: data.track_payments.id,
+                      invoicesID: data.track_invoices?.id,
+                    }
+                    const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
+                    // console.log('slackMessage: ', slackMessage);
+                    
+                    this.utilsService.postSlackMessage(slackMessage).subscribe()
+                    
+                  }else {
+                    // call enrollment webhook if not atr
+                    const data = res.data.email ? { cs_id, email: res.data.email } : { cs_id }
+                    this.utilsService.callSelfWebhook('/enrollment/new', data).subscribe()
+
+                  }
                 })
-    
               })
             }
           )
-         
         }
-        
-
       })
-
     } catch (error) {
       console.error(error)
       return error
     }
-
   }
-
 }
