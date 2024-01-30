@@ -243,7 +243,7 @@ export class SalesforceService {
                   return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento, data.track_payments.attributes.date);
                   // return offer?.bnrProgramCode === data.track_payments.attributes.metadata.SFprogram // && this.validateOfferPeriod(offer?.fechaInicio, offer?.fechaVencimiento);
                 })
-                // console.log('offerMatch: ', offerMatch);
+                console.log('offerMatch: ', offerMatch);
                 // birth_entity: 'Aguascalientes', no se envia birth_entity
                 
                 const prefilledData = {
