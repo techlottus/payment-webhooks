@@ -59,7 +59,7 @@ export class EnrollmentController {
         const scope = 'Program response'
         const enrollmentObs = this.enrollmentsService.enrollStudent(user.id, program.id)
         
-        return ProgramHasError? combineLatest([of({inscription, payment, user, error, scope}), enrollmentObs ]) : combineLatest([of({inscription, payment, user, error, scope}), enrollmentObs ])
+        return ProgramHasError? combineLatest([of({inscription, payment, user, error, scope}) ]) : combineLatest([of({inscription, payment, user, error, scope}), enrollmentObs ])
       })
     ).subscribe(responses => {
       
