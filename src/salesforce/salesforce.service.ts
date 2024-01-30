@@ -164,7 +164,8 @@ export class SalesforceService {
       "calleFacturacion": data?.calleFacturacion,
       "coloniaFacturacion": data?.coloniaFacturacion,
       "ciudadFacturacion": data?.ciudadFacturacion,
-      "estadoFacturacion": estadoFacturacion
+      "estadoFacturacion": estadoFacturacion,
+      "checkoutSessionID": data.checkoutSessionID
     };
 
     return requestData;
@@ -293,7 +294,7 @@ export class SalesforceService {
                 this.utilsService.postSFInscription(finalData, authResponse.data.access_token, authResponse.data.token_type)
                 .pipe(
                   catchError((err) => {
-                    // console.log(err.response.data)
+                    console.log(err.response.data)
                     return of(err)
                   })
                 ).subscribe(res => {
@@ -325,7 +326,7 @@ export class SalesforceService {
                     
                     this.utilsService.postSlackMessage(slackMessage).subscribe()
                     
-                  }else {
+                  } else if (data.track_payments.attributes.metadata.SFcampus !== "UTC A TU RITMO") {
                     // call enrollment webhook if not atr
                     const data = res.data.email ? { cs_id, email: res.data.email } : { cs_id }
                     this.utilsService.callSelfWebhook('/enrollment/new', data).subscribe()

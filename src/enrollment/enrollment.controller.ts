@@ -10,6 +10,8 @@ export class EnrollmentController {
 
   @Post('/new')
   webhook(@Req() request: any, @Res() response: any ) {
+    console.log(request.body.cs_id );
+    
     const ParamsHasError =  !!request.body.cs_id
     const ParamsError = `Missing parameters: ${ request.body.cs_id ? '' : 'cs_id, please check call.' }`
     
@@ -83,6 +85,8 @@ export class EnrollmentController {
           response.send(EnrollmentError)
         } else {
           response.status(201)
+          console.log(data);
+          
           response.send(data.enrollment)
         }
       }
