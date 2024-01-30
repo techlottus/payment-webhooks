@@ -1,7 +1,7 @@
 
 import { Controller, Post, Req, Res } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
-import { catchError, combineLatest, concatAll, mergeMap, of, pipe, switchMap, tap } from 'rxjs';
+import { catchError, combineLatest, mergeMap, of, switchMap } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Controller('enrollment')
@@ -10,10 +10,10 @@ export class EnrollmentController {
 
   @Post('/new')
   webhook(@Req() request: any, @Res() response: any ) {
-    console.log(request.body.cs_id );
-    
-    const ParamsHasError =  !!request.body.cs_id
+    // console.log(request.body.cs_id );
+    const ParamsHasError =  !request.body.cs_id
     const ParamsError = `Missing parameters: ${ request.body.cs_id ? '' : 'cs_id, please check call.' }`
+    if(ParamsHasError) return response.status(400).send(ParamsError)
     
     const baseObservables = {
       inscription: this.utilsService.fetchStrapi("track-inscriptions", [`filters[cs_id][$eq]=${request.body.cs_id}`]),
@@ -21,7 +21,7 @@ export class EnrollmentController {
     }
 
     combineLatest(baseObservables).pipe(
-      catchError((err, caught) => { console.error(err); return caught}),
+      catchError((err, caught) => { console.error(err); return caught }),
       mergeMap(responses => {
         const inscription = { id: responses.inscription.data.data[0].id, ...responses.inscription.data.data[0].attributes }
         const payment = { id: responses.payment.data.data[0].id, ...responses.payment.data.data[0].attributes }
@@ -53,13 +53,12 @@ export class EnrollmentController {
         const user = responses[1].data[0]
         const program = responses[2].data.courses[0]
         // check if program exists error  
-        const ProgramHasError =  !program
+        const ProgramHasError =  !program?.id
         const ProgramError = `Program ${ payment.metadata.LMSprogram }: not found, please check shortname.`
         const error = ProgramHasError ? ProgramError : null
         const scope = 'Program response'
-        const enrollmentObs = this.enrollmentsService.enrollStudent(user.id, program.id)
         
-        return ProgramHasError? combineLatest([of({inscription, payment, user, error, scope}) ]) : combineLatest([of({inscription, payment, user, error, scope}), enrollmentObs ])
+        return ProgramHasError ? combineLatest([of({inscription, payment, user, error, scope}) ]) : combineLatest([of({inscription, payment, user, error, scope}), this.enrollmentsService.enrollStudent(user?.id, program?.id) ])
       })
     ).subscribe(responses => {
       
@@ -85,15 +84,13 @@ export class EnrollmentController {
           response.send(EnrollmentError)
         } else {
           response.status(201)
-          console.log(data);
-          
           response.send(data.enrollment)
         }
       }
     })
   }
   SendSlackMessage(data: any, scope: string, error: string) {
-    
+
     const labels = {
       email: 'Correo electrónico inscripción',
       name: 'Nombres',
@@ -107,7 +104,6 @@ export class EnrollmentController {
       last_name: data.inscription.last_name,
       phone: data.inscription.phone,
       email: data.email
-      
     }
     // console.log(data);
     
