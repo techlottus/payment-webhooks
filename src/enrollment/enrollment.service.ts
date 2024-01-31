@@ -10,7 +10,7 @@ export class EnrollmentService {
   checkUser(email: string) {
     const wsfunction = 'core_user_get_users_by_field'
     const req = {
-      field: 'username',
+      field: 'email',
       'values[0]': email,
       wsfunction
     }
