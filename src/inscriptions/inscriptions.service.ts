@@ -55,7 +55,7 @@ export class InscriptionsService {
           return of(err)
         })).subscribe(data => {
           response.status(data[0].status)
-          this.utilsService.callSFWebhook(cs_id).subscribe()
+          this.utilsService.callSelfWebhook('/salesforce/inscription', { cs_id }).subscribe()
           // guardar need invoice data
         })
         

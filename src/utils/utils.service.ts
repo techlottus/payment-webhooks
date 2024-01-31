@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 require('dotenv').config();
 import { env } from 'process';
+import { catchError } from 'rxjs';
 
 @Injectable()
 export class UtilsService {
@@ -14,8 +15,8 @@ export class UtilsService {
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.Strapiconfig)
   }
-  callSFWebhook(cs_id: string) {
-    return this.http.post(`${env.SELF_URL}/salesforce/inscription`, { cs_id })
+  callSelfWebhook(endpoint: string, data: any) {
+    return this.http.post(`${env.SELF_URL}${endpoint}`, data)
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
     return this.http.get(`${env.SF_OFFER_ENDPOINT}?linea=${brand}&campus=${campus}`, { headers: { Authorization: `${token_type} ${token}` }})
@@ -40,7 +41,7 @@ export class UtilsService {
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Hola :wave:",
+        "text": "Hola Tenemos una nueva incidencia :is_fine:",
         "emoji": true
       }
     }
@@ -50,6 +51,63 @@ export class UtilsService {
         "type": "plain_text",
         "text": "Hola, esto es una prueba, favor de ignorar. :everythingsfineparrot: ",
         "emoji": true
+      }
+    }
+
+    const buttonBlocks = {
+      invoicesID: {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Acceso a track invoices"
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Navegar a strapi",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-invoice.track-invoice/${metadata.invoicesID}`,
+          "action_id": "button-action"
+        }
+      },
+      inscriptionsID: {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Acceso a track inscriptions"
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Navegar a strapi",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
+          "action_id": "button-action"
+        }
+      },
+      paymentsID: {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Acceso a track payments"
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Navegar a strapi",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-payment.track-payment/${metadata.paymentsID}`,
+          "action_id": "button-action"
+        }
       }
     }
     const buttons = [
@@ -116,10 +174,29 @@ export class UtilsService {
         env.NODE_ENV !== 'staging' ? headerBlock : testBlock,
         {
           "type": "section",
+          "fields": [
+            {
+              "type": "plain_text",
+              "text": `Parte del proceso: ${metadata.scope}`,
+              "emoji": true
+            },
+            {
+              "type": "plain_text",
+              "text": `Producto: ${metadata.product_name}`,
+              "emoji": true
+            },
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
           "text": {
-            "type": "mrkdwn",
-            "text": `Tenemos una nueva incidencia :is_fine:`
-          },
+            "type": "plain_text",
+            "text": "Error",
+            "emoji": true
+          }
         },
         {
           "type": "section",
@@ -152,7 +229,11 @@ export class UtilsService {
   
   }
   postSlackMessage(message: any) {
-    return this.http.post(env.WEBHOOK_SLACK, message)
+    return this.http.post(env.WEBHOOK_SLACK, message).pipe(catchError((err, caught) => {
+      console.log(err);
+      
+      return caught
+    }))
   }
 
   
