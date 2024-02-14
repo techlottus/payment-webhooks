@@ -150,8 +150,8 @@ export class SalesforceService {
       "monto": data?.montoPago,
       "fechaPago": fechaPago,
       "tipoPago": tipoPago,
-      "claveCargoBanner": data.claveCargoBanner,
-      "codigoDetalle": codigoDetalle,
+      "claveCargoBanner": data.claveCargoBanner, //check
+      "codigoDetalle": codigoDetalle, //check
       "folioPago": data?.folioPago,
       "deseaFactura": data?.deseaFactura,
       "rfc": data.rfc,
@@ -260,6 +260,7 @@ export class SalesforceService {
                   deseaFactura: data.track_inscriptions.attributes.need_invoice,
     
                   claveCargoBanner: data.track_payments.attributes.metadata.BNRcharge,
+
                   tipoTarjeta: data.track_payments.attributes.card_type,
                   montoPago: data.track_payments.attributes.amount,
                   tipoPago: data.track_payments.attributes.payment_method_type,
@@ -294,7 +295,7 @@ export class SalesforceService {
                 this.utilsService.postSFInscription(finalData, authResponse.data.access_token, authResponse.data.token_type)
                 .pipe(
                   catchError((err) => {
-                    console.log(err.response.data)
+                    console.log(err.response.data.message)
                     return of(err)
                   })
                 ).subscribe(res => {
@@ -329,6 +330,8 @@ export class SalesforceService {
                   } else if (data.track_payments.attributes.metadata.SFcampus !== "UTC A TU RITMO") {
                     // call enrollment webhook if not atr
                     const data = res.data.email ? { cs_id, email: res.data.email } : { cs_id }
+                    console.log(data);
+                    
                     this.utilsService.callSelfWebhook('/enrollment/new', data).subscribe()
 
                   }
