@@ -25,6 +25,7 @@ export class EnrollmentService {
       'users[0][lastname]': last_name,
       'users[0][email]': email,
       'users[0][createpassword]': 1,
+      'users[0][institution]': 'EXTENSION',
       wsfunction
     }
 
