@@ -61,7 +61,7 @@ export class EnrollmentController {
         return ProgramHasError ? combineLatest([of({inscription, payment, user, error, scope}) ]) : combineLatest([of({inscription, payment, user, error, scope}), this.enrollmentsService.enrollStudent(user?.id, program?.id) ])
       })
     ).subscribe(responses => {
-      console.log('responses: ', responses);
+      // console.log('responses: ', responses);
       
       let data: any = {
         inscription: responses[0].inscription,
