@@ -7,6 +7,7 @@ import { RouterModule } from '@nestjs/core';
 import { UtilsModule } from './utils/utils.module';
 import { SalesforceModule } from './salesforce/salesforce.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
+import { CurpModule } from './curp/curp.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
     ]),
     UtilsModule,
     EnrollmentModule,
+    CurpModule,
     
   ],
   controllers: [ AppController ],
