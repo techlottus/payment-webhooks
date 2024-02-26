@@ -8,7 +8,7 @@ import { catchError } from 'rxjs';
 export class UtilsService {
   constructor(private readonly http: HttpService) {}
   StrapiTrackingConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
-  StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TEMPLATES_TOKEN }` } }
+  StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
   
 
   postStrapi (endpoint: string, data: any) {
@@ -17,8 +17,11 @@ export class UtilsService {
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)
   }
-  fetchEmailTemplate = (id: number ) => {
-    return this.http.get(`${env.STRAPI_EMAIL_URL}/api/templates/${id}`, this.StrapiTrackingConfig)
+  postEmailTemplate = (template: string, params: { [key:string]: any }, subject: string) => {
+    return this.http.post(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates`,{html: template, subject, params }, this.StrapiTemplatesConfig)
+  }
+  fetchEmailTemplate = (id: number) => {
+    return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/${id}`, this.StrapiTemplatesConfig)
   }
   callSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
