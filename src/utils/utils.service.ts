@@ -17,11 +17,17 @@ export class UtilsService {
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)
   }
-  postEmailTemplate = (template: string, params: { [key:string]: any }, subject: string) => {
-    return this.http.post(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates`,{html: template, subject, params }, this.StrapiTemplatesConfig)
+  postEmailTemplate = (data: any) => {
+
+    return this.http.post(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/`,{ data }, this.StrapiTemplatesConfig)
   }
-  fetchEmailTemplate = (id: number) => {
-    return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/${id}`, this.StrapiTemplatesConfig)
+  putEmailTemplate = (data: any, id: number) => {
+
+    return this.http.put(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/${id}`,{ data }, this.StrapiTemplatesConfig)
+  }
+  fetchEmailTemplate = ({ id, name }:{ id?: number, name?: string}) => {
+    const uri = !name ? `/api/templates/${id}` : `/api/templates?filters[name][$eq]=${name}`
+    return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}${uri}`, this.StrapiTemplatesConfig)
   }
   callSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
