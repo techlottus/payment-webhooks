@@ -30,7 +30,7 @@ export class SalesforceController {
           //     })
           //   )
           // }
-          return !enrrollments.includes(false) ?  combineLatest({ data, auth: this.utilsService.authSF()}) : of({ error: 'Missing data'})
+          return !enrrollments.includes(false) ?  combineLatest({ data: of(data), auth: this.utilsService.authSF()}) : of({ error: 'Missing data'})
         }),
         mergeMap( res => {
           // .subscribe(authResponse => {
@@ -39,10 +39,9 @@ export class SalesforceController {
             const authResponse = res['auth']
             const data = res['data']
             const err = res['error']
-            const finalData = this.salesforceService.formatEnrollRequest(data)
           
             // console.log('finalData: ', finalData);
-            return err ? of(err) : combineLatest({ data, inscription: this.utilsService.postSFInscription(finalData, authResponse.data.access_token, authResponse.data.token_type)})
+            return err ? of(err) : combineLatest({ data: of(data), inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)})
             .pipe(
               catchError((err) => {
                 console.log(err.response.data.message)
@@ -53,18 +52,19 @@ export class SalesforceController {
         })
       ).subscribe(res => {
         const data = res.data
-        // console.log(`data: `, data);
+        // console.log(`res: `, res);
+        // console.log(`res.data: `, res.data);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
         // console.log('enrrollments: ', enrrollments);
         if (res.inscription.data.Exitoso === 'False') {
-          this.SendSlackMessage(data, 'Salesforce', res.data.Error)
+          this.SendSlackMessage(data, 'Salesforce', res.inscription.data.Error)
         } else if (data.track_payments.attributes.metadata.SFcampus !== "UTC A TU RITMO") {
           // call enrollment webhook if not atr
           const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
-          console.log(data);
+          // console.log(data);
           
           this.utilsService.callSelfWebhook('/enrollment/new', data).subscribe()
 
@@ -95,7 +95,7 @@ export class SalesforceController {
     const metadata = {
       scope: scope,
       product_name: data.track_payments.attributes.product_name,
-      error: error,
+      error,
       inscriptionsID: data.track_inscriptions.id,
       paymentsID: data.track_payments.id,
       invoicesID: data.track_invoices?.id,

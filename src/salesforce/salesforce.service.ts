@@ -17,8 +17,6 @@ export class SalesforceService {
 
   }
   formatEnrollRequest(req: any) {
-    // this is wrapped in an `async` function
-    // you can use await throughout the function
     
     // Format generoEstudiante
     const generos = {
@@ -112,7 +110,7 @@ export class SalesforceService {
       "nombre": req.track_inscriptions.attributes.name,
       "apellidos": req.track_inscriptions.attributes.last_name,
       "nacionalidad": req.track_inscriptions.attributes.residence,
-      "fechaNacimiento": req.track_inscriptions.attributes.birthdate?.toLocaleDateString('en-GB'),
+      "fechaNacimiento": new Date(req.track_inscriptions.attributes.birthdate)?.toLocaleDateString('en-GB'),
       "genero": generoEstudiante,
       "estadoCivil": req.track_inscriptions.attributes.civil_status,
       "curp": req.track_inscriptions.attributes.CURP?.toUpperCase(),
