@@ -122,7 +122,7 @@ export class SalesforceService {
       "nivel": req.track_payments.attributes.metadata.SFlevel,
       "campus": req.track_payments.attributes.metadata.SFcampus,
       "programa": req.track_payments.attributes.metadata.SFprogram,
-      "lineaNegocio": req.track_payments.attributes.metadata.line,
+      "lineaNegocio": req.track_payments.attributes.metadata.SFline,
 
       "monto": req.track_payments.attributes.amount,
       "fechaPago": fechaPago,
