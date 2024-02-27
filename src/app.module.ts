@@ -8,6 +8,7 @@ import { UtilsModule } from './utils/utils.module';
 import { SalesforceModule } from './salesforce/salesforce.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { EmailModule } from './email/email.module';
+import { CurpModule } from './curp/curp.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EmailModule } from './email/email.module';
     UtilsModule,
     EnrollmentModule,
     EmailModule,
+    CurpModule,
     
   ],
   controllers: [ AppController ],
