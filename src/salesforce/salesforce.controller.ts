@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { SalesforceService } from './salesforce.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { catchError, combineLatest, forkJoin, mergeMap, of, take } from 'rxjs';
@@ -21,15 +21,6 @@ export class SalesforceController {
             return acc
           }, {})
           const enrrollments = [ data.track_inscriptions?.attributes?.enrollment === null,  data.track_payments?.attributes?.enrollment === null, data.track_inscriptions?.attributes.need_invoice ? data.track_invoices?.attributes?.enrollment === null : true ]
-          // if (!enrrollments.includes(false)) {
-          //   this.utilsService.authSF().pipe(
-          //     take(1), 
-          //     catchError((err) => {
-          //       // console.log(err)
-          //       return of(err.response)
-          //     })
-          //   )
-          // }
           return !enrrollments.includes(false) ?  combineLatest({ data: of(data), auth: this.utilsService.authSF()}) : of({ error: 'Missing data'})
         }),
         mergeMap( res => {
@@ -41,11 +32,11 @@ export class SalesforceController {
             const err = res['error']
           
             // console.log('finalData: ', finalData);
-            return err ? of(err) : combineLatest({ data: of(data), inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)})
+            return err ? of({ error: true, ...err}) : combineLatest({ data: of(data), inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)})
             .pipe(
               catchError((err) => {
-                console.log(err.response.data.message)
-                return of(err)
+                // console.log(err.response.data.message)
+                return of({ error: true, ...err})
               })
             )
         // })
@@ -53,13 +44,14 @@ export class SalesforceController {
       ).subscribe(res => {
         const data = res.data
         // console.log(`res: `, res);
+        // console.log(`res.error: `, res.error);
         // console.log(`res.data: `, res.data);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
         // console.log('enrrollments: ', enrrollments);
-        if (res.inscription.data.Exitoso === 'False') {
+        if (res.inscription?.data?.Exitoso === 'False' || res.error) {
           this.SendSlackMessage(data, 'Salesforce', res.inscription.data.Error)
         } else if (data.track_payments.attributes.metadata.SFcampus !== "UTC A TU RITMO") {
           // call enrollment webhook if not atr

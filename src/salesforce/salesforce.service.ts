@@ -20,8 +20,8 @@ export class SalesforceService {
     
     // Format generoEstudiante
     const generos = {
-      "Masculino": "Hombre",
-      "Femenino": "Mujer",
+      "HOMBRE": "Hombre",
+      "MUJER": "Mujer",
       "Otro": "Otro"
     };
 
@@ -108,9 +108,10 @@ export class SalesforceService {
 
     const requestData = {
       "nombre": req.track_inscriptions.attributes.name,
-      "apellidos": req.track_inscriptions.attributes.last_name,
+      "apellidoPaterno": req.track_inscriptions.attributes.last_name,
+      "apellidoMaterno": req.track_inscriptions.attributes.second_last_name,
       "nacionalidad": req.track_inscriptions.attributes.residence,
-      "fechaNacimiento": new Date(req.track_inscriptions.attributes.birthdate)?.toLocaleDateString('en-GB'),
+      "fechaNacimiento": req.track_inscriptions.attributes.birthdate,
       "genero": generoEstudiante,
       "estadoCivil": req.track_inscriptions.attributes.civil_status,
       "curp": req.track_inscriptions.attributes.CURP?.toUpperCase(),
