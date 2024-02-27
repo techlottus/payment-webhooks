@@ -29,7 +29,7 @@ export class UtilsService {
     const uri = !name ? `/api/templates/${id}` : `/api/templates?filters[name][$eq]=${name}`
     return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}${uri}`, this.StrapiTemplatesConfig)
   }
-  callSelfWebhook(endpoint: string, data: any) {
+  postSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
@@ -132,24 +132,6 @@ export class UtilsService {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": "Acceso a track inscriptions"
-        },
-        "accessory": {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "Navegar a strapi",
-            "emoji": true
-          },
-          "value": "click_me_123",
-          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
-          "action_id": "button-action"
-        }
-      },
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
           "text": "Acceso a track payments"
         },
         "accessory": {
@@ -183,7 +165,26 @@ export class UtilsService {
         "action_id": "button-action"
       }
     }
+    const inscriptionsButton = {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Acceso a track inscriptions"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Navegar a strapi",
+          "emoji": true
+        },
+        "value": "click_me_123",
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
+        "action_id": "button-action"
+      }
+    }
     if (metadata.invoicesID) buttons.push(invoiceButton)
+    if (metadata.inscriptionsID) buttons.push(inscriptionsButton)
   
     // Block template for Slack notification
     const notificationBlock = {
