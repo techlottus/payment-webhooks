@@ -1,5 +1,4 @@
 import { Injectable, Response } from '@nestjs/common';
-import { subscribe } from 'diagnostics_channel';
 import { catchError, forkJoin, of, take, throwError } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 

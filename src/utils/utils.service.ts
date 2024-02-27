@@ -7,13 +7,27 @@ import { catchError } from 'rxjs';
 @Injectable()
 export class UtilsService {
   constructor(private readonly http: HttpService) {}
-  Strapiconfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
+  StrapiTrackingConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
+  StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
+  
 
   postStrapi (endpoint: string, data: any) {
-    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.Strapiconfig)
+    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.StrapiTrackingConfig)
   }
   fetchStrapi = (model: string, params: string[] ) => {
-    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.Strapiconfig)
+    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)
+  }
+  postEmailTemplate = (data: any) => {
+
+    return this.http.post(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/`,{ data }, this.StrapiTemplatesConfig)
+  }
+  putEmailTemplate = (data: any, id: number) => {
+
+    return this.http.put(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/${id}`,{ data }, this.StrapiTemplatesConfig)
+  }
+  fetchEmailTemplate = ({ id, name }:{ id?: number, name?: string}) => {
+    const uri = !name ? `/api/templates/${id}` : `/api/templates?filters[name][$eq]=${name}`
+    return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}${uri}`, this.StrapiTemplatesConfig)
   }
   callSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
@@ -26,6 +40,9 @@ export class UtilsService {
   }
   postSFInscription(data: any, token:string, token_type:string) {
     return this.http.post(`${env.SF_INSCRIPTION_ENDPOINT}`, data, { headers: { Authorization: `${token_type} ${token}` }})
+  }
+  sendSFemail(xml: any) {
+    return this.http.post(`${env.SF_EMAIL_ENDPOINT}`,  xml, { headers: { "Content-Type": `text/xml;charset=UTF-8`, SOAPAction: 'HTTP' }})
   }
   generateSlackErrorMessage(labels: any, metadata: any, data: any) {
     
@@ -235,6 +252,4 @@ export class UtilsService {
       return caught
     }))
   }
-
-  
 }
