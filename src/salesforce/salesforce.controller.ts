@@ -66,7 +66,7 @@ export class SalesforceController {
           const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
           // console.log(data);
           
-          this.utilsService.callSelfWebhook('/enrollment/new', data).subscribe()
+          this.utilsService.postSelfWebhook('/enrollment/new', data).subscribe()
 
         }
        

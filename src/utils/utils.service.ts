@@ -15,7 +15,7 @@ export class UtilsService {
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.Strapiconfig)
   }
-  callSelfWebhook(endpoint: string, data: any) {
+  postSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
