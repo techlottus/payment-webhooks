@@ -115,24 +115,6 @@ export class UtilsService {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": "Acceso a track inscriptions"
-        },
-        "accessory": {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "Navegar a strapi",
-            "emoji": true
-          },
-          "value": "click_me_123",
-          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
-          "action_id": "button-action"
-        }
-      },
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
           "text": "Acceso a track payments"
         },
         "accessory": {
@@ -166,7 +148,26 @@ export class UtilsService {
         "action_id": "button-action"
       }
     }
+    const inscriptionsButton = {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Acceso a track inscriptions"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Navegar a strapi",
+          "emoji": true
+        },
+        "value": "click_me_123",
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
+        "action_id": "button-action"
+      }
+    }
     if (metadata.invoicesID) buttons.push(invoiceButton)
+    if (metadata.inscriptionsID) buttons.push(inscriptionsButton)
   
     // Block template for Slack notification
     const notificationBlock = {
