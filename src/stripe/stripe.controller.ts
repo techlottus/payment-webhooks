@@ -1,5 +1,6 @@
 import { Controller, HttpException, Post, RawBodyRequest, Req, Res } from '@nestjs/common';
 import { env } from 'process';
+import { catchError, mergeMap, of } from 'rxjs';
 require('dotenv').config();
 
 import { UtilsService } from 'src/utils/utils.service';
@@ -30,13 +31,35 @@ export class StripeController {
             const strapiReq = await this.checkoutSessionCompleted(event)
             const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
             
-            paymentObs.subscribe(res => {
-              if (!!res.data.error) {
+            paymentObs.subscribe(paymentRes => {
+              if (!!paymentRes.data.error) {
                 throw new HttpException({
-                  message: res.data.error.message
-                }, res.data.error.status);
+                  message: paymentRes.data.error.message
+                }, paymentRes.data.error.status);
               } else {
-                this.utilsService.
+                this.utilsService.postSelfWebhook('/email/compile', { template_id: 1, params: {
+                  "first_name": "Diana Pelaez",
+                  "campus": "prueba ula online",
+                  "start_date": "17/2/24",
+                  "email": "test@test.test",
+                  "password": "password"
+                } })
+                  .pipe(
+                    catchError((err) => {
+                      console.log(err)
+                      return of({ error: true, ...err})
+                    }),
+                    mergeMap(emailRes => {
+                      if (emailRes.error) {
+                        return of(emailRes)
+                      }
+                      console.log(emailRes);
+                      
+                      const { compiled, params, template: { subject, priority } } = emailRes.data
+                      return this.utilsService.postSelfWebhook('/email/salesforce/send', { template: JSON.parse(compiled), subject, toAddress: paymentRes.data.data.attributes.email, priority })
+
+                    })
+                  ).subscribe(data => console.log(data))
               }
 
             })
@@ -169,4 +192,5 @@ export class StripeController {
     // console.log('line_items.data[0]: ', line_items.data[0] , '\n');
     return request
   }
+
 }
