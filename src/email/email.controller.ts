@@ -73,10 +73,6 @@ export class EmailController {
     console.log(finalParams);
     this.utils.fetchEmailTemplate({ name: body.name })
       .pipe(
-        catchError((err, caught) => {
-          // console.log(err);
-          return caught
-        }),
         mergeMap((templateRes) => {
           let params = { name, html, subject, params: finalParams }
 
@@ -88,7 +84,7 @@ export class EmailController {
               response.status(err.response.status).send(err.response.data.error)
               return caught
             })) 
-          :this.utils.postEmailTemplate(params).pipe(
+          : this.utils.postEmailTemplate(params).pipe(
             catchError((err,caught) => {
               // console.log(err);
               // console.log(err);
