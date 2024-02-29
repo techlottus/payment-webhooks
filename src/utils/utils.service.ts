@@ -7,15 +7,29 @@ import { catchError } from 'rxjs';
 @Injectable()
 export class UtilsService {
   constructor(private readonly http: HttpService) {}
-  Strapiconfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
+  StrapiTrackingConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
+  StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
+  
 
   postStrapi (endpoint: string, data: any) {
-    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.Strapiconfig)
+    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.StrapiTrackingConfig)
   }
   fetchStrapi = (model: string, params: string[] ) => {
-    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.Strapiconfig)
+    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)
   }
-  callSelfWebhook(endpoint: string, data: any) {
+  postEmailTemplate = (data: any) => {
+
+    return this.http.post(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/`,{ data }, this.StrapiTemplatesConfig)
+  }
+  putEmailTemplate = (data: any, id: number) => {
+
+    return this.http.put(`${env.STRAPI_EMAIL_TEMPLATES_URL}/api/templates/${id}`,{ data }, this.StrapiTemplatesConfig)
+  }
+  fetchEmailTemplate = ({ id, name }:{ id?: number, name?: string}) => {
+    const uri = !name ? `/api/templates/${id}` : `/api/templates?filters[name][$eq]=${name}`
+    return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}${uri}`, this.StrapiTemplatesConfig)
+  }
+  postSelfWebhook(endpoint: string, data: any) {
     return this.http.post(`${env.SELF_URL}${endpoint}`, data)
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
@@ -26,6 +40,9 @@ export class UtilsService {
   }
   postSFInscription(data: any, token:string, token_type:string) {
     return this.http.post(`${env.SF_INSCRIPTION_ENDPOINT}`, data, { headers: { Authorization: `${token_type} ${token}` }})
+  }
+  sendSFemail(xml: any) {
+    return this.http.post(`${env.SF_EMAIL_ENDPOINT}`,  xml, { headers: { "Content-Type": `text/xml;charset=UTF-8`, SOAPAction: 'HTTP' }})
   }
   generateSlackErrorMessage(labels: any, metadata: any, data: any) {
     
@@ -115,24 +132,6 @@ export class UtilsService {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": "Acceso a track inscriptions"
-        },
-        "accessory": {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "Navegar a strapi",
-            "emoji": true
-          },
-          "value": "click_me_123",
-          "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
-          "action_id": "button-action"
-        }
-      },
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
           "text": "Acceso a track payments"
         },
         "accessory": {
@@ -166,7 +165,26 @@ export class UtilsService {
         "action_id": "button-action"
       }
     }
+    const inscriptionsButton = {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Acceso a track inscriptions"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Navegar a strapi",
+          "emoji": true
+        },
+        "value": "click_me_123",
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-inscription.track-inscription/${metadata.inscriptionsID}`,
+        "action_id": "button-action"
+      }
+    }
     if (metadata.invoicesID) buttons.push(invoiceButton)
+    if (metadata.inscriptionsID) buttons.push(inscriptionsButton)
   
     // Block template for Slack notification
     const notificationBlock = {
@@ -235,6 +253,4 @@ export class UtilsService {
       return caught
     }))
   }
-
-  
 }
