@@ -96,7 +96,7 @@ export class EmailController {
         }),
         
       ).subscribe(res => {
-        // console.log(res)
+        console.log(res)
         if (res.data) {
           response.send(res.data)
         }
