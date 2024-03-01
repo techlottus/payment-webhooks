@@ -1,7 +1,9 @@
 import { Controller, HttpException, Post, RawBodyRequest, Req, Res } from '@nestjs/common';
 import { env } from 'process';
-import { catchError, mergeMap, of } from 'rxjs';
+import { catchError, combineLatest, mergeMap, of, take } from 'rxjs';
 require('dotenv').config();
+// import * as schedule  from "node-schedule";
+import * as xml2js from "xml2js"
 
 import { UtilsService } from 'src/utils/utils.service';
 import { StripeService } from './stripe.service';
@@ -14,7 +16,7 @@ export class StripeController {
   @Post('/new')
   async webhook(@Req() request: RawBodyRequest<Request>, @Res() response: any ) {
     // console.log("request: ", request);
-    try {
+   
       const sig = request.headers['stripe-signature'];
       let event;
     
@@ -27,48 +29,110 @@ export class StripeController {
       // Handle the event
       switch (event.type) {
         case 'checkout.session.completed':
-          try {
+
             const strapiReq = await this.stripeService.populateCS(event)
             const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
-            
-            paymentObs.subscribe(paymentRes => {
-              if (!!paymentRes.data.error) {
-                throw new HttpException({
-                  message: paymentRes.data.error.message
-                }, paymentRes.data.error.status);
-              } else {
-                this.utilsService.postSelfWebhook('/email/compile', { template_id: 1, params: {
-                  "first_name": "Diana Pelaez",
-                  "campus": "prueba ula online",
-                  "start_date": "17/2/24",
-                  "email": "test@test.test",
-                  "password": "password"
-                } })
-                  .pipe(
-                    catchError((err) => {
-                      console.log(err)
-                      return of({ error: true, ...err})
-                    }),
-                    mergeMap(emailRes => {
-                      if (emailRes.error) {
-                        return of(emailRes)
-                      }
-                      console.log(emailRes);
-                      
-                      return of(emailRes.data)
-                      // const { compiled, params, template: { subject, priority } } = emailRes.data
-                      // return this.utilsService.postSelfWebhook('/email/salesforce/send', { template: JSON.parse(compiled), subject, toAddress: paymentRes.data.data.attributes.email, priority })
+           
+            paymentObs.pipe(
+              catchError((err) => {
+                console.log('payment data error', err.data.error)
+                return of({ error: true, ...err.data.error})
+              }),
+              mergeMap(paymentRes => {
+                if (paymentRes.error) {
+                  return of(paymentRes)
+                  // throw new HttpException({
+                  //   message: paymentRes.data.error.message
+                  // }, paymentRes.data.error.status);
+                }
+                const attrs = paymentRes.data.data.attributes
+                const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
+                // console.log('name: ', name);
+                // return of(paymentRes)
 
-                    })
-                  ).subscribe(data => console.log(data))
+                return combineLatest({payment: of(paymentRes.data.data), template: this.utilsService.postSelfWebhook('/email/compile', { template_id: 3, params: {
+                  "amount": attrs.amount,
+                  "program": attrs.product_name,
+                  "First_name": name,
+                  "file_number": attrs.payment_id,
+                  "payment_date": attrs.date
+                }})})
+              }),
+              catchError((err) => {
+                console.log('compile error', err.data.error)
+                return of({ error: true, ...err.data.error})
+              }),
+              mergeMap(res => {
+                if (res.error) {
+                  console.log('res: ', res);
+                  // response.status(res.data.error.status).send(`Webhook Error: ${res.data.error.message}`)
+
+                  return of(res)
+                }
+                
+                
+                const { compiled, params, template: { subject, priority } } = res.template.data
+                return combineLatest({
+                  payment: of(res.payment),
+                  template: of(res.template),
+                  send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                    template: JSON.parse(compiled),
+                    subject,
+                    toAddress: res.payment.data.data.attributes.email,
+                    priority
+                  })
+                })
+                // this.sendFollowUpmail(name)
+              })
+            ).subscribe(res => {
+              const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
+              const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
+              const data = {
+                payment: {
+                  ...res.payment.attributes,
+                  id: res.payment.id,
+                  name,
+                  curp
+                },
+                send: {},
+                
               }
+              const sendMessage = (data, scope, error) => {
+                this.SendSlackMessage(data, scope, error)
+              }
+              xml2js.parseString(res.send.data,  function (err, result) {
+                // console.dir(result);
+                // console.dir(result['soapenv:Envelope']);
+                if (result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false') {
+                  // treat error
+                  data.send =  {
+                    fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
+                    message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
+                    statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
+                  }
+                  sendMessage(data, 'payment message', data.send)
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields);
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message);
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode);
+
+                  // console.dir(data);
+                } 
+              //   else {
+              //     data.send = {
+              //       current: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].current[0],
+              //       limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
+              //       type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
+              //     }
+              //     console.dir(data);
+                  
+              //     response.send(data);
+
+              //   }
+              });
+              response.send();
+
 
             })
-          } catch (error) {
-            console.error(error.message);
-            response.status(error.status).send(`Webhook Error: ${error.message}`)
-          }
-          // Then define and call a function to handle the event checkout.session.completed
           break;
         case 'checkout.session.expired':
           const checkoutSessionExpired = event.data.object;
@@ -85,13 +149,38 @@ export class StripeController {
         default:
           console.log(`Unhandled event type ${event.type}`);
       }
-      
-      response.send();
-    } catch (error) {
-      console.error(error.message)
-    }
+
     
   }
 
+  SendSlackMessage(data: any, scope: string, error: string) {
+
+    const labels = {
+      email: 'Correo electrónico',
+      name: 'Nombre',
+      phone: 'Teléfono',
+      cs_id: 'Checkout Session Id',
+    }
+    const fields = {
+      cs_id: data.payment.cs_id,
+      name: data.payment.name,
+      phone: data.payment.phone,
+      email: data.payment.email
+    }
+    // console.log(data);
+    
+    // send slack message with error
+    const metadata = {
+      scope,
+      product_name: data.payment.product_name,
+      error,
+      paymentsID: data.payment.id,
+    }
+    const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
+    // console.log('slackMessage: ', slackMessage);
+    
+    this.utilsService.postSlackMessage(slackMessage).subscribe()
+
+  }
 
 }

@@ -220,7 +220,7 @@ export class UtilsService {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": metadata.error
+            "text": JSON.stringify(metadata.error, null, 2)
           }
         },
         {

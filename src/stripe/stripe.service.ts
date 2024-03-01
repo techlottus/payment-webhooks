@@ -22,7 +22,7 @@ export class StripeService {
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     
     
     const cs_id = checkoutSessionCompleted.id
@@ -106,5 +106,13 @@ export class StripeService {
     // console.log('latest_invoice: ', latest_invoice , '\n');
     // console.log('line_items.data[0]: ', line_items.data[0] , '\n');
     return request
+  }
+  getField(fields: any[], key: string) {
+    return fields.reduce((acc, field) => {
+      if (field.key === key) {
+        acc = field[field.type]
+      }
+      return acc
+    }, '')
   }
 }
