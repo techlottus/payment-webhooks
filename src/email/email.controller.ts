@@ -64,14 +64,17 @@ export class EmailController {
     console.log(body);
     
     const { html, name, subject } = body
-    const params = body.html.split('/{/{')
+    const params = html.split('/{/{')
     params.splice(0,1)
     const finalParams = params.reduce((acc, param) => {
       acc[param.split('/}/}')[0].trim()] = "data prueba, cambiar en strapi"
       return acc
     }, {})
+    html.replaceAll('/{/{', '{{')
+    html.replaceAll('/}/}', '}}')
     console.log(finalParams);
-    this.utils.fetchEmailTemplate({ name: body.name })
+    console.log(html);
+    this.utils.fetchEmailTemplate({ name })
       .pipe(
         mergeMap((templateRes) => {
           let params = { name, html, subject, params: finalParams }
