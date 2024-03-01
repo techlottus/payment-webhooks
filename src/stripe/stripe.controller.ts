@@ -39,46 +39,42 @@ export class StripeController {
                 return of({ error: true, ...err.data.error})
               }),
               mergeMap(paymentRes => {
-                if (paymentRes.error) {
-                  return of(paymentRes)
-                  // throw new HttpException({
-                  //   message: paymentRes.data.error.message
-                  // }, paymentRes.data.error.status);
-                }
-                const attrs = paymentRes.data.data.attributes
+                if (paymentRes.error) return of(paymentRes)
+                const payment = paymentRes.data.data
+                const attrs = payment.attributes
                 const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
                 // console.log('name: ', name);
                 // return of(paymentRes)
 
-                return combineLatest({payment: of(paymentRes.data.data), template: this.utilsService.postSelfWebhook('/email/compile', { template_id: 3, params: {
-                  "amount": attrs.amount,
-                  "program": attrs.product_name,
-                  "First_name": name,
-                  "file_number": attrs.payment_id,
-                  "payment_date": attrs.date
-                }})})
+                return combineLatest({
+                  payment: of(payment),
+                  template: this.utilsService.postSelfWebhook('/email/compile', { template_id: attrs.metadata.payment_template,
+                    params: {
+                      "amount": attrs.amount,
+                      "program": attrs.product_name,
+                      "First_name": name,
+                      "file_number": attrs.payment_id,
+                      "payment_date": attrs.date,
+                      "provider": attrs.metadata.provider
+                    }
+                  })
+                })
               }),
               catchError((err) => {
                 console.log('compile error', err.data.error)
                 return of({ error: true, ...err.data.error})
               }),
               mergeMap(res => {
-                if (res.error) {
-                  console.log('res: ', res);
-                  // response.status(res.data.error.status).send(`Webhook Error: ${res.data.error.message}`)
+                if (res.error) return of(res)
 
-                  return of(res)
-                }
-                
-                
-                const { compiled, params, template: { subject, priority } } = res.template.data
+                const { compiled, template: { subject, priority } } = res.template.data
                 return combineLatest({
                   payment: of(res.payment),
                   template: of(res.template),
                   send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
                     template: JSON.parse(compiled),
                     subject,
-                    toAddress: res.payment.data.data.attributes.email,
+                    toAddress: res.payment.attributes.email,
                     priority
                   })
                 })
