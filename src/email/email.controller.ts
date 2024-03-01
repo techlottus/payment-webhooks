@@ -61,19 +61,15 @@ export class EmailController {
 
   @Post('/create/template')
   sendTemplateStrapi(@Body() body: { name: string, subject: string, preheader: string, html: string  }, @Res() response: any) {
-    console.log(body);
+    // console.log(body);
     
     const { html, name, subject } = body
-    const params = html.split('/{/{')
+    const params = html.split('{{')
     params.splice(0,1)
     const finalParams = params.reduce((acc, param) => {
-      acc[param.split('/}/}')[0].trim()] = "data prueba, cambiar en strapi"
+      acc[param.split('}}')[0].trim()] = "data prueba, cambiar en strapi"
       return acc
     }, {})
-    html.replaceAll('/{/{', '{{')
-    html.replaceAll('/}/}', '}}')
-    console.log(finalParams);
-    console.log(html);
     this.utils.fetchEmailTemplate({ name })
       .pipe(
         mergeMap((templateRes) => {
