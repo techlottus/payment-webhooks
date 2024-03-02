@@ -45,16 +45,17 @@ export class EmailController {
     }
     
     this.utils.fetchEmailTemplate({ id: body.template_id }).pipe(catchError((err, caught) => {console.log(err); return caught})).subscribe((res) => {
-      console.log(res);
+      // console.log(res);
       const template_data = res.data.data.attributes
       const template = Handlebars.compile(template_data.html);
+      // use params only if staging or throw an error
       let params = (body.params || template_data.params) || {}
       // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
 
       const compiled = JSON.stringify(template(params))
       // console.log(compiled);
       
-      response.send(JSON.stringify({template: compiled, params}))
+      response.send(JSON.stringify({ compiled, params, template: template_data}))
     } )
     // body.data
   }

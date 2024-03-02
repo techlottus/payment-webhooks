@@ -1,63 +1,12 @@
-import { HttpException, Injectable, RawBodyRequest } from '@nestjs/common';
-require('dotenv').config();
+import { Injectable } from '@nestjs/common';
 import { env } from 'process';
-import { UtilsService } from 'src/utils/utils.service';
+require('dotenv').config();
+
 const stripe = require('stripe')(env.STRIPE_API_KEY);
+
 @Injectable()
 export class StripeService {
-  constructor(private utilsService: UtilsService) {}
-
-  async populateStrapi(request: RawBodyRequest<Request>, response: any) {
-    const sig = request.headers['stripe-signature'];
-    let event;
-  
-    try {
-      event = stripe.webhooks.constructEvent(request.rawBody, sig, env.WEBHOOK_SECRET);
-    } catch (err) {
-      response.status(400).send(`Webhook Error: ${err.message}`);
-      return;
-    }
-    // Handle the event
-    switch (event.type) {
-      case 'checkout.session.completed':
-        // stripe.  
-        try {
-          const strapiReq = await this.checkoutSessionCompleted(event)
-          const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
-          
-          paymentObs.subscribe(res => {
-            if (!!res.data.error) {
-              throw new HttpException({
-                message: res.data.error.message
-              }, res.data.error.status);
-            }
-          })
-        } catch (error) {
-          console.error(error.message);
-          response.status(error.status).send(`Webhook Error: ${error.message}`)
-        }
-        // Then define and call a function to handle the event checkout.session.completed
-        break;
-      case 'checkout.session.expired':
-        const checkoutSessionExpired = event.data.object;
-        // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
-      // Then define and call a function to handle the event checkout.session.expired
-      break;
-      case 'subscription_schedule.updated':
-        const subscriptionScheduleUpdated = event.data.object;
-        // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
-  
-        // Then define and call a function to handle the event subscription_schedule.updated
-        break;
-      // ... handle other event types
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
-  
-    response.send();
-  }
-
-  async checkoutSessionCompleted(event: any) {
+  async populateCS(event: any) {
     const checkout_session_id = event.data.object.id
     const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       checkout_session_id,
@@ -73,7 +22,7 @@ export class StripeService {
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     
     
     const cs_id = checkoutSessionCompleted.id
@@ -157,5 +106,13 @@ export class StripeService {
     // console.log('latest_invoice: ', latest_invoice , '\n');
     // console.log('line_items.data[0]: ', line_items.data[0] , '\n');
     return request
+  }
+  getField(fields: any[], key: string) {
+    return fields.reduce((acc, field) => {
+      if (field.key === key) {
+        acc = field[field.type]
+      }
+      return acc
+    }, '')
   }
 }

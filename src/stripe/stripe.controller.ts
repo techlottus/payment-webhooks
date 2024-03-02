@@ -1,17 +1,182 @@
-import { Body, Controller, Post, RawBodyRequest, Req, Res } from '@nestjs/common';
+import { Controller, HttpException, Post, RawBodyRequest, Req, Res } from '@nestjs/common';
+import { env } from 'process';
+import { catchError, combineLatest, mergeMap, of, take } from 'rxjs';
+require('dotenv').config();
+// import * as schedule  from "node-schedule";
+import * as xml2js from "xml2js"
+
+import { UtilsService } from 'src/utils/utils.service';
 import { StripeService } from './stripe.service';
+const stripe = require('stripe')(env.STRIPE_API_KEY);
 
 @Controller('stripe')
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(private utilsService: UtilsService, private stripeService: StripeService) {}
+
   @Post('/new')
   async webhook(@Req() request: RawBodyRequest<Request>, @Res() response: any ) {
     // console.log("request: ", request);
-    try {
-      await this.stripeService.populateStrapi(request, response)
-    } catch (error) {
-      console.error(error.message)
-    }
+   
+      const sig = request.headers['stripe-signature'];
+      let event;
+    
+      try {
+        event = stripe.webhooks.constructEvent(request.rawBody, sig, env.WEBHOOK_SECRET);
+      } catch (err) {
+        response.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+      }
+      // Handle the event
+      switch (event.type) {
+        case 'checkout.session.completed':
+
+            const strapiReq = await this.stripeService.populateCS(event)
+            const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
+           
+            paymentObs.pipe(
+              catchError((err) => {
+                console.log('payment data error', err.data.error)
+                return of({ error: true, ...err.data.error})
+              }),
+              mergeMap(paymentRes => {
+                if (paymentRes.error) return of(paymentRes)
+                const payment = paymentRes.data.data
+                const attrs = payment.attributes
+                const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
+                // console.log('name: ', name);
+                // return of(paymentRes)
+
+                return combineLatest({
+                  payment: of(payment),
+                  template: this.utilsService.postSelfWebhook('/email/compile', { template_id: attrs.metadata.payment_template,
+                    params: {
+                      "amount": attrs.amount,
+                      "program": attrs.product_name,
+                      "First_name": name,
+                      "file_number": attrs.payment_id,
+                      "payment_date": attrs.date,
+                      "provider": attrs.metadata.provider
+                    }
+                  })
+                })
+              }),
+              catchError((err) => {
+                console.log('compile error', err.data.error)
+                return of({ error: true, ...err.data.error})
+              }),
+              mergeMap(res => {
+                if (res.error) return of(res)
+
+                const { compiled, template: { subject, priority } } = res.template.data
+                return combineLatest({
+                  payment: of(res.payment),
+                  template: of(res.template),
+                  send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                    template: JSON.parse(compiled),
+                    subject,
+                    toAddress: res.payment.attributes.email,
+                    priority
+                  })
+                })
+                // this.sendFollowUpmail(name)
+              })
+            ).subscribe(res => {
+              const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
+              const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
+              const data = {
+                payment: {
+                  ...res.payment.attributes,
+                  id: res.payment.id,
+                  name,
+                  curp
+                },
+                send: {},
+                
+              }
+              const sendMessage = (data, scope, error) => {
+                this.SendSlackMessage(data, scope, error)
+              }
+              xml2js.parseString(res.send.data,  function (err, result) {
+                // console.dir(result);
+                // console.dir(result['soapenv:Envelope']);
+                if (result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false') {
+                  // treat error
+                  data.send =  {
+                    fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
+                    message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
+                    statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
+                  }
+                  sendMessage(data, 'payment message', data.send)
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields);
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message);
+                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode);
+
+                  // console.dir(data);
+                } 
+              //   else {
+              //     data.send = {
+              //       current: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].current[0],
+              //       limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
+              //       type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
+              //     }
+              //     console.dir(data);
+                  
+              //     response.send(data);
+
+              //   }
+              });
+              response.send();
+
+
+            })
+          break;
+        case 'checkout.session.expired':
+          const checkoutSessionExpired = event.data.object;
+          // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
+        // Then define and call a function to handle the event checkout.session.expired
+        break;
+        case 'subscription_schedule.updated':
+          const subscriptionScheduleUpdated = event.data.object;
+          // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
+    
+          // Then define and call a function to handle the event subscription_schedule.updated
+          break;
+        // ... handle other event types
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
     
   }
+
+  SendSlackMessage(data: any, scope: string, error: string) {
+
+    const labels = {
+      email: 'Correo electrónico',
+      name: 'Nombre',
+      phone: 'Teléfono',
+      cs_id: 'Checkout Session Id',
+    }
+    const fields = {
+      cs_id: data.payment.cs_id,
+      name: data.payment.name,
+      phone: data.payment.phone,
+      email: data.payment.email
+    }
+    // console.log(data);
+    
+    // send slack message with error
+    const metadata = {
+      scope,
+      product_name: data.payment.product_name,
+      error,
+      paymentsID: data.payment.id,
+    }
+    const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
+    // console.log('slackMessage: ', slackMessage);
+    
+    this.utilsService.postSlackMessage(slackMessage).subscribe()
+
+  }
+
 }
