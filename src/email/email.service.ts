@@ -5,13 +5,17 @@ import {
 export class EmailService {
 
 
-  generateXML(token: string, template: string, subject: string, toAddress = '', priority = 'Normal') {
+  generateXML(token: string, template: string, subject: string, toAddress = '', priority = 'Normal', ccToAddress?: string) {
     const generateAddress = (address: string) => {
       return `<urn:toAddresses>${address}</urn:toAddresses>`
     }
     const generateAddresses = (addresses: string[]) => {
       return addresses.map(address => generateAddress(address))
     }
+    const ccAddress = ccToAddress 
+      ? `<urn:toAddresses>${toAddress}</urn:toAddresses>
+        <urn:toAddresses>${ccToAddress}</urn:toAddresses>`
+      : `<urn:toAddresses>${toAddress}</urn:toAddresses>`
 
     const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:enterprise.soap.sforce.com">
@@ -29,7 +33,7 @@ export class EmailService {
             <urn:senderDisplayName xsi:nil="true"/>
             <urn:subject>${subject}</urn:subject>
             <urn:orgWideEmailAddressId>0D26g000000g0XZCAY</urn:orgWideEmailAddressId>
-            <urn:toAddresses>${toAddress}</urn:toAddresses>
+            ${ccAddress}
             <urn:htmlBody><![CDATA[${template}]]></urn:htmlBody>
           </urn:messages>
         </urn:sendEmail>
