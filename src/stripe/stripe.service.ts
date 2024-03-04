@@ -71,7 +71,7 @@ export class StripeService {
     // console.log('subscription_id: ', subscription_id);
 
     // console.log('payment_id: ', payment_id);
-    const typeform_url = after_completion[type].url.replace('{CHECKOUT_SESSION_ID}', cs_id)
+    const typeform_url = after_completion[type].url?.replace('{CHECKOUT_SESSION_ID}', cs_id) || null
     
     const payment_intent = await stripe.paymentIntents.retrieve(payment_id, {
       expand: [
