@@ -9,31 +9,26 @@ export class EmailController {
   constructor(public utils: UtilsService, public email: EmailService) {}
 
   @Post('/salesforce/send')
-  sendEmail(@Body() body: {template: string, subject: string, toAddress: string, priority?: string }, @Res() response: any ) {
+  sendEmail(@Body() body: {template: string, subject: string, toAddress: string, priority?: string, ccToAddress: string }, @Res() response: any ) {
     // console.log(body);
     const {
       template, 
       subject, 
-      toAddress
+      toAddress,
     } = body
     
     const priority = body.priority || 'Normal'
+    const ccToAddress = body.ccToAddress || null
     this.utils.authSF().pipe(
       mergeMap(authRes => {
         const token = authRes.data.access_token
-        const xml = this.email.generateXML(token, template, subject, toAddress, priority )
-        // console.log(xml);
+        const xml = this.email.generateXML(token, template, subject, toAddress, priority, ccToAddress )
         
        return  this.utils.sendSFemail(xml)
       }),
       catchError((err, caught)=> { console.log(err); console.log(); response.status(err.response.status).send(err.response.data); return caught })
     ).subscribe(res => {
-      // console.log(res);
-      if ([200, 201].includes(res.status) ) {
-        // console.log(res);
-        // FALTA MANDAR ERROR A SLACK
-        response.send(res.data)
-      }
+      response.send(res.data)
     })
   }
 
@@ -47,12 +42,12 @@ export class EmailController {
     this.utils.fetchEmailTemplate({ id: body.template_id }).pipe(catchError((err, caught) => {console.log(err); return caught})).subscribe((res) => {
       // console.log(res);
       const template_data = res.data.data.attributes
-      const template = Handlebars.compile(template_data.html);
+      const template = Handlebars.compile(template_data.html, { noEscape: true });
       // use params only if staging or throw an error
       let params = (body.params || template_data.params) || {}
       // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
 
-      const compiled = JSON.stringify(template(params))
+      const compiled = template(params)
       // console.log(compiled);
       
       response.send(JSON.stringify({ compiled, params, template: template_data}))
