@@ -115,10 +115,10 @@ export class EnrollmentController {
             scope: of(data.scope || scope),
             enrollment: of(data.enrollment),
         }
-        responseObs = !error
+        responseObs = !error && data.payment.metadata.SFline !== data.payment.metadata.provider
           ? {
               ...responseObs,
-              template: this.utilsService.postSelfWebhook('/email/compile', { template_id: data.payment.metadata.enrollment_template || 4,
+              template: this.utilsService.postSelfWebhook('/email/compile', { template_id: data.payment.metadata.enrollment_template,
                 params: {
                   "email": data.email,
                   "campus": data.payment.metadata.SFcampus,
