@@ -1,6 +1,7 @@
 import {
   Injectable
 } from '@nestjs/common';
+import { env } from 'process';
 @Injectable()
 export class EmailService {
 
@@ -32,7 +33,7 @@ export class EmailService {
             <urn:replyTo xsi:nil="true"/>
             <urn:senderDisplayName xsi:nil="true"/>
             <urn:subject>${subject}</urn:subject>
-            <urn:orgWideEmailAddressId>0D26g000000g0XZCAY</urn:orgWideEmailAddressId>
+            <urn:orgWideEmailAddressId>${env.SF_EMAIL_ORG_ID}</urn:orgWideEmailAddressId>
             ${ccAddress}
             <urn:htmlBody><![CDATA[${template}]]></urn:htmlBody>
           </urn:messages>
