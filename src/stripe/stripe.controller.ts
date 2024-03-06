@@ -123,18 +123,18 @@ export class StripeController {
                     limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
                     type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
                   }
-                  const year = new Date().getFullYear()
-                  const month = new Date().getMonth()
-                  const day = new Date().getDate()
-                  const hours = new Date().getHours()
-                  const minutes = new Date().getMinutes()
-                  const seconds = new Date().getSeconds()
-
-                  const date = env.NODE_ENV === 'production'
-                    ? new Date(year, month, day + 1, hours, minutes , seconds)
-                    : new Date(year, month, day, hours, minutes, seconds + 30)
-
                   if(data.payment.metadata.SFline !== data.payment.metadata.provider) {
+                    const year = new Date().getFullYear()
+                    const month = new Date().getMonth()
+                    const day = new Date().getDate()
+                    const hours = new Date().getHours()
+                    const minutes = new Date().getMinutes()
+                    const seconds = new Date().getSeconds()
+
+                    const date = env.NODE_ENV === 'production'
+                      ? new Date(year, month, day + 1, hours, minutes , seconds)
+                      : new Date(year, month, day, hours, minutes, seconds + 30)
+
                     const job = schedule.scheduleJob(date, function() {
                       sendFollowUpMail(data)
                     });
@@ -166,7 +166,7 @@ export class StripeController {
   }
   sendFollowUpMail(data) {
     // console.log('data: ', data);
-
+    if (data.payment.metadata.SFline === data.payment.metadata.provider) return data
     return combineLatest({
       payment: of(data.payment),
       template: this.utilsService.postSelfWebhook('/email/compile', {
