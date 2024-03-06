@@ -115,7 +115,7 @@ export class EnrollmentController {
             scope: of(data.scope || scope),
             enrollment: of(data.enrollment),
         }
-        responseObs = !error && data.payment.metadata.SFline !== data.payment.metadata.provider
+        responseObs = !error
           ? {
               ...responseObs,
               template: this.utilsService.postSelfWebhook('/email/compile', { template_id: data.payment.metadata.enrollment_template,
