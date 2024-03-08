@@ -107,13 +107,23 @@ export class SalesforceService {
     } else {
       codigoDetalle = req.track_payments.attributes.metadata.SFdebitCode;
     }
+    // console.log(req.track_inscriptions.attributes.birthdate);
+    // console.log(typeof req.track_inscriptions.attributes.birthdate);
+    // console.log(req.track_inscriptions.attributes.birthdate.includes('/'));
+    // console.log(new Date(req.track_inscriptions.attributes.birthdate));
+    // console.log(new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx'));
+
+    const birthdate = req.track_inscriptions.attributes.birthdate.includes('/')
+      ? req.track_inscriptions.attributes.birthdate
+      : new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx');
+    
 
     const requestData = {
       "nombre": req.track_inscriptions.attributes.name,
       "apellidoPaterno": req.track_inscriptions.attributes.last_name,
       "apellidoMaterno": req.track_inscriptions.attributes.second_last_name,
       "nacionalidad": req.track_inscriptions.attributes.residence,
-      "fechaNacimiento": new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx'),
+      "fechaNacimiento": birthdate,
       "genero": generoEstudiante,
       "estadoCivil": req.track_inscriptions.attributes.civil_status,
       "curp": req.track_inscriptions.attributes.CURP?.toUpperCase(),
