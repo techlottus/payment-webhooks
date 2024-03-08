@@ -42,7 +42,7 @@ export class InscriptionsService {
         }
         return acc
       }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
-      const curp = answers.inscription.residence ===  'Nacional'
+      const curp = answers.inscription.residence === 'Nacional'
         ? answers.inscription.CURP?.toUpperCase()
         : null
       
