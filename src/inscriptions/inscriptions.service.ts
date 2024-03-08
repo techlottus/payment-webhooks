@@ -42,8 +42,10 @@ export class InscriptionsService {
         }
         return acc
       }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
-      const curp = answers.inscription.CURP.toUpperCase() || null
-
+      const curp = answers.inscription.residence === 'Nacional'
+        ? answers.inscription.CURP?.toUpperCase()
+        : null
+      
       try {
         this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]).pipe(
           mergeMap((res) => {

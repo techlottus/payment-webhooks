@@ -22,6 +22,8 @@ export class SalesforceService {
     const generos = {
       "HOMBRE": "Hombre",
       "MUJER": "Mujer",
+      "Masculino": "Hombre",
+      "Femenino": "Mujer",
       "Otro": "Otro"
     };
 
