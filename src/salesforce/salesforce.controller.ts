@@ -10,7 +10,7 @@ export class SalesforceController {
   @Post('/inscription')
   inscription(@Body() body: any) {
     // console.log('cs_id: ', cs_id);
-    try {
+
       const routes = ['track-invoices', 'track-payments', 'track-inscriptions' ]
 
       forkJoin(routes.map(route => this.utilsService.fetchStrapi(route, [`filters[cs_id][$eq]=${body.cs_id}`]))).pipe(
@@ -24,36 +24,40 @@ export class SalesforceController {
           return !enrrollments.includes(false) ?  combineLatest({ data: of(data), auth: this.utilsService.authSF()}) : of({ error: 'Missing data'})
         }),
         mergeMap( res => {
-          // .subscribe(authResponse => {
-            // console.log('authResponse.data: ', authResponse.data);
+            // console.log('res: ', res);
 
-            const authResponse = res['auth']
-            const data = res['data']
-            const err = res['error']
-          
-            // console.log('finalData: ', finalData);
-            return err ? of({ error: true, ...err}) : combineLatest({ data: of(data), inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)})
-            .pipe(
-              catchError((err) => {
-                // console.log(err.response.data.message)
-                return of({ error: true, ...err})
-              })
-            )
-        // })
+          const authResponse = res['auth']
+          const data = res['data']
+          const err = res['error']
+        
+          console.log('err: ', err);
+          return err
+            ? of({ data: of(data), error: true, ...err})
+            : combineLatest({
+              data: of(data),
+              inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)
+                .pipe(
+                  catchError((err) => {
+                    console.log('SF inscription error: ', err.response)
+                    return of({ error: true, ...err.response.data[0]})
+                  })
+                )
+            })
         })
       ).subscribe(res => {
-        const data = res.data
         // console.log(`res: `, res);
+        const data = res.data
         // console.log(`res.error: `, res.error);
         // console.log(`res.data: `, res.data);
+        // console.log(`res.inscription: `, res.inscription);
         // console.log(`data[${routes[0]}]: `, data[routes[0]]);
         // console.log(`data[${routes[1]}]: `, data[routes[1]]);
         // console.log(`data[${routes[2]}]: `, data[routes[2]]);
 
         // console.log('enrrollments: ', enrrollments);
-        if (res.inscription?.data?.Exitoso === 'False' || res.error) {
-          this.SendSlackMessage(data, 'Salesforce', res.inscription.data.Error)
-        } else if (data.track_payments.attributes.metadata.SFcampus !== "UTC A TU RITMO") {
+        if (res.inscription?.data?.Exitoso === 'False' || res.inscription?.error) {
+          this.SendSlackMessage(data, 'Salesforce', res.inscription?.data?.Error || res.inscription?.message)
+        } else if (data.track_payments?.attributes?.metadata?.SFcampus !== "UTC A TU RITMO") {
           // call enrollment webhook if not atr
           const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
           // console.log(data);
@@ -63,10 +67,6 @@ export class SalesforceController {
         }
        
       })
-    } catch (error) {
-      console.error(error)
-      return error
-    }
   }
   SendSlackMessage(data: any, scope: string, error: string) {
 
@@ -78,11 +78,11 @@ export class SalesforceController {
       cs_id: 'Checkout Session Id',
     }
     const fields = {
-      cs_id: data.track_payments.attributes.cs_id,
-      name: data.track_inscriptions.attributes.name,
-      last_name: data.track_inscriptions.attributes.last_name,
-      phone: data.track_inscriptions.attributes.phone,
-      email: data.track_inscriptions.attributes.email,
+      cs_id: data.track_payments?.attributes?.cs_id,
+      name: data.track_inscriptions?.attributes?.name,
+      last_name: data.track_inscriptions?.attributes?.last_name,
+      phone: data.track_inscriptions?.attributes?.phone,
+      email: data.track_inscriptions?.attributes?.email,
     }
     const metadata = {
       scope: scope,
