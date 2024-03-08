@@ -113,7 +113,7 @@ export class SalesforceService {
       "apellidoPaterno": req.track_inscriptions.attributes.last_name,
       "apellidoMaterno": req.track_inscriptions.attributes.second_last_name,
       "nacionalidad": req.track_inscriptions.attributes.residence,
-      "fechaNacimiento": req.track_inscriptions.attributes.birthdate,
+      "fechaNacimiento": new Date(req.track_inscriptions.attributes.birthdate),
       "genero": generoEstudiante,
       "estadoCivil": req.track_inscriptions.attributes.civil_status,
       "curp": req.track_inscriptions.attributes.CURP?.toUpperCase(),
