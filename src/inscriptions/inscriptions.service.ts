@@ -75,13 +75,13 @@ export class InscriptionsService {
             const inscription = !!res.curp.data 
             ? {
               ...answers.inscription,
-                name: res.curp.data.nombre,
+                name: this.utilsService.capitalizeText(res.curp.data.nombre),
                 CURP: res.curp.data.curp,
-                last_name: res.curp.data.apellidoPaterno,
-                second_last_name: res.curp.data.apellidoMaterno,
+                last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
+                second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
                 gender: res.curp.data.sexo,
-                birthdate: res.curp.data.fechaNacimiento,
-                birth_entity: res.curp.data.estadoNacimiento
+                birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
+                birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
               }
             : null
             console.log(inscription);
@@ -100,7 +100,7 @@ export class InscriptionsService {
             }))
           }),
           mergeMap(res => {
-            if (res.error || res.curp.error || res.curp.data?.errorType) {
+            if (res?.error || res.curp?.error || res.curp?.data?.errorType) {
               return of(res)
             }
             return this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id })
