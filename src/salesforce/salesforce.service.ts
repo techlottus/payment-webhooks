@@ -113,9 +113,11 @@ export class SalesforceService {
     // console.log(new Date(req.track_inscriptions.attributes.birthdate));
     // console.log(new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx'));
 
-    const birthdate = req.track_inscriptions.attributes.birthdate.includes('/')
-      ? req.track_inscriptions.attributes.birthdate
-      : new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx');
+    const birthdate = req.track_inscriptions.attributes.birthdate
+      ? req.track_inscriptions.attributes.birthdate.includes('/')
+        ? req.track_inscriptions.attributes.birthdate
+        : new Date(req.track_inscriptions.attributes.birthdate).toLocaleDateString('es-mx')
+      : req.track_inscriptions.attributes.birthdate
     
 
     const requestData = {
