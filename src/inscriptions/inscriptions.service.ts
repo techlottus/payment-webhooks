@@ -56,31 +56,35 @@ export class InscriptionsService {
                 console.log(res.data.data[0]);
                 this.SendSlackMessage({track_payments: res.data.data[0], track_inscriptions:{ attributes: answers.inscription}}, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return of({ error: true, ...err})
+                return of({ track_payments: res.data.data[0], curp: { error: true, ...err} } )
               }),
             )
+            
           }),
           
-          mergeMap((res) => {
-            // console.log(res);
+          mergeMap((res: any) => {
             
-            if (res.error) {
+            if (res.curp.error || res.curp.data?.errorType) {
+              // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
+              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ attributes: answers.inscription}}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.data.errorMessage).error)
               return of(res)
             }
-
-            const inscription = res.curp 
+            // console.log('res.curp.error: ', res.curp.error);
+            // console.log('res.curp.data: ', res.curp.data);
+            
+            const inscription = !!res.curp.data 
             ? {
               ...answers.inscription,
-                name: res.curp.data.nombre,
+                name: this.utilsService.capitalizeText(res.curp.data.nombre),
                 CURP: res.curp.data.curp,
-                last_name: res.curp.data.apellidoPaterno,
-                second_last_name: res.curp.data.apellidoMaterno,
+                last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
+                second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
                 gender: res.curp.data.sexo,
-                birthdate: res.curp.data.fechaNacimiento,
-                birth_entity: res.curp.data.estadoNacimiento
+                birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
+                birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
               }
-            : answers.inscription
-            // console.log(inscription);
+            : null
+            console.log(inscription);
             
             const inscriptionObs = this.utilsService.postStrapi('track-inscriptions', inscription)
             const invoiceObs = this.utilsService.postStrapi('track-invoices', answers.invoice)
@@ -96,7 +100,7 @@ export class InscriptionsService {
             }))
           }),
           mergeMap(res => {
-            if (res.error) {
+            if (res?.error || res.curp?.error || res.curp?.data?.errorType) {
               return of(res)
             }
             return this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id })
@@ -122,11 +126,11 @@ export class InscriptionsService {
       cs_id: 'Checkout Session Id',
     }
     const fields = {
-      cs_id: data.track_payments.attributes.cs_id,
-      name: data.track_inscriptions.attributes.name,
-      last_name: data.track_inscriptions.attributes.last_name,
-      phone: data.track_inscriptions.attributes.phone,
-      email: data.track_inscriptions.attributes.email,
+      cs_id: data.track_payments?.attributes?.cs_id,
+      name: data.track_inscriptions?.attributes?.name,
+      last_name: data.track_inscriptions?.attributes?.last_name,
+      phone: data.track_inscriptions?.attributes?.phone,
+      email: data.track_inscriptions?.attributes?.email,
     }
     const metadata = {
       scope: scope,

@@ -253,4 +253,13 @@ export class UtilsService {
       return caught
     }))
   }
+  capitalizeText(text: string) {
+    const capitalizedText = text.split(' ').map(str => {
+      
+      const strArr = str.split('')
+      const [ first, ...rest ] = strArr
+      return `${first.toUpperCase()}${rest.join('').toLowerCase()}`
+    }).join(' ')
+    return capitalizedText
+  }
 }
