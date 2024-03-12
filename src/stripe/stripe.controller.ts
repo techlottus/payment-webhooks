@@ -61,8 +61,8 @@ export class StripeController {
                 })
               }),
               catchError((err) => {
-                console.log('compile error', err.data.error)
-                return of({ error: true, ...err.data.error})
+                console.log('compile error', err?.data?.error)
+                return of({ error: true, ...err?.data?.error})
               }),
               mergeMap(res => {
                 if (res.error) return of(res)
