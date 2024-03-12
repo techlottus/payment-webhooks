@@ -25,6 +25,14 @@ export class EnrollmentController {
     combineLatest(baseObservables).pipe(
       // catchError((err, caught) => { console.error(err); return caught }),
       mergeMap(responses => {
+        // console.log('responses: ', responses);
+        const DataHasError =  !responses.inscription.data.data[0].id || !responses.payment.data.data[0].id
+        const DataError = `No data found in strapi for cs_id: ${request.body.cs_id}.`
+        if (DataHasError) return combineLatest({
+          error: of(DataError),
+          scope: of('Data Strapi'),
+        })
+        
         const inscription = { id: responses.inscription.data.data[0].id, ...responses.inscription.data.data[0].attributes }
         const payment = { id: responses.payment.data.data[0].id, ...responses.payment.data.data[0].attributes }
         // error correo, nombre, apellidos o LMSprogram
@@ -35,8 +43,8 @@ export class EnrollmentController {
         const ProgramHasError =  !payment.metadata.LMSprogram
         const ProgramError = `Missing parameters: LMSprogram in stripe metadata, add it manually or contact admin for bulk edit.`
         
-        const error = EnrollmentHasError ? EnrollmentError : ProgramHasError ? ProgramError : null
-        const scope = EnrollmentHasError ? 'Enrollment data' : ProgramHasError ? 'Program data' : null
+        const error = EnrollmentHasError ? EnrollmentError : ProgramHasError ? ProgramError : DataHasError ? DataError : null
+        const scope = EnrollmentHasError ? 'Enrollment data' : ProgramHasError ? 'Program data' : DataHasError ? 'Data Strapi' : null
         const password = Math.random().toString(36).slice(-8);
 
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password)
@@ -60,9 +68,9 @@ export class EnrollmentController {
         return combineLatest(responseObs)
       }),
       mergeMap((responses: any) => {
-        // console.log(responses);
+        // console.log('responses: ', responses);
         
-        const inscription = responses.inscription 
+        const inscription = responses.inscription
         const payment = responses.payment
         if (responses.error) {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
@@ -84,9 +92,8 @@ export class EnrollmentController {
         return ProgramHasError ? combineLatest([of({inscription, payment, user, error, scope, password})]) : combineLatest([of({inscription, payment, user, error, scope, password}), this.enrollmentsService.enrollStudent(user?.id, program?.id) ])
       }),
       mergeMap((responses: any) => {
-        // console.log(responses);
-        // console.log(responses[1]);
-        
+
+        if (responses[0].error) return of(responses[0])
         let data: any = {
           inscription: responses[0].inscription,
           payment: responses[0].payment,
@@ -99,7 +106,6 @@ export class EnrollmentController {
         // console.dir(data.user);
         
 
-        if (responses[0].error) return of(responses)
         
         const EnrollmentHasError =  !!data.enrollment
         const EnrollmentError = JSON.stringify(data.enrollment)
@@ -132,9 +138,10 @@ export class EnrollmentController {
         return combineLatest(responseObs)
       }),
       mergeMap(res => {
+        
         if (res.error) return of(res)
 
-        const { compiled, template: { subject, priority } } = res.template.data
+        const { compiled, template: { subject, priority } } = res.template?.data
         // console.log(JSON.parse(compiled));
         // console.dir(res.template.data.compiled);
         
@@ -155,41 +162,48 @@ export class EnrollmentController {
       })
     )
     .subscribe(responses => {
-      
-      let data: any = {
-        inscription: responses.inscription,
-        payment: responses.payment,
-        email: request.body.email || responses.email,
-      }
-      const sendMessage = (data, scope, error) => {
-        this.SendSlackMessage(data, scope, error)
-      }
-      xml2js.parseString(responses.send.data,  function (err, result) {
-        // console.dir(result);
-        // console.dir(result['soapenv:Envelope']);
+      if (responses.error) {
+        this.SendSlackMessage(responses, responses.scope, responses.error)
 
-        const SendEmailHasError = result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false'
-        if (SendEmailHasError) {
-          const SendEmailError = {
-            fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
-            message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
-            statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
-          }
-          const error = SendEmailHasError ? SendEmailError : null
-          const scope = SendEmailHasError ?  'enrollment email' : null
+        response.status(400)
+        response.send(responses.error)
+      } else {
 
-          if (error) {
-            sendMessage(data, scope, error)
-            response.status(400)
-            response.send(responses.error)
-          } else {
-            response.status(201)
-            response.send(data.enrollment)
-          }
-        } 
-        
-      });
-      response.send(data.enrollment)
+        let data: any = {
+          inscription: responses.inscription,
+          payment: responses.payment,
+          email: request.body.email || responses.email,
+        }
+        const sendMessage = (data, scope, error) => {
+          this.SendSlackMessage(data, scope, error)
+        }
+        xml2js.parseString(responses.send.data,  function (err, result) {
+          // console.dir(result);
+          // console.dir(result['soapenv:Envelope']);
+  
+          const SendEmailHasError = result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false'
+          if (SendEmailHasError) {
+            const SendEmailError = {
+              fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
+              message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
+              statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
+            }
+            const error = SendEmailHasError ? SendEmailError : null
+            const scope = SendEmailHasError ?  'enrollment email' : null
+  
+            if (error) {
+              sendMessage(data, scope, error)
+              response.status(400)
+              response.send(responses.error)
+            } else {
+              response.status(201)
+              response.send(data.enrollment)
+            }
+          } 
+          
+        });
+        response.send(data.enrollment)
+      }
     })
   }
   SendSlackMessage(data: any, scope: string, error: string) {
@@ -202,10 +216,10 @@ export class EnrollmentController {
       cs_id: 'Checkout Session Id',
     }
     const fields = {
-      cs_id: data.payment.cs_id,
-      name: data.inscription.name,
-      last_name: data.inscription.last_name,
-      phone: data.inscription.phone,
+      cs_id: data.payment?.cs_id,
+      name: data.inscription?.name,
+      last_name: data.inscription?.last_name,
+      phone: data.inscription?.phone,
       email: data.email,
     }
     // console.log(data);
@@ -214,9 +228,9 @@ export class EnrollmentController {
     const metadata = {
       scope,
       error,
-      product_name: data.payment.product_name,
-      inscriptionsID: data.inscription.id,
-      paymentsID: data.payment.id,
+      product_name: data.payment?.product_name,
+      inscriptionsID: data.inscription?.id,
+      paymentsID: data.payment?.id,
     }
     const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
     // console.log('slackMessage: ', slackMessage);
