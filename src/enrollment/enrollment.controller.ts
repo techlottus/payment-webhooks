@@ -68,12 +68,14 @@ export class EnrollmentController {
         return combineLatest(responseObs)
       }),
       mergeMap((responses: any) => {
-        // console.log('responses: ', responses);
         
         const inscription = responses.inscription
         const payment = responses.payment
         if (responses.error) {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
+        }
+        if (responses.program) {
+          
         }
         // // log
         // console.log(responses.program.data);
@@ -132,7 +134,11 @@ export class EnrollmentController {
                   "first_name": data.inscription.name,
                   "start_date": data.payment.date.split('T')[0]
                 }
-              })
+              }).pipe(catchError((err, caught) => {
+                // console.log('err: ', err);
+                
+                return of({error: true, ...err})
+              }))
             }
           : responseObs
         return combineLatest(responseObs)
@@ -140,6 +146,7 @@ export class EnrollmentController {
       mergeMap(res => {
         
         if (res.error) return of(res)
+        if (res.template.error) return of(res)
 
         const { compiled, template: { subject, priority } } = res.template?.data
         // console.log(JSON.parse(compiled));
@@ -165,8 +172,8 @@ export class EnrollmentController {
       if (responses.error) {
         this.SendSlackMessage(responses, responses.scope, responses.error)
 
-        response.status(400)
-        response.send(responses.error)
+        // response.status(400)
+        // response.send(responses.error)
       } else {
 
         let data: any = {
