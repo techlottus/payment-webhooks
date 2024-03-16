@@ -1,62 +1,70 @@
 import {  Injectable } from '@nestjs/common';
 import { catchError, combineLatest, forkJoin, mergeMap, of } from 'rxjs';
+import { StripeService } from 'src/stripe/stripe.service';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class InscriptionsService {
   
-  constructor(private utilsService: UtilsService) {}
-  async populateStrapi(request: any, response: any) {
+  constructor(private utilsService: UtilsService, private stripeService: StripeService) {}
+  async populateStrapi({ cs_id }: any, response: any) {
 
-    const formResponse = request.body.form_response    
-    const cs_id = formResponse.hidden?.checkout_session_id || null
-    const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
+    // const formResponse = request.body.form_response
+    // const cs_id = formResponse.hidden?.checkout_session_id || null
+    // const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
 
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
       response.send();
     } else {
-      const submitted_at = formResponse.submitted_at
-      const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
-        const { type, ref } = field
-        const rawAnswer = formResponse.answers[index]
-        const answer = rawAnswer[rawAnswer.type]
-        if(ref === 'need_invoice') {
-          acc.needInvoiceIndex = index;
-          acc.needInvoice = answer
-          acc.inscription = { ...acc.inscription, [ref]: answer }
-        }
-        if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
-          const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
-          acc.inscription = { ...acc.inscription, ...strapiField }
-        } else if (index > acc.needInvoiceIndex) {
+      const submitted_at = new Date()
+      // const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
+      //   const { type, ref } = field
+      //   const rawAnswer = formResponse.answers[index]
+      //   const answer = rawAnswer[rawAnswer.type]
+      //   if(ref === 'need_invoice') {
+      //     acc.needInvoiceIndex = index;
+      //     acc.needInvoice = answer
+      //     acc.inscription = { ...acc.inscription, [ref]: answer }
+      //   }
+      //   if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
+      //     const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
+      //     acc.inscription = { ...acc.inscription, ...strapiField }
+      //   } else if (index > acc.needInvoiceIndex) {
 
-          let [ _first, ...rest ] = ref.split('_')
-          const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
+      //     let [ _first, ...rest ] = ref.split('_')
+      //     const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
 
-          if (hasRepeatedField.includes(true)) rest.pop()
+      //     if (hasRepeatedField.includes(true)) rest.pop()
           
-          const key = rest.join('_')
-          const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
-          acc.invoice = { ...acc.invoice, ...strapiField }
-        }
-        return acc
-      }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
-      const curp = answers.inscription.residence === 'Nacional'
-        ? answers.inscription.CURP?.toUpperCase()
-        : null
+      //     const key = rest.join('_')
+      //     const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
+      //     acc.invoice = { ...acc.invoice, ...strapiField }
+      //   }
+      //   return acc
+      // }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
+      // const curp = answers.inscription.residence === 'Nacional'
+      //   ? answers.inscription.CURP?.toUpperCase()
+      //   : null
       
       try {
         this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]).pipe(
           mergeMap((res) => {
-            const curpObservable = answers.inscription.residence ===  'Nacional' ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
-            const observables = { track_payments: of(res.data.data[0]), curp: curpObservable }
+            // console.log('res.data.data[0]: ', res.data.data[0]);
+            // const curp = res.data.data[0].attributes.extra_fields;
+            const curp = this.stripeService.getField(res.data.data[0].attributes.extra_fields, 'curp').value
+            const residence = this.utilsService.capitalizeText(this.stripeService.getField(res.data.data[0].attributes.extra_fields, 'residencia').value)
+            // console.log('curp: ', curp);
+            // console.log('residence: ', residence);
+            
+            const curpObservable = !!curp ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
+            const observables = { track_payments: of({...res.data.data[0], residence}), curp: curpObservable }
             return combineLatest(observables).pipe(
               catchError((err, caught) => {
-                console.log(res.data.data[0]);
-                this.SendSlackMessage({track_payments: res.data.data[0], track_inscriptions:{ attributes: answers.inscription}}, 'CURP', err.response.data)
+                // console.log(res.data.data[0]);
+                this.SendSlackMessage({ track_payments: res.data.data[0], track_inscriptions:{ attributes: { cs_id, submitted_at } } }, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return of({ track_payments: res.data.data[0], curp: { error: true, ...err} } )
+                return of({ track_payments: {...res.data.data[0], residence}, curp: { error: true, ...err} } )
               }),
             )
             
@@ -66,15 +74,19 @@ export class InscriptionsService {
             
             if (res.curp.error || res.curp.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
-              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ attributes: answers.inscription}}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.data.errorMessage).error)
+              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.data.errorMessage).error)
               return of(res)
             }
             // console.log('res.curp.error: ', res.curp.error);
-            // console.log('res.curp.data: ', res.curp.data);
+            // console.log('res: ', res);
             
             const inscription = !!res.curp.data 
             ? {
-              ...answers.inscription,
+                cs_id,
+                submitted_at,
+                residence: res.track_payments.residence,
+                email: res.track_payments.attributes.email,
+                phone: res.track_payments.attributes.phone,
                 name: this.utilsService.capitalizeText(res.curp.data.nombre),
                 CURP: res.curp.data.curp,
                 last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
@@ -84,15 +96,11 @@ export class InscriptionsService {
                 birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
               }
             : null
-            console.log(inscription);
+            // console.log(inscription);
             
-            const inscriptionObs = this.utilsService.postStrapi('track-inscriptions', inscription)
-            const invoiceObs = this.utilsService.postStrapi('track-invoices', answers.invoice)
-    
-            const sources = [ inscriptionObs ]
-            if (answers.needInvoice) sources.push(invoiceObs)
+         
 
-            return forkJoin(sources).pipe(catchError((err) => {
+            return this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
               // console.log(err)
               // response.status(err.response.status).send(err.response.data);
 
