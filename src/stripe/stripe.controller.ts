@@ -32,119 +32,121 @@ export class StripeController {
 
             const strapiReq = await this.stripeService.populateCS(event)
             const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
-           
-            paymentObs.pipe(
-              catchError((err) => {
-                console.log('payment data error', err.data.error)
-                return of({ error: true, ...err.data.error})
-              }),
-              mergeMap(paymentRes => {
-                if (paymentRes.error) return of(paymentRes)
-                const payment = paymentRes.data.data
-                const attrs = payment.attributes
-                const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
-                // console.log('name: ', name);
-                // return of(paymentRes)
-
-                return combineLatest({
-                  payment: of(payment),
-                  template: this.utilsService.postSelfWebhook('/email/compile', { template_id: attrs.metadata.payment_template,
-                    params: {
-                      "amount": attrs.amount,
-                      "program": attrs.product_name,
-                      "First_name": name,
-                      "file_number": attrs.payment_id,
-                      "payment_date": attrs.date,
-                      "provider": attrs.metadata.provider
-                    }
-                  })
-                })
-              }),
-              catchError((err) => {
-                console.log('compile error', err?.data?.error)
-                return of({ error: true, ...err?.data?.error})
-              }),
-              mergeMap(res => {
-                if (res.error) return of(res)
-
-                const { compiled, template: { subject, priority } } = res.template.data
-                return combineLatest({
-                  payment: of(res.payment),
-                  template: of(res.template),
-                  send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-                    template: compiled,
-                    subject,
-                    toAddress: res.payment.attributes.email,
-                    priority
-                  })
-                })
-                // this.sendFollowUpmail(name)
-
-              })
-            ).subscribe(res => {
-              const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
-              const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
-              const data = {
-                payment: {
-                  ...res.payment.attributes,
-                  id: res.payment.id,
-                  name,
-                  curp
-                },
-                send: {},
-                
-              }
-              const sendMessage = (data, scope, error) => {
-                this.SendSlackMessage(data, scope, error)
-              }
-              const sendFollowUpMail = (data) => {
-                this.sendFollowUpMail(data)
-              }
-              xml2js.parseString(res.send.data,  function (err, result) {
-                // console.dir(result);
-                // console.dir(result['soapenv:Envelope']);
-                if (result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false') {
-                  // treat error
-                  data.send =  {
-                    fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
-                    message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
-                    statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
-                  }
-                  sendMessage(data, 'payment email', data.send)
-                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields);
-                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message);
-                  // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode);
-
-                  // console.dir(data);
-                } 
-                else {
-                  data.send = {
-                    current: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].current[0],
-                    limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
-                    type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
-                  }
-                  if(data.payment.metadata.SFline !== data.payment.metadata.provider) {
-                    const year = new Date().getFullYear()
-                    const month = new Date().getMonth()
-                    const day = new Date().getDate()
-                    const hours = new Date().getHours()
-                    const minutes = new Date().getMinutes()
-                    const seconds = new Date().getSeconds()
-
-                    const date = env.NODE_ENV === 'production'
-                      ? new Date(year, month, day + 1, hours, minutes , seconds)
-                      : new Date(year, month, day, hours, minutes, seconds + 30)
-
-                    const job = schedule.scheduleJob(date, function() {
-                      sendFollowUpMail(data)
-                    });
-                  }
-                }
-              });
-              response.send();
-
-
-            })
+           if (strapiReq) {
+             paymentObs.pipe(
+               catchError((err) => {
+                 console.log('payment data error', err.data.error)
+                 return of({ error: true, ...err.data.error})
+               }),
+               mergeMap(paymentRes => {
+                 if (paymentRes.error) return of(paymentRes)
+                 const payment = paymentRes.data.data
+                 const attrs = payment.attributes
+                 const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
+                 // console.log('name: ', name);
+                 // return of(paymentRes)
+ 
+                 return combineLatest({
+                   payment: of(payment),
+                   template: this.utilsService.postSelfWebhook('/email/compile', { template_id: attrs.metadata.payment_template,
+                     params: {
+                       "amount": attrs.amount,
+                       "program": attrs.product_name,
+                       "First_name": name,
+                       "file_number": attrs.payment_id,
+                       "payment_date": attrs.date,
+                       "provider": attrs.metadata.provider
+                     }
+                   })
+                 })
+               }),
+               catchError((err) => {
+                 console.log('compile error', err?.data?.error)
+                 return of({ error: true, ...err?.data?.error})
+               }),
+               mergeMap(res => {
+                 if (res.error) return of(res)
+ 
+                 const { compiled, template: { subject, priority } } = res.template.data
+                 return combineLatest({
+                   payment: of(res.payment),
+                   template: of(res.template),
+                   send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                     template: compiled,
+                     subject,
+                     toAddress: res.payment.attributes.email,
+                     priority
+                   })
+                 })
+                 // this.sendFollowUpmail(name)
+ 
+               })
+             ).subscribe(res => {
+               const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
+               const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
+               const data = {
+                 payment: {
+                   ...res.payment.attributes,
+                   id: res.payment.id,
+                   name,
+                   curp
+                 },
+                 send: {},
+                 
+               }
+               const sendMessage = (data, scope, error) => {
+                 this.SendSlackMessage(data, scope, error)
+               }
+               const sendFollowUpMail = (data) => {
+                 this.sendFollowUpMail(data)
+               }
+               xml2js.parseString(res.send.data,  function (err, result) {
+                 // console.dir(result);
+                 // console.dir(result['soapenv:Envelope']);
+                 if (result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false') {
+                   // treat error
+                   data.send =  {
+                     fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
+                     message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
+                     statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
+                   }
+                   sendMessage(data, 'payment email', data.send)
+                   // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields);
+                   // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message);
+                   // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode);
+ 
+                   // console.dir(data);
+                 } 
+                 else {
+                   data.send = {
+                     current: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].current[0],
+                     limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
+                     type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
+                   }
+                   if(data.payment.metadata.SFline !== data.payment.metadata.provider) {
+                     const year = new Date().getFullYear()
+                     const month = new Date().getMonth()
+                     const day = new Date().getDate()
+                     const hours = new Date().getHours()
+                     const minutes = new Date().getMinutes()
+                     const seconds = new Date().getSeconds()
+ 
+                     const date = env.NODE_ENV === 'production'
+                       ? new Date(year, month, day + 1, hours, minutes , seconds)
+                       : new Date(year, month, day, hours, minutes, seconds + 30)
+ 
+                     const job = schedule.scheduleJob(date, function() {
+                       sendFollowUpMail(data)
+                     });
+                   }
+                 }
+               });
+               if (res.payment.attributes.metadata.SFline === res.payment.attributes.metadata.provider ) {
+                 this.utilsService.postSelfWebhook('/inscriptions/new', { cs_id: res.payment.attributes.cs_id } ).subscribe()
+               }
+               response.send();
+             })
+           }
           break;
         case 'checkout.session.expired':
           const checkoutSessionExpired = event.data.object;
