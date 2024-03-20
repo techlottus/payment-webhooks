@@ -1,6 +1,4 @@
 import { Injectable, Response } from '@nestjs/common';
-import { catchError, forkJoin, of, take, throwError } from 'rxjs';
-import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class SalesforceService {

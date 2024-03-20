@@ -60,10 +60,10 @@ export class StripeService {
     const payment_method_types = checkoutSessionCompleted.payment_method_types
     // console.log('payment_method_types: ', payment_method_types);
     
-    // const after_completion = checkoutSessionCompleted.payment_link.after_completion
+    const after_completion = checkoutSessionCompleted.payment_link.after_completion || null
     // console.log('after_completion: ', after_completion);
     
-    // const type = after_completion.type
+    const type = after_completion?.type || null
     // console.log('type: ', type);
     
     // console.log('checkoutSessionCompleted.payment_intent: ', checkoutSessionCompleted.payment_intent);
@@ -75,7 +75,7 @@ export class StripeService {
     // console.log('subscription_id: ', subscription_id);
 
     // console.log('payment_id: ', payment_id);
-    // const typeform_url = after_completion[type].url?.replace('{CHECKOUT_SESSION_ID}', cs_id) || null
+    const typeform_url = after_completion[type].url?.replace('{CHECKOUT_SESSION_ID}', cs_id) || null
     
     const payment_intent = await stripe.paymentIntents.retrieve(payment_id, {
       expand: [

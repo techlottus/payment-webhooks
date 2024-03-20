@@ -18,41 +18,41 @@ export class InscriptionsService {
       response.send();
     } else {
       const submitted_at = new Date()
-      if (formResponse) {
-        
-        const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
-          const { type, ref } = field
-          const rawAnswer = formResponse.answers[index]
-          const answer = rawAnswer[rawAnswer.type]
-          if(ref === 'need_invoice') {
-            acc.needInvoiceIndex = index;
-            acc.needInvoice = answer
-            acc.inscription = { ...acc.inscription, [ref]: answer }
-          }
-          if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
-            const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
-            acc.inscription = { ...acc.inscription, ...strapiField }
-          } else if (index > acc.needInvoiceIndex) {
-  
-            let [ _first, ...rest ] = ref.split('_')
-            const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
-  
-            if (hasRepeatedField.includes(true)) rest.pop()
-            
-            const key = rest.join('_')
-            const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
-            acc.invoice = { ...acc.invoice, ...strapiField }
-          }
-          return acc
-        }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
-        const curp = answers.inscription.residence === 'Nacional'
-          ? answers.inscription.CURP?.toUpperCase()
-          : null
-        
-      }
-      try {
+
+   
         this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]).pipe(
           mergeMap((res) => {
+            // if (formResponse) {
+        
+              const answers = !formResponse 
+                ? null
+                : formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
+                const { type, ref } = field
+                const rawAnswer = formResponse.answers[index]
+                const answer = rawAnswer[rawAnswer.type]
+                if(ref === 'need_invoice') {
+                  acc.needInvoiceIndex = index;
+                  acc.needInvoice = answer
+                  acc.inscription = { ...acc.inscription, [ref]: answer }
+                }
+                if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
+                  const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
+                  acc.inscription = { ...acc.inscription, ...strapiField }
+                } else if (index > acc.needInvoiceIndex) {
+        
+                  let [ _first, ...rest ] = ref.split('_')
+                  const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
+        
+                  if (hasRepeatedField.includes(true)) rest.pop()
+                  
+                  const key = rest.join('_')
+                  const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
+                  acc.invoice = { ...acc.invoice, ...strapiField }
+                }
+                return acc
+              }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
+              
+            // }
             // console.log('res.data.data[0]: ', res.data.data[0]);
             // const curp = res.data.data[0].attributes.extra_fields;
             const curp = this.stripeService.getField(res.data.data[0].attributes.extra_fields, 'curp').value
@@ -61,7 +61,7 @@ export class InscriptionsService {
             // console.log('residence: ', residence);
             
             const curpObservable = !!curp ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
-            const observables = { track_payments: of({...res.data.data[0], residence}), curp: curpObservable }
+            const observables = { track_payments: of({...res.data.data[0], residence}), curp: curpObservable, answers: of(answers) }
             return combineLatest(observables).pipe(
               catchError((err, caught) => {
                 // console.log(res.data.data[0]);
@@ -87,6 +87,7 @@ export class InscriptionsService {
             ? {
                 cs_id,
                 submitted_at,
+                ...res.answers,
                 residence: res.track_payments.residence,
                 email: res.track_payments.attributes.email,
                 phone: res.track_payments.attributes.phone,
@@ -98,7 +99,11 @@ export class InscriptionsService {
                 birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
                 birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
               }
-            : null
+            : {
+              cs_id,
+              submitted_at,
+              ...res.answers
+              }
             // console.log(inscription);
             
          
@@ -122,9 +127,7 @@ export class InscriptionsService {
          response.send()
        })
         
-      } catch (error) {
-        // response.status(error.status).send(error.message || error.data);
-      }
+    
     }
   }
   SendSlackMessage(data: any, scope: string, error: string) {
