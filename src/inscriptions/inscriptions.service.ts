@@ -7,46 +7,49 @@ import { UtilsService } from 'src/utils/utils.service';
 export class InscriptionsService {
   
   constructor(private utilsService: UtilsService, private stripeService: StripeService) {}
-  async populateStrapi({ cs_id }: any, response: any) {
+  async populateStrapi(body: any, response: any) {
 
-    // const formResponse = request.body.form_response
-    // const cs_id = formResponse.hidden?.checkout_session_id || null
-    // const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
+    const formResponse = body.form_response || null
+    const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id
+    const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
 
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
       response.send();
     } else {
       const submitted_at = new Date()
-      // const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
-      //   const { type, ref } = field
-      //   const rawAnswer = formResponse.answers[index]
-      //   const answer = rawAnswer[rawAnswer.type]
-      //   if(ref === 'need_invoice') {
-      //     acc.needInvoiceIndex = index;
-      //     acc.needInvoice = answer
-      //     acc.inscription = { ...acc.inscription, [ref]: answer }
-      //   }
-      //   if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
-      //     const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
-      //     acc.inscription = { ...acc.inscription, ...strapiField }
-      //   } else if (index > acc.needInvoiceIndex) {
-
-      //     let [ _first, ...rest ] = ref.split('_')
-      //     const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
-
-      //     if (hasRepeatedField.includes(true)) rest.pop()
-          
-      //     const key = rest.join('_')
-      //     const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
-      //     acc.invoice = { ...acc.invoice, ...strapiField }
-      //   }
-      //   return acc
-      // }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
-      // const curp = answers.inscription.residence === 'Nacional'
-      //   ? answers.inscription.CURP?.toUpperCase()
-      //   : null
-      
+      if (formResponse) {
+        
+        const answers = formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
+          const { type, ref } = field
+          const rawAnswer = formResponse.answers[index]
+          const answer = rawAnswer[rawAnswer.type]
+          if(ref === 'need_invoice') {
+            acc.needInvoiceIndex = index;
+            acc.needInvoice = answer
+            acc.inscription = { ...acc.inscription, [ref]: answer }
+          }
+          if (acc.needInvoiceIndex === null || index < acc.needInvoiceIndex) {
+            const strapiField = { [ref]: type === "multiple_choice" ? answer.label : answer }
+            acc.inscription = { ...acc.inscription, ...strapiField }
+          } else if (index > acc.needInvoiceIndex) {
+  
+            let [ _first, ...rest ] = ref.split('_')
+            const hasRepeatedField = repeatedFields.map((rf) => (ref as string).includes(rf))
+  
+            if (hasRepeatedField.includes(true)) rest.pop()
+            
+            const key = rest.join('_')
+            const strapiField = { [key]: type === "multiple_choice" ? answer.label : answer }
+            acc.invoice = { ...acc.invoice, ...strapiField }
+          }
+          return acc
+        }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
+        const curp = answers.inscription.residence === 'Nacional'
+          ? answers.inscription.CURP?.toUpperCase()
+          : null
+        
+      }
       try {
         this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]).pipe(
           mergeMap((res) => {
