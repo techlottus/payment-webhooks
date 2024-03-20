@@ -3,10 +3,14 @@ import { env } from 'process';
 require('dotenv').config();
 
 const stripe = require('stripe')(env.STRIPE_API_KEY);
+const flows = ['ATR', 'EUONLINE', 'EUPROVIDER']
 
 @Injectable()
 export class StripeService {
   async populateCS(event: any) {
+    if (flows.includes(event.data.object.metadata.flow)) {
+      return false
+    }
     const checkout_session_id = event.data.object.id
     const checkoutSessionCompleted = await stripe.checkout.sessions.retrieve(
       checkout_session_id,

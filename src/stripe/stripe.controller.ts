@@ -146,6 +146,8 @@ export class StripeController {
                }
                response.send();
              })
+           } else {
+            response.status(200).send('product managed by other pipeline')
            }
           break;
         case 'checkout.session.expired':
