@@ -12,7 +12,8 @@ export class InscriptionsService {
     const formResponse = body.form_response || null
     const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
-
+    console.log('formResponse: ', formResponse);
+    
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
       response.send();
@@ -87,7 +88,6 @@ export class InscriptionsService {
             ? {
                 cs_id,
                 submitted_at,
-                ...res.answers,
                 residence: res.track_payments.residence,
                 email: res.track_payments.attributes.email,
                 phone: res.track_payments.attributes.phone,
@@ -108,18 +108,23 @@ export class InscriptionsService {
             
          
 
-            return this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
-              // console.log(err)
-              // response.status(err.response.status).send(err.response.data);
-
-              return of({ error: true, ...err})
-            }))
+            return combineLatest({
+              payment: of(res.track_payment),
+              inscription:  this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
+                // console.log(err)
+                // response.status(err.response.status).send(err.response.data);
+  
+                return of({ error: true, ...err})
+              }))
+            })
           }),
           mergeMap(res => {
+            console.log('res: ', res);
+            
             if (res?.error || res.curp?.error || res.curp?.data?.errorType) {
               return of(res)
             }
-            return this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id })
+            return  this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id }) 
           })
         )
        .subscribe(() => {

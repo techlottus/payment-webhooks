@@ -33,12 +33,16 @@ export class StripeController {
             const strapiReq = await this.stripeService.populateCS(event)
             const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
            if (strapiReq) {
+            // console.log('strapiReq: ', strapiReq);
+            
              paymentObs.pipe(
                catchError((err) => {
                  console.log('payment data error', err.data.error)
                  return of({ error: true, ...err.data.error})
                }),
                mergeMap(paymentRes => {
+                // console.log('paymentRes: ', paymentRes);
+                
                  if (paymentRes.error) return of(paymentRes)
                  const payment = paymentRes.data.data
                  const attrs = payment.attributes
@@ -65,6 +69,8 @@ export class StripeController {
                  return of({ error: true, ...err?.data?.error})
                }),
                mergeMap(res => {
+                // console.log('res: ', res);
+
                  if (res.error) return of(res)
  
                  const { compiled, template: { subject, priority } } = res.template.data
@@ -76,12 +82,17 @@ export class StripeController {
                      subject,
                      toAddress: res.payment.attributes.email,
                      priority
-                   })
+                   }).pipe(catchError((err, caught) => {
+                    console.log('err: ', err);
+                    return caught
+                  }))
                  })
                  // this.sendFollowUpmail(name)
  
                })
              ).subscribe(res => {
+              // console.log('res: ', res);
+
                const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
                const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
                const data = {
@@ -93,6 +104,9 @@ export class StripeController {
                  },
                  send: {},
                  
+               }
+               if (data.payment.metadata.SFline === data.payment.metadata.provider && data.payment.metadata.flow !== 'ATR' ) {
+                 this.utilsService.postSelfWebhook('/inscriptions/new', { cs_id: res.payment.attributes.cs_id } ).subscribe()
                }
                const sendMessage = (data, scope, error) => {
                  this.SendSlackMessage(data, scope, error)
@@ -141,9 +155,6 @@ export class StripeController {
                    }
                  }
                });
-               if (res.payment.attributes.metadata.SFline === res.payment.attributes.metadata.provider ) {
-                 this.utilsService.postSelfWebhook('/inscriptions/new', { cs_id: res.payment.attributes.cs_id } ).subscribe()
-               }
                response.send();
              })
            } else {
