@@ -8,7 +8,7 @@ const flows = ['ATR', 'EUONLINE', 'EUPROVIDER']
 @Injectable()
 export class StripeService {
   async populateCS(event: any) {
-    if (flows.includes(event.data.object.metadata.flow)) {
+    if (!flows.includes(event.data.object.metadata.flow)) {
       return false
     }
     const checkout_session_id = event.data.object.id
