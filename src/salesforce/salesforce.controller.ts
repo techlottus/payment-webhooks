@@ -57,11 +57,10 @@ export class SalesforceController {
         // console.log('enrrollments: ', enrrollments);
         if (res.inscription?.data?.Exitoso === 'False' || res.inscription?.error) {
           this.SendSlackMessage(data, 'Salesforce', res.inscription?.data?.Error || res.inscription?.message)
-        } else if (data.track_payments?.attributes?.metadata?.SFcampus !== "UTC A TU RITMO") {
+        } else if (data.track_payments?.attributes?.metadata?.flow !== "ATR" ) {
           // call enrollment webhook if not atr
           const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
           // console.log(data);
-          
           this.utilsService.postSelfWebhook('/enrollment/new', data).subscribe()
 
         }

@@ -6,8 +6,8 @@ export class InscriptionsController {
   constructor(private readonly inscriptionsService: InscriptionsService) {}
 
   @Post('/new')
-  webhook(@Req() request: any, @Res() response: any ) {
+  webhook(@Body() body: any, @Res() response: any ) {
     // console.log("request: ", request);
-    this.inscriptionsService.populateStrapi(request, response)
+    this.inscriptionsService.populateStrapi(body, response)
   }
 }

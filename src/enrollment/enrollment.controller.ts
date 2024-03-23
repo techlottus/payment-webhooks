@@ -45,8 +45,17 @@ export class EnrollmentController {
         
         const error = EnrollmentHasError ? EnrollmentError : ProgramHasError ? ProgramError : DataHasError ? DataError : null
         const scope = EnrollmentHasError ? 'Enrollment data' : ProgramHasError ? 'Program data' : DataHasError ? 'Data Strapi' : null
-        const password = Math.random().toString(36).slice(-8);
 
+        const chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const passwordLength = 10;
+        let password = "";
+
+        for (var i = 0; i <= passwordLength; i++) {
+          var randomNumber = Math.floor(Math.random() * chars.length);
+          password += chars.substring(randomNumber, randomNumber +1);
+         }
+        // console.log(password);
+        
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password)
         const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram)
         const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email).pipe(switchMap(res=> !!res.data[0] ? of({...res, exist: true }) : createUserObs))
@@ -72,7 +81,10 @@ export class EnrollmentController {
         
         const inscription = responses.inscription
         const payment = responses.payment
-        if (responses.error) {
+        if (!!responses.user.data.exception) {
+          return combineLatest([of({inscription, payment ,error: responses.user.data.message, scope: "User get or create"})])
+          
+        } else if (responses.error) {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
         }
         // // log
@@ -132,7 +144,11 @@ export class EnrollmentController {
                   "first_name": data.inscription.name,
                   "start_date": data.payment.date.split('T')[0]
                 }
-              })
+              }).pipe(catchError((err, caught) => {
+                // console.log('err: ', err);
+                
+                return of({error: true, ...err})
+              }))
             }
           : responseObs
         return combineLatest(responseObs)
@@ -140,6 +156,7 @@ export class EnrollmentController {
       mergeMap(res => {
         
         if (res.error) return of(res)
+        if (res.template.error) return of(res)
 
         const { compiled, template: { subject, priority } } = res.template?.data
         // console.log(JSON.parse(compiled));
@@ -165,8 +182,8 @@ export class EnrollmentController {
       if (responses.error) {
         this.SendSlackMessage(responses, responses.scope, responses.error)
 
-        response.status(400)
-        response.send(responses.error)
+        // response.status(400)
+        // response.send(responses.error)
       } else {
 
         let data: any = {

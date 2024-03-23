@@ -1,6 +1,4 @@
 import { Injectable, Response } from '@nestjs/common';
-import { catchError, forkJoin, of, take, throwError } from 'rxjs';
-import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class SalesforceService {
@@ -127,7 +125,7 @@ export class SalesforceService {
       "nacionalidad": req.track_inscriptions.attributes.residence,
       "fechaNacimiento": birthdate,
       "genero": generoEstudiante,
-      "estadoCivil": req.track_inscriptions.attributes.civil_status,
+      "estadoCivil": req.track_inscriptions.attributes.civil_status || 'Soltero',
       "curp": req.track_inscriptions.attributes.CURP?.toUpperCase(),
       "telefono": this.formatPhone(req.track_inscriptions.attributes.phone),
       "celular": this.formatPhone(req.track_inscriptions.attributes.phone),
@@ -146,7 +144,7 @@ export class SalesforceService {
       "codigoDetalle": codigoDetalle,
       "folioPago": req.track_payments.attributes.payment_id,
 
-      "deseaFactura": req.track_inscriptions.attributes.need_invoice,
+      "deseaFactura": !!req.track_inscriptions.attributes.need_invoice,
       "rfc": req.track_invoices?.attributes?.RFC,
       "tipoPersona": tiposPersona?.[req.track_invoices?.attributes?.tax_person],
       "razonSocial": req.track_invoices?.attributes?.full_name,

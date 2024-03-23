@@ -26,7 +26,7 @@ export class EmailController {
         
        return  this.utils.sendSFemail(xml)
       }),
-      catchError((err, caught)=> { console.log(err); console.log(); response.status(err.response.status).send(err.response.data); return caught })
+      catchError((err, caught)=> { console.log(err); return caught })
     ).subscribe(res => {
       response.send(res.data)
     })
