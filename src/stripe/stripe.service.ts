@@ -72,7 +72,7 @@ export class StripeService {
     const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
     // console.log('payment_id: ', payment_id);
     
-    const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : null
+    const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.id : null
     // console.log('subscription_id: ', subscription_id);
 
     // console.log('payment_id: ', payment_id);
