@@ -254,6 +254,7 @@ export class UtilsService {
     }))
   }
   capitalizeText(text: string) {
+    if (!text) return text
     const capitalizedText = text.split(' ').map(str => {
       
       const strArr = str.split('')
