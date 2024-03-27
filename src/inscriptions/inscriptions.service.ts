@@ -12,7 +12,7 @@ export class InscriptionsService {
     const formResponse = body.form_response || null
     const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
-    console.log('formResponse: ', formResponse);
+    // console.log('formResponse: ', formResponse);
     
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
@@ -78,7 +78,7 @@ export class InscriptionsService {
             const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'nombredelalumno').value)
             // console.log('curp: ', curp);
             // console.log('residence: ', residence);
-            console.log('track_inscriptions: ', track_inscriptions);
+            // console.log('track_inscriptions: ', track_inscriptions);
             
             const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
             const observables = {
@@ -107,8 +107,8 @@ export class InscriptionsService {
             }
             // console.log('res.curp.error: ', res.curp.error);
             // console.log('res: ', res);
-            console.log('res.track_inscriptions: ', res.track_inscriptions);
-            console.log('res.answers: ', res.answers);
+            // console.log('res.track_inscriptions: ', res.track_inscriptions);
+            // console.log('res.answers: ', res.answers);
             
             const inscription = !!res.curp.data 
               ? {
@@ -157,8 +157,8 @@ export class InscriptionsService {
             })
           }),
           mergeMap(res => {
-            console.log('res: ', res);
-            console.log('res.data?.data[0]: ', res.data?.data[0]);
+            // console.log('res: ', res);
+            // console.log('res.inscription.data?.data[0]: ', res.inscription.data?.data[0]);
             
             if (res?.error || res.curp?.error || res.curp?.data?.errorType || (!!res.inscription.exists && !!res.inscription.filled)) {
               return of(res)

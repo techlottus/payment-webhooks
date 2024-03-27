@@ -137,7 +137,7 @@ export class StripeController {
                      limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
                      type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
                    }
-                   if(data.payment.metadata.SFline !== data.payment.metadata.provider) {
+                   if(data.payment.metadata.flow === "EUPROVIDER") {
                      const year = new Date().getFullYear()
                      const month = new Date().getMonth()
                      const day = new Date().getDate()
