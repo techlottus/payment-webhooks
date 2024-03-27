@@ -125,15 +125,24 @@ export class InscriptionsService {
                   birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
                   birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
                 }
-              : {
-                  cs_id,
-                  submitted_at,
-                  residence: res.track_payments.residence,
-                  email: res.track_payments.attributes.email,
-                  name: res.track_payments.username,
-                  phone: res.track_payments.attributes.phone,
-                  ...res.answers.inscription
-                }
+              : !!res.answers && !!res.answers.inscription 
+                ? {
+                    cs_id,
+                    submitted_at,
+                    residence: res.track_payments.residence,
+                    email: res.track_payments.attributes.email,
+                    name: res.track_payments.username,
+                    phone: res.track_payments.attributes.phone,
+                    ...res.answers.inscription
+                  }
+                : {
+                    cs_id,
+                    submitted_at,
+                    residence: res.track_payments.residence,
+                    email: res.track_payments.attributes.email,
+                    name: res.track_payments.username,
+                    phone: res.track_payments.attributes.phone,
+                  }
             // console.log(inscription);
             const inscriptionObs = res.track_inscriptions.exists && res.track_inscriptions.filled
               ? of(res.track_inscriptions)
