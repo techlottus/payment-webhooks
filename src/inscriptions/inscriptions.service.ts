@@ -12,7 +12,7 @@ export class InscriptionsService {
     const formResponse = body.form_response || null
     const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime']
-    console.log('formResponse: ', formResponse);
+    // console.log('formResponse: ', formResponse);
     
     if (!cs_id) {
       response.status(400).send(`Webhook Error: Not checkout session id has been provided`);
@@ -20,14 +20,30 @@ export class InscriptionsService {
     } else {
       const submitted_at = new Date()
 
-   
-        this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]).pipe(
+        combineLatest({
+          payment: this.utilsService.fetchStrapi('track-payments', [`filters[cs_id][$eq]=${cs_id}`]),
+          inscription: this.utilsService.fetchStrapi('track-inscriptions', [`filters[cs_id][$eq]=${cs_id}`])
+        }).pipe(
           mergeMap((res) => {
             // if (formResponse) {
-        
+              const track_inscriptions = !res.inscription.data.data[0] 
+                ? {
+                    attributes: {
+                      cs_id,
+                      submitted_at
+                    },
+                    exists: false,
+                    filled: false
+                  }
+                : {
+                    ...res.inscription.data.data[0],
+                    exists: true,
+                    filled: res.inscription.data.data[0].attributes.name && res.inscription.data.data[0].attributes.last_name && res.inscription.data.data[0].attributes.birthdate
+                  }
+              const track_payments = res.payment.data.data[0]
               const answers = !formResponse 
                 ? null
-                : formResponse.definition.fields.reduce((acc: any, field: any, index: number) => {
+                : formResponse?.definition.fields.reduce((acc: any, field: any, index: number) => {
                 const { type, ref } = field
                 const rawAnswer = formResponse.answers[index]
                 const answer = rawAnswer[rawAnswer.type]
@@ -51,24 +67,32 @@ export class InscriptionsService {
                   acc.invoice = { ...acc.invoice, ...strapiField }
                 }
                 return acc
-              }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
+                  }, { inscription: { cs_id, submitted_at }, invoice: { cs_id, submitted_at }, needInvoiceIndex: null, needInvoice: false })
+              // console.log('answers: ', answers);
               
             // }
-            // console.log('res.data.data[0]: ', res.data.data[0]);
-            // const curp = res.data.data[0].attributes.extra_fields;
-            const curp = this.stripeService.getField(res.data.data[0].attributes.extra_fields, 'curp').value
-            const residence = this.utilsService.capitalizeText(this.stripeService.getField(res.data.data[0].attributes.extra_fields, 'residencia').value)
+            // console.log('track_payments: ', track_payments);
+            // const curp = track_payments.attributes.extra_fields;
+            const curp = this.stripeService.getField(track_payments.attributes.extra_fields, 'curp').value
+            const residence = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'residencia').value)
+            const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'nombredelalumno').value)
             // console.log('curp: ', curp);
             // console.log('residence: ', residence);
+            // console.log('track_inscriptions: ', track_inscriptions);
             
-            const curpObservable = !!curp ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
-            const observables = { track_payments: of({...res.data.data[0], residence}), curp: curpObservable, answers: of(answers) }
+            const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
+            const observables = {
+              track_payments: of({...track_payments, residence, username}),
+              track_inscriptions: of(track_inscriptions),
+              curp: curpObservable,
+              answers: of(answers)
+            }
             return combineLatest(observables).pipe(
               catchError((err, caught) => {
-                // console.log(res.data.data[0]);
-                this.SendSlackMessage({ track_payments: res.data.data[0], track_inscriptions:{ attributes: { cs_id, submitted_at } } }, 'CURP', err.response.data)
+                // console.log(track_payments);
+                this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return of({ track_payments: {...res.data.data[0], residence}, curp: { error: true, ...err} } )
+                return of({ track_payments: {...track_payments, residence}, curp: { error: true, ...err} } )
               }),
             )
             
@@ -83,45 +107,69 @@ export class InscriptionsService {
             }
             // console.log('res.curp.error: ', res.curp.error);
             // console.log('res: ', res);
+            // console.log('res.track_inscriptions: ', res.track_inscriptions);
+            // console.log('res.answers: ', res.answers);
             
             const inscription = !!res.curp.data 
-            ? {
-                cs_id,
-                submitted_at,
-                residence: res.track_payments.residence,
-                email: res.track_payments.attributes.email,
-                phone: res.track_payments.attributes.phone,
-                name: this.utilsService.capitalizeText(res.curp.data.nombre),
-                CURP: res.curp.data.curp,
-                last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
-                second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
-                gender: res.curp.data.sexo,
-                birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
-                birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
-              }
-            : {
-              cs_id,
-              submitted_at,
-              ...res.answers
-              }
+              ? {
+                  cs_id,
+                  submitted_at,
+                  residence: res.track_payments.residence,
+                  email: res.track_payments.attributes.email,
+                  phone: res.track_payments.attributes.phone,
+                  name: this.utilsService.capitalizeText(res.curp.data.nombre),
+                  CURP: res.curp.data.curp,
+                  last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
+                  second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
+                  gender: res.curp.data.sexo,
+                  birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
+                  birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
+                }
+              : !!res.answers && !!res.answers.inscription 
+                ? {
+                    cs_id,
+                    submitted_at,
+                    residence: res.track_payments.residence,
+                    email: res.track_payments.attributes.email,
+                    name: res.track_payments.username,
+                    phone: res.track_payments.attributes.phone,
+                    ...res.answers.inscription
+                  }
+                : {
+                    cs_id,
+                    submitted_at,
+                    residence: res.track_payments.residence,
+                    email: res.track_payments.attributes.email,
+                    name: res.track_payments.username,
+                    phone: res.track_payments.attributes.phone,
+                  }
             // console.log(inscription);
-            
-         
+            const inscriptionObs = res.track_inscriptions.exists && res.track_inscriptions.filled
+              ? of(res.track_inscriptions)
+              : res.track_inscriptions.exists && !res.track_inscriptions.filled
+                ? this.utilsService.putStrapi('track-inscriptions', inscription, res.track_inscriptions.id).pipe(catchError((err) => {
+                    // console.log(err)
+                    // response.status(err.response.status).send(err.response.data);
+      
+                    return of({ error: true, ...err})
+                  }))
+                : this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
+                    // console.log(err)
+                    // response.status(err.response.status).send(err.response.data);
+      
+                    return of({ error: true, ...err})
+                  }))
 
             return combineLatest({
               payment: of(res.track_payment),
-              inscription:  this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
-                // console.log(err)
-                // response.status(err.response.status).send(err.response.data);
-  
-                return of({ error: true, ...err})
-              }))
+              inscription: inscriptionObs,
             })
           }),
           mergeMap(res => {
-            console.log('res: ', res);
+            // console.log('res: ', res);
+            // console.log('res.inscription.data?.data[0]: ', res.inscription.data?.data[0]);
             
-            if (res?.error || res.curp?.error || res.curp?.data?.errorType) {
+            if (res?.error || res.curp?.error || res.curp?.data?.errorType || (!!res.inscription.exists && !!res.inscription.filled)) {
               return of(res)
             }
             return  this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id }) 
