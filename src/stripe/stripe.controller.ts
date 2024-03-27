@@ -179,7 +179,7 @@ export class StripeController {
     
   }
   sendFollowUpMail(data) {
-    // console.log('data: ', data);
+    console.log('data followUp: ', data);
     if (data.payment.metadata.flow !== 'EUPROVIDER') return data
     return combineLatest({
       payment: of(data.payment),
