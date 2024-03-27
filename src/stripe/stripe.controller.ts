@@ -105,7 +105,7 @@ export class StripeController {
                  send: {},
                  
                }
-               if (data.payment.metadata.SFline === data.payment.metadata.provider && data.payment.metadata.flow !== 'ATR' ) {
+               if (data.payment.metadata.flow === 'EUONLINE') {
                  this.utilsService.postSelfWebhook('/inscriptions/new', { cs_id: res.payment.attributes.cs_id } ).subscribe()
                }
                const sendMessage = (data, scope, error) => {
@@ -130,29 +130,28 @@ export class StripeController {
                     // console.dir(result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode);
   
                     // console.dir(data);
-                  } 
-                  else {
+                  } else {
                     data.send = {
                       current: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].current[0],
                       limit: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].limit[0],
                       type: result['soapenv:Envelope']['soapenv:Header'][0].LimitInfoHeader[0].limitInfo[0].type[0],
                     }
-                    if(data.payment.metadata.flow === "EUPROVIDER") {
-                      const year = new Date().getFullYear()
-                      const month = new Date().getMonth()
-                      const day = new Date().getDate()
-                      const hours = new Date().getHours()
-                      const minutes = new Date().getMinutes()
-                      const seconds = new Date().getSeconds()
-  
-                      const date = env.NODE_ENV === 'production'
-                        ? new Date(year, month, day, hours + 24, minutes , seconds)
-                        : new Date(year, month, day, hours, minutes, seconds + 30)
-  
-                      const job = schedule.scheduleJob(date, function() {
-                        sendFollowUpMail(data)
-                      });
-                    }
+                  }
+                  if(data.payment.metadata.flow === "EUPROVIDER") {
+                    const year = new Date().getFullYear()
+                    const month = new Date().getMonth()
+                    const day = new Date().getDate()
+                    const hours = new Date().getHours()
+                    const minutes = new Date().getMinutes()
+                    const seconds = new Date().getSeconds()
+
+                    const date = env.NODE_ENV === 'production'
+                      ? new Date(year, month, day, hours + 24, minutes , seconds)
+                      : new Date(year, month, day, hours, minutes, seconds + 30)
+
+                    const job = schedule.scheduleJob(date, function() {
+                      sendFollowUpMail(data)
+                    });
                   }
                });
                response.send();
