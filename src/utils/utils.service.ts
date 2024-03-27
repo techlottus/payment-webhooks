@@ -11,8 +11,11 @@ export class UtilsService {
   StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
   
 
-  postStrapi (endpoint: string, data: any, id?:number) {
-    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}${ !!id ? '/' + id : '' }`, { data }, this.StrapiTrackingConfig)
+  postStrapi (endpoint: string, data: any) {
+    return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.StrapiTrackingConfig)
+  }
+  putStrapi (endpoint: string, data: any, id:number) {
+    return this.http.put(`${env.STRAPI_TRACKING_URL}/api/${endpoint}/${id}`, { data }, this.StrapiTrackingConfig)
   }
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)

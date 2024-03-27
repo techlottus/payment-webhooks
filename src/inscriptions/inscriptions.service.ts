@@ -137,7 +137,7 @@ export class InscriptionsService {
             const inscriptionObs = res.track_inscriptions.exists && res.track_inscriptions.filled
               ? of(res.track_inscriptions)
               : res.track_inscriptions.exists && !res.track_inscriptions.filled
-                ? this.utilsService.postStrapi('track-inscriptions', inscription, res.track_inscriptions.id).pipe(catchError((err) => {
+                ? this.utilsService.putStrapi('track-inscriptions', inscription, res.track_inscriptions.id).pipe(catchError((err) => {
                     // console.log(err)
                     // response.status(err.response.status).send(err.response.data);
       
