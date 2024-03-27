@@ -152,13 +152,13 @@ export class InscriptionsService {
 
             return combineLatest({
               payment: of(res.track_payment),
-              inscription: inscriptionObs
+              inscription: inscriptionObs,
             })
           }),
           mergeMap(res => {
             console.log('res: ', res);
             
-            if (res?.error || res.curp?.error || res.curp?.data?.errorType || (res.track_inscriptions.exists && res.track_inscriptions.filled)) {
+            if (res?.error || res.curp?.error || res.curp?.data?.errorType || (!!res.inscription.exists && !!res.inscription.filled)) {
               return of(res)
             }
             return  this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id }) 
