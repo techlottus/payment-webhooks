@@ -78,6 +78,7 @@ export class InscriptionsService {
             const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'nombredelalumno').value)
             // console.log('curp: ', curp);
             // console.log('residence: ', residence);
+            console.log('track_inscriptions: ', track_inscriptions);
             
             const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
             const observables = {
@@ -106,6 +107,7 @@ export class InscriptionsService {
             }
             // console.log('res.curp.error: ', res.curp.error);
             // console.log('res: ', res);
+            console.log('res.track_inscriptions: ', res.track_inscriptions);
             
             const inscription = !!res.curp.data 
               ? {
