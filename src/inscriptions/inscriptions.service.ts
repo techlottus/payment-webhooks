@@ -108,6 +108,7 @@ export class InscriptionsService {
             // console.log('res.curp.error: ', res.curp.error);
             // console.log('res: ', res);
             console.log('res.track_inscriptions: ', res.track_inscriptions);
+            console.log('res.answers: ', res.answers);
             
             const inscription = !!res.curp.data 
               ? {
@@ -156,7 +157,7 @@ export class InscriptionsService {
             })
           }),
           mergeMap(res => {
-            console.log('res: ', res);
+            console.log('res.data?.data[0]: ', res.data?.data[0]);
             
             if (res?.error || res.curp?.error || res.curp?.data?.errorType || (!!res.inscription.exists && !!res.inscription.filled)) {
               return of(res)
