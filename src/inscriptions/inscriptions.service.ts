@@ -79,7 +79,7 @@ export class InscriptionsService {
             // console.log('curp: ', curp);
             // console.log('residence: ', residence);
             
-            const curpObservable = !!curp && !track_inscriptions.exists ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
+            const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
             const observables = {
               track_payments: of({...track_payments, residence, username}),
               track_inscriptions: of(track_inscriptions),
@@ -108,33 +108,33 @@ export class InscriptionsService {
             // console.log('res: ', res);
             
             const inscription = !!res.curp.data 
-            ? {
-                cs_id,
-                submitted_at,
-                residence: res.track_payments.residence,
-                email: res.track_payments.attributes.email,
-                phone: res.track_payments.attributes.phone,
-                name: this.utilsService.capitalizeText(res.curp.data.nombre),
-                CURP: res.curp.data.curp,
-                last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
-                second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
-                gender: res.curp.data.sexo,
-                birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
-                birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
-              }
-            : {
-                cs_id,
-                submitted_at,
-                residence: res.track_payments.residence,
-                email: res.track_payments.attributes.email,
-                name: res.track_payments.username,
-                phone: res.track_payments.attributes.phone,
-                ...res.answers
-              }
+              ? {
+                  cs_id,
+                  submitted_at,
+                  residence: res.track_payments.residence,
+                  email: res.track_payments.attributes.email,
+                  phone: res.track_payments.attributes.phone,
+                  name: this.utilsService.capitalizeText(res.curp.data.nombre),
+                  CURP: res.curp.data.curp,
+                  last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
+                  second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
+                  gender: res.curp.data.sexo,
+                  birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
+                  birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
+                }
+              : {
+                  cs_id,
+                  submitted_at,
+                  residence: res.track_payments.residence,
+                  email: res.track_payments.attributes.email,
+                  name: res.track_payments.username,
+                  phone: res.track_payments.attributes.phone,
+                  ...res.answers
+                }
             // console.log(inscription);
             const inscriptionObs = res.track_inscriptions.exists && res.track_inscriptions.filled
               ? of(res.track_inscriptions)
-              : res.track_inscriptions.filled
+              : res.track_inscriptions.exists && !res.track_inscriptions.filled
                 ? this.utilsService.postStrapi('track-inscriptions', inscription, res.track_inscriptions.id).pipe(catchError((err) => {
                     // console.log(err)
                     // response.status(err.response.status).send(err.response.data);
@@ -156,7 +156,7 @@ export class InscriptionsService {
           mergeMap(res => {
             console.log('res: ', res);
             
-            if (res?.error || res.curp?.error || res.curp?.data?.errorType || res.track_inscriptions.exists) {
+            if (res?.error || res.curp?.error || res.curp?.data?.errorType || (res.track_inscriptions.exists && res.track_inscriptions.filled)) {
               return of(res)
             }
             return  this.utilsService.postSelfWebhook('/salesforce/inscription', { cs_id }) 
