@@ -9,6 +9,7 @@ import { SalesforceModule } from './salesforce/salesforce.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { EmailModule } from './email/email.module';
 import { CurpModule } from './curp/curp.module';
+import { CdSantanderModule } from './cd-santander/cd-santander.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CurpModule } from './curp/curp.module';
     EnrollmentModule,
     EmailModule,
     CurpModule,
+    CdSantanderModule,
     
   ],
   controllers: [ AppController ],
