@@ -72,10 +72,10 @@ export class InscriptionsService {
               
             // }
             // console.log('track_payments: ', track_payments);
-            // const curp = track_payments.attributes.extra_fields;
-            const curp = this.stripeService.getField(track_payments.attributes.extra_fields, 'curp').value
-            const residence = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'residencia').value)
-            const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments.attributes.extra_fields, 'nombredelalumno').value)
+            // const curp = track_payments?.attributes?.extra_fields;
+            const curp = this.stripeService.getField(track_payments?.attributes?.extra_fields, 'curp').value
+            const residence = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'residencia').value)
+            const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'nombredelalumno').value)
             // console.log('curp: ', curp);
             // console.log('residence: ', residence);
             // console.log('track_inscriptions: ', track_inscriptions);
@@ -115,8 +115,8 @@ export class InscriptionsService {
                   cs_id,
                   submitted_at,
                   residence: res.track_payments.residence,
-                  email: res.track_payments.attributes.email,
-                  phone: res.track_payments.attributes.phone,
+                  email: res.track_payments?.attributes?.email,
+                  phone: res.track_payments?.attributes?.phone,
                   name: this.utilsService.capitalizeText(res.curp.data.nombre),
                   CURP: res.curp.data.curp,
                   last_name: this.utilsService.capitalizeText(res.curp.data.apellidoPaterno),
@@ -130,18 +130,18 @@ export class InscriptionsService {
                     cs_id,
                     submitted_at,
                     residence: res.track_payments.residence,
-                    email: res.track_payments.attributes.email,
+                    email: res.track_payments?.attributes?.email,
                     name: res.track_payments.username,
-                    phone: res.track_payments.attributes.phone,
+                    phone: res.track_payments?.attributes?.phone,
                     ...res.answers.inscription
                   }
                 : {
                     cs_id,
                     submitted_at,
                     residence: res.track_payments.residence,
-                    email: res.track_payments.attributes.email,
+                    email: res.track_payments?.attributes?.email,
                     name: res.track_payments.username,
-                    phone: res.track_payments.attributes.phone,
+                    phone: res.track_payments?.attributes?.phone,
                   }
             // console.log(inscription);
             const inscriptionObs = res.track_inscriptions.exists && res.track_inscriptions.filled
@@ -201,7 +201,7 @@ export class InscriptionsService {
     }
     const metadata = {
       scope: scope,
-      product_name: data.track_payments.attributes.product_name,
+      product_name: data.track_payments?.attributes?.product_name,
       error,
       paymentsID: data.track_payments.id,
     }
