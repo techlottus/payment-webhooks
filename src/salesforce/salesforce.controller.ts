@@ -85,7 +85,7 @@ export class SalesforceController {
     }
     const metadata = {
       scope: scope,
-      product_name: data.track_payments?.attributes.?product_name,
+      product_name: data.track_payments?.attributes?.product_name,
       error,
       inscriptionsID: data.track_inscriptions.id,
       paymentsID: data.track_payments.id,
