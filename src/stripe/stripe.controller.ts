@@ -107,13 +107,21 @@ export class StripeController {
                   console.log('err: ', err);
                   return caught
                 })),
-
+                send_invoice: this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                  template: res.template_invoice.data.compiled,
+                  subject: res.template_invoice.data.template.subject,
+                  toAddress: res.payment.attributes.email,
+                  priority: res.template_invoice.data.template.priority
+                }).pipe(catchError((err, caught) => {
+                  console.log('err: ', err);
+                  return caught
+                })),
               })
               // this.sendFollowUpmail(name)
 
             })
           ).subscribe(res => {
-            // console.log('res: ', res);
+            console.log('res: ', res);
 
             const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
             const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
