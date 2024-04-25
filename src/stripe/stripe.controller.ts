@@ -123,8 +123,8 @@ export class StripeController {
           ).subscribe(res => {
             console.log('res: ', res);
 
-            const name = this.stripeService.getField(res.payment.attributes.extra_fields, 'nombredelalumno').value
-            const curp = this.stripeService.getField(res.payment.attributes.extra_fields, 'curp').value
+            const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno').value
+            const curp = this.stripeService.getField(res.payment.attributes?.extra_fields, 'curp').value
             const data = {
               payment: {
                 ...res.payment.attributes,
