@@ -8,7 +8,7 @@ import { catchError, take } from 'rxjs';
 export class CdSantanderController {
   constructor(private CDSantanderService: CdSantanderService) {}
 
- @Post('/me')
+ @Post('/credentials')
   async webhook(@Req() request: any, @Res() response: any ) {
      const authHeader = request.headers.authorization;
         console.log(authHeader);
