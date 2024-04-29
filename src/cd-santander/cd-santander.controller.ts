@@ -1,7 +1,5 @@
 import { Controller, Post, Req, Res } from '@nestjs/common';
 import { CdSantanderService } from './cd-santander.service';
-import { env } from 'process';
-import { log } from 'handlebars';
 import { catchError, take } from 'rxjs';
 
 @Controller('cd-santander')
@@ -20,7 +18,7 @@ export class CdSantanderController {
         // const token = authHeader.split(' ')[1];
         this.CDSantanderService.me(authHeader).pipe(
           catchError((err, caught) => {
-            console.log(err.response.data);
+            // console.log(err.response.data);
             response.status(err.response.status).send(err.response.data)
 
             return caught
@@ -36,9 +34,10 @@ export class CdSantanderController {
               return caught
             })
           ).subscribe(res => {
+            // console.log(res);
             // console.log(res.data.Data);
 
-            response.send(res.data.Data)
+            response.status(res.status).send(res.data.Data)
             
           });
         });
