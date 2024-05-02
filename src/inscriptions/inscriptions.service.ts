@@ -75,11 +75,12 @@ export class InscriptionsService {
             // }
             // console.log('track_payments: ', track_payments);
             // const curp = track_payments?.attributes?.extra_fields;
-            const curp = this.stripeService.getField(track_payments?.attributes?.extra_fields, 'curp').value
-            const residence = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'residencia').value)
-            const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'nombredelalumno').value)
-            // console.log('curp: ', curp);
-            // console.log('residence: ', residence);
+            const curp = this.stripeService.getField(track_payments?.attributes?.extra_fields, 'curp')?.value
+            const residence = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'residencia')?.value)
+            const username = this.utilsService.capitalizeText(this.stripeService.getField(track_payments?.attributes?.extra_fields, 'nombredelalumno')?.value)
+            console.log('curp: ', curp);
+            console.log('residence: ', residence);
+            console.log('username: ', username);
             // console.log('track_inscriptions: ', track_inscriptions);
             
             const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
