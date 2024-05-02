@@ -41,6 +41,8 @@ export class InscriptionsService {
                     filled: res.inscription.data.data[0].attributes.name && res.inscription.data.data[0].attributes.last_name && res.inscription.data.data[0].attributes.birthdate
                   }
               const track_payments = res.payment.data.data[0]
+              console.log('formResponse: ', formResponse);
+              
               const answers = !formResponse 
                 ? null
                 : formResponse?.definition?.fields?.reduce((acc: any, field: any, index: number) => {
