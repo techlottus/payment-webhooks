@@ -43,7 +43,7 @@ export class InscriptionsService {
               const track_payments = res.payment.data.data[0]
               const answers = !formResponse 
                 ? null
-                : formResponse?.definition.fields.reduce((acc: any, field: any, index: number) => {
+                : formResponse?.definition?.fields?.reduce((acc: any, field: any, index: number) => {
                 const { type, ref } = field
                 const rawAnswer = formResponse.answers[index]
                 const answer = rawAnswer[rawAnswer.type]
