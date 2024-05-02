@@ -116,7 +116,7 @@ export class StripeService {
     return false
   }
   getField(fields: any[], key: string) {
-    return fields.reduce((acc, field) => {
+    return fields?.reduce((acc, field) => {
       if (field.key === key) {
         acc = field[field.type]
       }

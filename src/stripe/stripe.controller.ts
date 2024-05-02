@@ -65,14 +65,20 @@ export class StripeController {
                     "payment_date": attrs.date,
                     "provider": attrs.metadata.provider
                   }
-                }),
+                }).pipe(catchError((err, caught) => {
+                  console.log('err: ', err);
+                  return caught
+                })),
                 template_invoice: !!attrs.metadata.invoice_template ?
                   this.utilsService.postSelfWebhook('/email/compile', {
                     template_id: attrs.metadata.invoice_template,
                     params: {
                       "first_name": name
                     }
-                  }) :
+                  }).pipe(catchError((err, caught) => {
+                  console.log('err: ', err);
+                  return caught
+                })) :
                   of (false)
               })
             }),
