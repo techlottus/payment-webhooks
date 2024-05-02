@@ -25,8 +25,8 @@ export class EnrollmentController {
     combineLatest(baseObservables).pipe(
       // catchError((err, caught) => { console.error(err); return caught }),
       mergeMap(responses => {
-        // console.log('responses: ', responses);
-        const DataHasError =  !responses.inscription.data.data[0].id || !responses.payment.data.data[0].id
+        console.log('responses: ', responses);
+        const DataHasError =  !responses.inscription.data.data[0]?.id || !responses.payment.data.data[0]?.id
         const DataError = `No data found in strapi for cs_id: ${request.body.cs_id}.`
         if (DataHasError) return combineLatest({
           error: of(DataError),
@@ -35,6 +35,9 @@ export class EnrollmentController {
         
         const inscription = { id: responses.inscription.data.data[0].id, ...responses.inscription.data.data[0].attributes }
         const payment = { id: responses.payment.data.data[0].id, ...responses.payment.data.data[0].attributes }
+        console.log('inscription: ', inscription);
+        console.log('payment: ', payment);
+
         // error correo, nombre, apellidos o LMSprogram
         const EnrollmentHasError =  [!!(request.body.email || inscription.email),  !!inscription.name, !!inscription.last_name].includes(false)
         const EnrollmentError = `Missing parameters: ${ request.body.email || inscription.email ? '' : 'Email ' }${ inscription.name ? '' : 'Name ' }${ inscription.last_name ? '' : 'Last Name ' } Check stripe data`
@@ -55,6 +58,7 @@ export class EnrollmentController {
           password += chars.substring(randomNumber, randomNumber +1);
          }
         // console.log(password);
+        console.log('request.body.email || inscription.email: ', request.body.email || inscription.email);
         
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password)
         const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram)
@@ -77,7 +81,7 @@ export class EnrollmentController {
         return combineLatest(responseObs)
       }),
       mergeMap((responses: any) => {
-        // console.log('responses: ', responses);
+        console.log('responses: ', responses);
         
         const inscription = responses.inscription
         const payment = responses.payment
