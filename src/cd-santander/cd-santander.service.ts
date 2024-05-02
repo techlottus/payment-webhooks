@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { env } from 'process';
 import { of } from 'rxjs';
 
 @Injectable()
@@ -11,9 +12,9 @@ export class CdSantanderService {
        return this.http.get('https://graph.microsoft.com/v1.0/me',{ headers: { 'Authorization': token}})
     }
     SantanderLottus = (email) => {
-        return this.http.get(`https://r3v3cydwpg.execute-api.us-east-1.amazonaws.com/prod/getEventCDULA?email=${email}`, {
+        return this.http.get(`${env.CD_SANTANDER_URL}${email}`, {
             headers: {
-                authorizationToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZWNyZXQiOiImSTJSQzs1ZWchayNZVT4_dT1IayJ9.7tbGNxyit59rfC9SLHLBOnZziSmmXzAbvEXnXVDgVsI'
+                authorizationToken: env.CD_SANTANDER_TOKEN
             }
         })
     }
