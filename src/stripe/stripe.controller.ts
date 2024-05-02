@@ -55,20 +55,22 @@ export class StripeController {
 
               return combineLatest({
                 payment: of (payment),
-                template: this.utilsService.postSelfWebhook('/email/compile', {
-                  template_id: attrs.metadata.payment_template,
-                  params: {
-                    "amount": attrs.amount,
-                    "program": attrs.product_name,
-                    "First_name": name,
-                    "file_number": attrs.payment_id,
-                    "payment_date": attrs.date,
-                    "provider": attrs.metadata.provider
-                  }
-                }).pipe(catchError((err, caught) => {
-                  console.log('err: ', err);
-                  return caught
-                })),
+                template: !!attrs.metadata.payment_template
+                  ? this.utilsService.postSelfWebhook('/email/compile', {
+                      template_id: attrs.metadata.payment_template,
+                      params: {
+                        "amount": attrs.amount,
+                        "program": attrs.product_name,
+                        "First_name": name,
+                        "file_number": attrs.payment_id,
+                        "payment_date": attrs.date,
+                        "provider": attrs.metadata.provider
+                      }
+                    }).pipe(catchError((err, caught) => {
+                      console.log('err: ', err);
+                      return caught
+                    }))
+                  : of(false),
                 template_invoice: !!attrs.metadata.invoice_template ?
                   this.utilsService.postSelfWebhook('/email/compile', {
                     template_id: attrs.metadata.invoice_template,
@@ -93,35 +95,31 @@ export class StripeController {
               // console.log('res: ', res);
 
               if (res.error) return of(res)
-
-              const {
-                compiled,
-                template: {
-                  subject,
-                  priority
-                }
-              } = res.template.data
               return combineLatest({
                 payment: of (res.payment),
                 template: of (res.template),
-                send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-                  template: compiled,
-                  subject,
-                  toAddress: res.payment.attributes.email,
-                  priority
-                }).pipe(catchError((err, caught) => {
-                  console.log('err: ', err);
-                  return caught
-                })),
-                send_invoice: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-                  template: res.template_invoice.data.compiled,
-                  subject: res.template_invoice.data.template.subject,
-                  toAddress: res.payment.attributes.email,
-                  priority: res.template_invoice.data.template.priority
-                }).pipe(catchError((err, caught) => {
-                  console.log('err: ', err);
-                  return caught
-                })),
+                send: !!res.template
+                  ? this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                    template: res.template.data.compiled,
+                    subject: res.template.data.template.subject,
+                    toAddress: res.payment.attributes.email,
+                    priority: res.template.data.template.priority,
+                  }).pipe(catchError((err, caught) => {
+                    console.log('err: ', err);
+                    return caught
+                  }))
+                  : of(false),
+                send_invoice: !!res.template_invoice
+                  ? this.utilsService.postSelfWebhook('/email/salesforce/send', {
+                    template: res.template_invoice.data.compiled,
+                    subject: res.template_invoice.data.template.subject,
+                    toAddress: res.payment.attributes.email,
+                    priority: res.template_invoice.data.template.priority
+                  }).pipe(catchError((err, caught) => {
+                    console.log('err: ', err);
+                    return caught
+                  }))
+                  : of(false),
               })
               // this.sendFollowUpmail(name)
 
