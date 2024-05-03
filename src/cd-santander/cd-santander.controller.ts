@@ -14,7 +14,7 @@ export class CdSantanderController {
         response.status(401).send();
     }
     this.CDSantanderService.me(authHeader).pipe(
-      concatMap(res => res.data.email
+      concatMap(res => res.data.mail
         ? this.CDSantanderService.SantanderLottus(res.data.mail)
         : of(res)),
       catchError((err, caught) => {
@@ -22,11 +22,11 @@ export class CdSantanderController {
       })
       )
       .subscribe(res => {
-      if (res.data.error) {
-        return response.status(res.status).send(res.data)
-      } else {
-        return response.status(res.status).send(res.data.Data)
-      }
-    });
+        if (res.data.error) {
+          return response.status(res.status).send(res.data)
+        } else {
+          return response.status(res.status).send(res.data.Data)
+        }
+      });
   }
 }
