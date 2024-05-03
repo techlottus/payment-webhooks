@@ -19,7 +19,7 @@ export class CdSantanderController {
         this.CDSantanderService.me(authHeader).pipe(
           catchError((err, caught) => {
             console.log(err.response.data);
-            response.send(err.response.data)
+            response.status(400).send(err.response.data)
 
             return caught
           }),
@@ -29,7 +29,7 @@ export class CdSantanderController {
           this.CDSantanderService.SantanderLottus(res.data.mail).pipe(
             catchError((err, caught) => {
               console.log(err);
-              response.send(err.response.data)
+              response.status(400).send(err.response.data)
               
               return caught
             })
