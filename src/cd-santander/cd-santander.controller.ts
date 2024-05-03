@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get, Req, Res } from '@nestjs/common';
 import { CdSantanderService } from './cd-santander.service';
 import { catchError, take } from 'rxjs';
 
@@ -6,7 +6,7 @@ import { catchError, take } from 'rxjs';
 export class CdSantanderController {
   constructor(private CDSantanderService: CdSantanderService) {}
 
- @Post('/credentials')
+ @Get('/credentials')
   async webhook(@Req() request: any, @Res() response: any ) {
      const authHeader = request.headers.authorization;
         console.log(authHeader);
@@ -18,8 +18,8 @@ export class CdSantanderController {
         // const token = authHeader.split(' ')[1];
         this.CDSantanderService.me(authHeader).pipe(
           catchError((err, caught) => {
-            // console.log(err.response.data);
-            // response.status(err.response.status).send(err.response.data)
+            console.log(err.response.data);
+            response.send(err.response.data)
 
             return caught
           }),
@@ -29,7 +29,7 @@ export class CdSantanderController {
           this.CDSantanderService.SantanderLottus(res.data.mail).pipe(
             catchError((err, caught) => {
               console.log(err);
-              // response.status(err.response.status).send(err.response.data)
+              response.send(err.response.data)
               
               return caught
             })
