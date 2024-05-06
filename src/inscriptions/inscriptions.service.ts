@@ -166,6 +166,12 @@ export class InscriptionsService {
             return combineLatest({
               payment: of(res.track_payment),
               inscription: inscriptionObs,
+              invoice: this.utilsService.postStrapi('track-invoices', res.answers.invoice).pipe(catchError((err) => {
+                // console.log(err)
+                // response.status(err.response.status).send(err.response.data);
+  
+                return of({ error: true, ...err})
+              }))
             })
           }),
           mergeMap(res => {
