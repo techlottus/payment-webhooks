@@ -126,7 +126,8 @@ export class InscriptionsService {
                   second_last_name: this.utilsService.capitalizeText(res.curp.data.apellidoMaterno),
                   gender: res.curp.data.sexo,
                   birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
-                  birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento)
+                  birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento),
+                  need_invoice: res.answers.need_invoice
                 }
               : !!res.answers && !!res.answers.inscription 
                 ? {
