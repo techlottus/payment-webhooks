@@ -32,7 +32,7 @@ export class SalesforceController {
         
           console.log('err: ', err);
           return err
-            ? of({ data: of(data), error: true, ...err})
+            ? of({ data: data, error: true, errorData: err, inscription: false})
             : combineLatest({
               data: of(data),
               inscription: this.utilsService.postSFInscription(this.salesforceService.formatEnrollRequest(data), authResponse.data.access_token, authResponse.data.token_type)
@@ -45,7 +45,7 @@ export class SalesforceController {
             })
         })
       ).subscribe(res => {
-        // console.log(`res: `, res);
+        console.log(`res: `, res);
         const data = res.data
         // console.log(`res.error: `, res.error);
         // console.log(`res.data: `, res.data);
@@ -57,14 +57,14 @@ export class SalesforceController {
         // console.log('enrrollments: ', enrrollments);
         if (res.inscription?.data?.Exitoso === 'False' || res.inscription?.error) {
           this.SendSlackMessage(data, 'Salesforce', res.inscription?.data?.Error || res.inscription?.message)
-        } else if (data.track_payments?.attributes?.metadata?.flow !== "ATR" ) {
-          // call enrollment webhook if not atr
-          const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
-          // console.log(data);
-          this.utilsService.postSelfWebhook('/enrollment/new', data).subscribe()
-
+        } else {
+          if (data.track_payments?.attributes?.metadata?.flow !== "ATR" ) {
+            // call enrollment webhook if not atr
+            const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
+            console.log('Enrollment data',data);
+            this.utilsService.postSelfWebhook('/enrollment/new', data).subscribe()
+          }
         }
-       
       })
   }
   SendSlackMessage(data: any, scope: string, error: string) {
