@@ -8,20 +8,27 @@ export class CdSantanderController {
 
  @Get('/credentials')
   async webhook(@Req() request: any, @Res() response: any ) {
-     const authHeader = request.headers.authorization;
+    const authHeader = request.headers.authorization;
+    console.log(authHeader);
 
     if(!authHeader){
         response.status(401).send();
     }
     this.CDSantanderService.me(authHeader).pipe(
-      concatMap(res => res.data.mail
-        ? this.CDSantanderService.SantanderLottus(res.data.mail)
-        : of(res)),
+      concatMap(res => {
+        console.log(res);
+        
+        return res.data.mail
+        ? this.CDSantanderService.SantanderLottus('x.sanchezmendez@my.ula.edu.mx')
+        : of(res)
+      }),
       catchError((err, caught) => {
         return of(err.response)
       })
       )
       .subscribe(res => {
+        console.log(res);
+        
         if (res.data.error) {
           return response.status(res.status).send(res.data)
         } else {
