@@ -19,7 +19,7 @@ export class CdSantanderController {
         console.log(res);
         
         return res.data.mail
-        ? this.CDSantanderService.SantanderLottus('x.sanchezmendez@my.ula.edu.mx')
+        ? this.CDSantanderService.SantanderLottus(res.data.mail)
         : of(res)
       }),
       catchError((err, caught) => {
