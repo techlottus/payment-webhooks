@@ -104,7 +104,7 @@ export class InscriptionsService {
           mergeMap((res: any) => {
             if (res.curp.error || res.curp.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
-              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.data.errorMessage).error)
+              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.err.errorMessage).error)
               return of(res)
             }
             // console.log('res.curp.error: ', res.curp.error);
