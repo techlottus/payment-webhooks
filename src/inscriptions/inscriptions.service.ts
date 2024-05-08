@@ -137,7 +137,8 @@ export class InscriptionsService {
                     email: res.track_payments?.attributes?.email,
                     name: res.track_payments.username,
                     phone: res.track_payments?.attributes?.phone,
-                    ...res.answers.inscription
+                    ...res.answers.inscription,
+                    need_invoice: res.answers.need_invoice
                   }
                 : {
                     cs_id,
@@ -158,7 +159,7 @@ export class InscriptionsService {
                     return of({ error: true, ...err})
                   }))
                 : this.utilsService.postStrapi('track-inscriptions', inscription).pipe(catchError((err) => {
-                    // console.log(err)
+                    console.log(err)
                     // response.status(err.response.status).send(err.response.data);
       
                     return of({ error: true, ...err})
@@ -176,7 +177,7 @@ export class InscriptionsService {
             })
           }),
           mergeMap(res => {
-            // console.log('res: ', res);
+            console.log('res: ', res);
             // console.log('res.inscription.data?.data[0]: ', res.inscription.data?.data[0]);
             
             if (res?.error || res.curp?.error || res.curp?.data?.errorType || (!!res.inscription.exists && !!res.inscription.filled)) {
