@@ -81,28 +81,27 @@ export class InscriptionsService {
             console.log('curp: ', curp);
             console.log('residence: ', residence);
             console.log('username: ', username);
-            // console.log('track_inscriptions: ', track_inscriptions);
             
-            const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', {curp}) : of(false)
+            const curpObservable = !!curp && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', { curp }).pipe(
+              catchError((err, caught) => {
+                console.log('track_payments: ', track_payments);
+                console.log('track_inscriptions: ', track_inscriptions);
+                // this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
+                // response.status(err.response.status).send(err.response.data);
+                return of( { error: true, err}  )
+              }),
+            ) : of(false)
             const observables = {
               track_payments: of({...track_payments, residence, username}),
               track_inscriptions: of(track_inscriptions),
               curp: curpObservable,
               answers: of(answers)
             }
-            return combineLatest(observables).pipe(
-              catchError((err, caught) => {
-                // console.log(track_payments);
-                this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
-                // response.status(err.response.status).send(err.response.data);
-                return of({ track_payments: {...track_payments, residence}, curp: { error: true, ...err} } )
-              }),
-            )
+            return combineLatest(observables)
             
           }),
           
           mergeMap((res: any) => {
-            
             if (res.curp.error || res.curp.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
               this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.data.errorMessage).error)
@@ -168,8 +167,8 @@ export class InscriptionsService {
             return combineLatest({
               payment: of(res.track_payment),
               inscription: inscriptionObs,
-              invoice: this.utilsService.postStrapi('track-invoices', res.answers.invoice).pipe(catchError((err) => {
-                // console.log(err)
+              invoice: this.utilsService.postStrapi('track-invoices', res.answers?.invoice).pipe(catchError((err) => {
+                console.log(err)
                 // response.status(err.response.status).send(err.response.data);
   
                 return of({ error: true, ...err})
