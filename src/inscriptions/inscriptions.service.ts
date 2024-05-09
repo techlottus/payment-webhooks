@@ -89,7 +89,7 @@ export class InscriptionsService {
                 console.log('err: ', err);
                 // this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return of( { error: true, err}  )
+                return caught
               }),
             ) : of(false)
             const observables = {
@@ -167,12 +167,14 @@ export class InscriptionsService {
             return combineLatest({
               payment: of(res.track_payment),
               inscription: inscriptionObs,
-              invoice: this.utilsService.postStrapi('track-invoices', res.answers?.invoice).pipe(catchError((err) => {
-                console.log(err)
-                // response.status(err.response.status).send(err.response.data);
-  
-                return of({ error: true, ...err})
-              }))
+              invoice: res.answers?.invoice
+                ? this.utilsService.postStrapi('track-invoices', res.answers?.invoice).pipe(catchError((err) => {
+                    console.log(err)
+                    // response.status(err.response.status).send(err.response.data);
+      
+                    return of({ error: true, ...err})
+                  }))
+                : of(null)
             })
           }),
           mergeMap(res => {
