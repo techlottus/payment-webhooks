@@ -82,14 +82,14 @@ export class InscriptionsService {
             console.log('residence: ', residence);
             console.log('username: ', username);
             
-            const curpObservable = !!curp && residence === 'nacional' && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', { curp }).pipe(
+            const curpObservable = !!curp && residence === 'Nacional' && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', { curp }).pipe(
               catchError((err, caught) => {
                 console.log('track_payments: ', track_payments);
                 console.log('track_inscriptions: ', track_inscriptions);
                 console.log('err: ', err);
                 // this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return of( { error: true, err}  )
+                return caught
               }),
             ) : of(false)
             const observables = {
@@ -127,7 +127,6 @@ export class InscriptionsService {
                   gender: res.curp.data.sexo,
                   birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
                   birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento),
-                  need_invoice: res.answers.need_invoice
                 }
               : !!res.answers && !!res.answers.inscription 
                 ? {
@@ -168,12 +167,14 @@ export class InscriptionsService {
             return combineLatest({
               payment: of(res.track_payment),
               inscription: inscriptionObs,
-              invoice: this.utilsService.postStrapi('track-invoices', res.answers?.invoice).pipe(catchError((err) => {
-                console.log(err)
-                // response.status(err.response.status).send(err.response.data);
-  
-                return of({ error: true, ...err})
-              }))
+              invoice: res.answers?.invoice
+                ? this.utilsService.postStrapi('track-invoices', res.answers?.invoice).pipe(catchError((err) => {
+                    console.log(err)
+                    // response.status(err.response.status).send(err.response.data);
+      
+                    return of({ error: true, ...err})
+                  }))
+                : of(null)
             })
           }),
           mergeMap(res => {
