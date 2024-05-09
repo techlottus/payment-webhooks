@@ -82,7 +82,7 @@ export class InscriptionsService {
             console.log('residence: ', residence);
             console.log('username: ', username);
             
-            const curpObservable = !!curp && residence === 'nacional' && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', { curp }).pipe(
+            const curpObservable = !!curp && residence === 'Nacional' && !track_inscriptions.filled ? this.utilsService.postSelfWebhook('/curp/validate', { curp }).pipe(
               catchError((err, caught) => {
                 console.log('track_payments: ', track_payments);
                 console.log('track_inscriptions: ', track_inscriptions);
