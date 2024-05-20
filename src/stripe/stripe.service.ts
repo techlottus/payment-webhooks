@@ -103,7 +103,8 @@ export class StripeService {
         metadata: {...metadata, typeform_url},
         payment_method_type: payment_method_types[0],
         card_type: payment_intent.payment_method.card.funding,
-        extra_fields
+        extra_fields,
+        payment_gateway: 'Stripe'
       }
       // console.log('request: ', request);
   

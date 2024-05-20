@@ -1,4 +1,5 @@
 import {  Injectable } from '@nestjs/common';
+import { error } from 'console';
 import { catchError, combineLatest, forkJoin, mergeMap, of } from 'rxjs';
 import { StripeService } from 'src/stripe/stripe.service';
 import { UtilsService } from 'src/utils/utils.service';
@@ -89,8 +90,8 @@ export class InscriptionsService {
                 console.log('err: ', err);
                 // this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
                 // response.status(err.response.status).send(err.response.data);
-                return caught
-              }),
+                return of({error: true, err})
+              })
             ) : of(false)
             const observables = {
               track_payments: of({...track_payments, residence, username}),
@@ -103,9 +104,11 @@ export class InscriptionsService {
           }),
           
           mergeMap((res: any) => {
+            console.log('res: ', res);
+            
             if (res.curp.error || res.curp.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
-              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.err.errorMessage).error)
+              this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.err?.errorMessage).error)
               return of(res)
             }
             // console.log('res.curp.error: ', res.curp.error);
