@@ -131,7 +131,7 @@ export class InscriptionsService {
                   birthdate: this.utilsService.capitalizeText(res.curp.data.fechaNacimiento),
                   birth_entity: this.utilsService.capitalizeText(res.curp.data.estadoNacimiento),
                 }
-              : !!res.answers && !!res.answers.inscription 
+              : !!res.answers && !!res.answers?.inscription 
                 ? {
                     cs_id,
                     submitted_at,
