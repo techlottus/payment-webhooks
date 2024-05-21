@@ -32,8 +32,8 @@ export class UtilsService {
     const uri = !name ? `/api/templates/${id}` : `/api/templates?filters[name][$eq]=${name}`
     return this.http.get(`${env.STRAPI_EMAIL_TEMPLATES_URL}${uri}`, this.StrapiTemplatesConfig)
   }
-  postSelfWebhook(endpoint: string, data: any) {
-    return this.http.post(`${env.SELF_URL}${endpoint}`, data)
+  postSelfWebhook(endpoint: string, data: any, headers = {}) {
+    return this.http.post(`${env.SELF_URL}${endpoint}`, data, headers)
   }
   getSFOffer(token:string, token_type:string, brand: string, campus: string ) {
     return this.http.get(`${env.SF_OFFER_ENDPOINT}?linea=${brand}&campus=${campus}`, { headers: { Authorization: `${token_type} ${token}` }})
