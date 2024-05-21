@@ -8,6 +8,8 @@ export class CurpController {
 
     @Post('/validate')
     webhook(@Req() request: any, @Res() response: any) {
+        console.log(request.body);
+        
         const ParamsHasError = !request.body.curp
         const ParamsError = `Missing parameters: ${request.body.curp ? '' : 'curp, please check call.'}`
         if (ParamsHasError) return response.status(400).send(ParamsError)
@@ -15,7 +17,8 @@ export class CurpController {
         if (curp) {
             this.curpService.fetchCURP(curp).pipe(
                 catchError((err, caught) => {
-                    console.log('err: ', err);
+                    console.log('err.response: ', err.response);
+                    console.log('err.response.data: ', err.response.data);
                     
                     return of({error: true, ...err})
                 })
