@@ -1,6 +1,6 @@
 import { Controller, Post, Req, Res } from '@nestjs/common';
 import { CurpService } from './curp.service';
-import { catchError } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 @Controller('curp')
 export class CurpController {
@@ -15,11 +15,17 @@ export class CurpController {
         if (curp) {
             this.curpService.fetchCURP(curp).pipe(
                 catchError((err, caught) => {
-                    response.status(err.response.data.status).send(err.response.data.message)
-                    return caught
+                    console.log('err: ', err);
+                    
+                    return of({error: true, ...err})
                 })
             ).subscribe(res => {
-                return response.status(200).send({ ...res.data })
+                if (res.error) {
+                    return response.status(res.response.data.status).send(res.response.data.message)
+                }
+                if (res.data) {
+                    return response.status(200).send({ ...res.data })
+                }
             })
         } else {
             return response.status(400).send("CURP is invalid, please check params")
