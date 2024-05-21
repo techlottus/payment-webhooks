@@ -97,7 +97,7 @@ export class InscriptionsService {
               track_payments: of({...track_payments, residence, username}),
               track_inscriptions: of(track_inscriptions),
               curp: curpObservable,
-              answers: of(answers)
+              answers: of(answers || null)
             }
             return combineLatest(observables)
             
@@ -106,7 +106,7 @@ export class InscriptionsService {
           mergeMap((res: any) => {
             console.log('res: ', res);
             
-            if (res.curp.error || res.curp.data?.errorType) {
+            if (res.curp?.error || res.curp?.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
               this.SendSlackMessage({track_payments: res.track_payments, track_inscriptions:{ cs_id, submitted_at }}, 'CURP', res.curp.response?.data || JSON.parse(res.curp.err?.errorMessage).error)
               return of(res)
@@ -116,7 +116,7 @@ export class InscriptionsService {
             // console.log('res.track_inscriptions: ', res.track_inscriptions);
             // console.log('res.answers: ', res.answers);
             
-            const inscription = !!res.curp.data 
+            const inscription = !!res.curp?.data 
               ? {
                   cs_id,
                   submitted_at,
