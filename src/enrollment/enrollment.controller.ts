@@ -193,7 +193,7 @@ export class EnrollmentController {
         let data: any = {
           inscription: responses.inscription,
           payment: responses.payment,
-          email: request.body.email || responses.email,
+          email: responses.email,
         }
         const sendMessage = (data, scope, error) => {
           this.SendSlackMessage(data, scope, error)
