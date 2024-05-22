@@ -86,6 +86,8 @@ export class EnrollmentController {
         const inscription = responses.inscription
         const payment = responses.payment
         if (!!responses.user.data.exception) {
+          console.log('responses.user.data: ', responses.user.data);
+          
           return combineLatest([of({inscription, payment ,error: responses.user.data.message, scope: "User get or create"})])
           
         } else if (responses.error) {
