@@ -20,7 +20,7 @@ export class EnrollmentService {
   UserCreate(email: string, first_name: string, last_name: string, password:string ) {
     const wsfunction = 'core_user_create_users'
     const req = {
-      'users[0][username]': email,
+      'users[0][username]': email.toLowerCase(),
       'users[0][firstname]': first_name,
       'users[0][lastname]': last_name,
       'users[0][email]': email,
