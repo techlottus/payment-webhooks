@@ -54,7 +54,9 @@ export class EnrollmentService {
     return this.callEnrollmentService(req)
 
   }
-  callEnrollmentService(req) {    
+  callEnrollmentService(req) {
+    console.log('req: ', req);
+     
     return this.http.post(env.ENROLLMENT_URL, {...req, wstoken: env.ENROLLMENT_TOKEN,  moodlewsrestformat: 'json'}, {
       headers: {
         "Content-Type": "multipart/form-data"
