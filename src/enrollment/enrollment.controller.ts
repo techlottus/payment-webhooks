@@ -62,7 +62,11 @@ export class EnrollmentController {
         
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password)
         const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram)
-        const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email).pipe(switchMap(res=> !!res.data[0] ? of({...res, exist: true }) : createUserObs))
+        const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email).pipe(switchMap(res=> {
+          console.log('res.data: ', res.data);
+          
+          return !!res.data[0] ? of({...res, exist: true }) : createUserObs
+        }))
 
         let responseObs: any = {
           inscription: of(inscription),
@@ -192,11 +196,7 @@ export class EnrollmentController {
         // response.send(responses.error)
       } else {
 
-        let data: any = {
-          inscription: responses.inscription,
-          payment: responses.payment,
-          email: responses.email,
-        }
+        
         const sendMessage = (data, scope, error) => {
           this.SendSlackMessage(data, scope, error)
         }
@@ -215,21 +215,23 @@ export class EnrollmentController {
             const scope = SendEmailHasError ?  'enrollment email' : null
   
             if (error) {
-              sendMessage(data, scope, error)
+              sendMessage(responses, scope, error)
               response.status(400)
               response.send(responses.error)
             } else {
               response.status(201)
-              response.send(data.enrollment)
+              response.send(responses.enrollment)
             }
           } 
           
         });
-        response.send(data.enrollment)
+        response.send(responses.enrollment)
       }
     })
   }
   SendSlackMessage(data: any, scope: string, error: string) {
+    console.log('slack message data: ', data);
+    
 
     const labels = {
       email: 'Correo electrónico inscripción',
