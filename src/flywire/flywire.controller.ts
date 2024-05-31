@@ -1,6 +1,7 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Controller, Post, Req, Res, HttpStatus } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { catchError, of } from 'rxjs';
-import { Request } from 'express';
+import { createHmac } from 'crypto';
 
 import { UtilsService } from 'src/utils/utils.service';
 
@@ -9,9 +10,18 @@ export class FlywireController {
   constructor(private utilsService: UtilsService) {}
 
   @Post('/')
-  webhook(@Req() request: Request) {
+  webhook(@Res() response: Response, @Req() request: Request) {
+    const flywireDigest = request.headers['x-flywire-digest'];
+    const sharedSecret = '';
+    const has = createHmac('sha256', sharedSecret)
+      .update(JSON.stringify(request.body))
+      .digest('base64');
+    if (has !== flywireDigest) {
+      response.status(HttpStatus.UNAUTHORIZED).json([]);
+      return [];
+    }
+
     const data = request.body;
-    // Strapi Request
     const strapiReq = {
       cs_id: null,
       payment_id: data.data.payment_id,
@@ -38,16 +48,12 @@ export class FlywireController {
     paymentObs
       .pipe(
         catchError((err) => {
-          console.log(err);
           return of(err);
         }),
       )
       .subscribe((res) => {
-        console.log(res);
         responsePayment = res;
       });
-    return {
-      response: responsePayment,
-    };
+    response.status(HttpStatus.OK).json(strapiReq);
   }
 }
