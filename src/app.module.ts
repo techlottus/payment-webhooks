@@ -10,6 +10,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { EmailModule } from './email/email.module';
 import { CurpModule } from './curp/curp.module';
 import { CdSantanderModule } from './cd-santander/cd-santander.module';
+import { FlywireModule } from './flywire/flywire.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CdSantanderModule } from './cd-santander/cd-santander.module';
     EmailModule,
     CurpModule,
     CdSantanderModule,
+    FlywireModule,
     
   ],
   controllers: [ AppController ],
