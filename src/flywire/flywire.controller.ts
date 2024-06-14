@@ -16,10 +16,12 @@ export class FlywireController {
   @Post('/webhook')
   webhook(@Res() response: Response, @Req() request: Request) {
     const flywireDigest = request.headers['x-flywire-digest'];
+    console.log('Headers: ', request.headers);
     const sharedSecret = env.FW_SECRET;
     const has = createHmac('sha256', sharedSecret)
       .update(JSON.stringify(request.body))
       .digest('base64');
+    console.log('has: ', has);
     if (has !== flywireDigest) {
       response.status(HttpStatus.UNAUTHORIZED).json([]);
       return [];
@@ -31,6 +33,7 @@ export class FlywireController {
     };
 
     const data = request.body;
+    console.log('Data: ', data);
     if (data.event_type !== 'delivered') {
       response.status(HttpStatus.OK).json([]);
       return [];
