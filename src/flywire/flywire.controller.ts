@@ -41,7 +41,7 @@ export class FlywireController {
     const strapiReq = {
       cs_id: data.data.fields.cs_id,
       payment_id: data.data.payment_id,
-      product_name: data.data.fields.nombre_del_programa,
+      product_name: data.data.fields.program_name,
       phone: data.data.payer.phone,
       customer_id: null,
       order_id: null,
@@ -80,7 +80,7 @@ export class FlywireController {
                     template_id: metadata.payment_template,
                     params: {
                       amount: attrs.amount,
-                      program: attrs.product_name,
+                      program: attrs.program_name,
                       First_name: name,
                       file_number: attrs.payment_id,
                       payment_date: attrs.date,
@@ -243,7 +243,7 @@ export class FlywireController {
         params: {
           provider: data.payment.metadata.provider,
           first_name: data.payment.extra_fields.student_first_name,
-          program_name: data.payment.extra_fields.nombre_del_programa,
+          program_name: data.payment.extra_fields.program_name,
         },
       }),
     })
