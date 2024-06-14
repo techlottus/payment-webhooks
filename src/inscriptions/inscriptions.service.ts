@@ -113,7 +113,7 @@ export class InscriptionsService {
             let username;
             if (track_payments.attributes.payment_gateway === 'Flywire') {
               curp = track_payments.attributes.extra_fields.curp;
-              residence = track_payments.attributes.extra_fields.recidence;
+              residence = track_payments.attributes.extra_fields.residence;
               username = `${track_payments.attributes.extra_fields.student_first_name} ${track_payments.attributes.extra_fields.student_last_name}`;
             } else {
               curp = this.stripeService.getField(
