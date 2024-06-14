@@ -39,7 +39,7 @@ export class FlywireController {
       return [];
     }
     const strapiReq = {
-      cs_id: data.data.fields.cs_id,
+      cs_id: data.data.payment_id,
       payment_id: data.data.payment_id,
       product_name: data.data.fields.program_name,
       phone: data.data.payer.phone,
