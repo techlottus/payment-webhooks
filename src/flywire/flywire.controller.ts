@@ -120,6 +120,7 @@ export class FlywireController {
         }),
         mergeMap((res) => {
           if (res.error) return of(res);
+          console.log('res: ', res.payment);
           return combineLatest({
             payment: of(res.payment),
             template: of(res.template),
@@ -143,7 +144,7 @@ export class FlywireController {
                   .postSelfWebhook('/email/salesforce/send', {
                     template: res.template_invoice.data.compiled,
                     subject: res.template_invoice.data.template.subject,
-                    toAddress: res.payment.attributes.email,
+                    toAddress: res.payment?.attributes.email,
                     priority: res.template_invoice.data.template.priority,
                   })
                   .pipe(
