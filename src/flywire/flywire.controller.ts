@@ -13,7 +13,7 @@ import { UtilsService } from 'src/utils/utils.service';
 export class FlywireController {
   constructor(private utilsService: UtilsService) {}
 
-  @Post('/')
+  @Post('/webhook')
   webhook(@Res() response: Response, @Req() request: Request) {
     const flywireDigest = request.headers['x-flywire-digest'];
     const sharedSecret = env.FW_SECRET;
