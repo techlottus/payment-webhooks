@@ -34,7 +34,7 @@ export class FlywireController {
 
     const data = request.body;
     console.log('Data: ', data);
-    if (data.event_type !== 'delivered') {
+    if (data.event_type !== 'guaranteed') {
       response.status(HttpStatus.OK).json([]);
       return [];
     }
