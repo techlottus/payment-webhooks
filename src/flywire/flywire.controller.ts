@@ -28,7 +28,7 @@ export class FlywireController {
     }
 
     const extractExtraFields = (obj) => {
-      const { metadata_lottus, ...rest } = obj.extra_fields;
+      const { metadatalottus, ...rest } = obj.extra_fields;
       return rest;
     };
 
@@ -50,7 +50,7 @@ export class FlywireController {
       status: data.data.status,
       amount: `${data.data.amount_to / 100}`,
       email: data.data.payer.email,
-      metadata: data.data.fields.metadata_lottus,
+      metadata: data.data.fields.metadatalottus,
       payment_method_type: data.data.payment_method.type,
       card_type: data.data.payment_method.card_classification,
       extra_fields: extractExtraFields({ extra_fields: data.data.fields }),
