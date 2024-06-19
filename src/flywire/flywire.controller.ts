@@ -62,11 +62,8 @@ export class FlywireController {
     );
     paymentObs
       .pipe(
-        catchError((err) => {
-          return of(err);
-        }),
         mergeMap((paymentRes) => {
-          if (paymentRes.error) return of(paymentRes);
+          // if (paymentRes.error) return of(paymentRes);
           const payment = paymentRes.data.data;
           const attrs = payment.attributes;
           const metadata = attrs.metadata;
@@ -112,14 +109,16 @@ export class FlywireController {
           });
         }),
         catchError((err) => {
-          console.log('compile error', err?.data?.error);
+          console.log('compile error', err.response.data);
+          console.log('err.response.data.error.details', err.response.data.error.details);
           return of({
             error: true,
-            ...err?.data?.error,
+            ...err.response.data,
           });
         }),
         mergeMap((res) => {
           if (res.error) return of(res);
+          // console.log('res: ', res);
           console.log('res: ', res.payment);
           return combineLatest({
             payment: of(res.payment),
@@ -158,6 +157,11 @@ export class FlywireController {
         }),
       )
       .subscribe((res) => {
+        if (res.error) return of(res);
+
+        console.log('res: ', res);
+        console.log('res.payment: ', res.payment);
+        
         const data = {
           payment: {
             ...res.payment.attributes,
