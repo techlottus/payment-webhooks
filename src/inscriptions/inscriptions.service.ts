@@ -53,6 +53,7 @@ export class InscriptionsService {
                     res.inscription.data.data[0].attributes.last_name &&
                     res.inscription.data.data[0].attributes.birthdate,
                 };
+            console.log('res.payment: ', res.payment);
             const track_payments = res.payment.data.data[0];
             console.log('formResponse: ', formResponse);
             console.log('track payments: ', track_payments);
@@ -111,7 +112,7 @@ export class InscriptionsService {
             let curp;
             let residence;
             let username;
-            if (track_payments.attributes.payment_gateway === 'Flywire') {
+            if (track_payments?.attributes?.payment_gateway === 'Flywire') {
               curp = track_payments.attributes.extra_fields.curp;
               residence = track_payments.attributes.extra_fields.residence;
               username = `${track_payments.attributes.extra_fields.student_first_name} ${track_payments.attributes.extra_fields.student_last_name}`;
