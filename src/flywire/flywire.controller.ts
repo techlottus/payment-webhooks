@@ -42,7 +42,7 @@ export class FlywireController {
       cs_id: data.data.payment_id,
       payment_id: data.data.payment_id,
       product_name: data.data.fields.program_name,
-      phone: data.data.payer.phone,
+      phone: data.data.payer.phone || data.data.fields.student_phone,
       customer_id: null,
       order_id: null,
       date: data.event_date,
