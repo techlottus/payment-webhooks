@@ -190,7 +190,7 @@ export class InscriptionsService {
                   submitted_at,
                   residence: res.track_payments.residence,
                   email: res.track_payments?.attributes?.email,
-                  phone: res.track_payments.attributes.extra_fields.student_phone || res.track_payments?.attributes?.phone.split(' ')[1],
+                  phone: res.track_payments.attributes.extra_fields.student_phone || res.track_payments?.attributes?.phone.split(' ').join() || res.track_payments?.attributes?.phone,
                   name: this.utilsService.capitalizeText(res.curp.data.nombre),
                   CURP: res.curp.data.curp,
                   last_name: this.utilsService.capitalizeText(
