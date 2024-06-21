@@ -38,11 +38,12 @@ export class FlywireController {
       response.status(HttpStatus.OK).json([]);
       return [];
     }
+    const payerPhone = !!data.data.payer.phone ? data.data.payer.phone.split(' ')[1] : data.data.fields.student_phone ;
     const strapiReq = {
       cs_id: data.data.payment_id,
       payment_id: data.data.payment_id,
       product_name: data.data.fields.program_name,
-      phone: data.data.payer.phone.split(' ')[1] || data.data.fields.student_phone,
+      phone: payerPhone,
       customer_id: null,
       order_id: null,
       date: data.event_date,
