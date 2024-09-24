@@ -95,15 +95,20 @@ export class StripeController {
               // console.log('res: ', res);
 
               if (res.error) return of(res)
+              const { compiled, template: { subject, priority, name }, params, template_id } = res.template?.data
               return combineLatest({
                 payment: of (res.payment),
                 template: of (res.template),
                 send: !!res.template
                   ? this.utilsService.postSelfWebhook('/email/salesforce/send', {
-                    template: res.template.data.compiled,
-                    subject: res.template.data.template.subject,
+                    template: compiled,
+                    subject: subject,
                     toAddress: res.payment.attributes.email,
-                    priority: res.template.data.template.priority,
+                    priority: priority,
+                    template_id,
+                    params,
+                    scope: 'enrollment',
+                    template_name: name
                   }).pipe(catchError((err, caught) => {
                     console.log('err: ', err);
                     return caught
@@ -111,10 +116,14 @@ export class StripeController {
                   : of(false),
                 send_invoice: !!res.template_invoice
                   ? this.utilsService.postSelfWebhook('/email/salesforce/send', {
-                    template: res.template_invoice.data.compiled,
-                    subject: res.template_invoice.data.template.subject,
+                    template: compiled,
+                    subject: subject,
                     toAddress: res.payment.attributes.email,
-                    priority: res.template_invoice.data.template.priority
+                    priority: priority,
+                    template_id,
+                    params,
+                    scope: 'enrollment',
+                    template_name: name
                   }).pipe(catchError((err, caught) => {
                     console.log('err: ', err);
                     return caught
@@ -230,17 +239,22 @@ export class StripeController {
       })
       .pipe(
         mergeMap((compileRes: any) => {
-          // subject: compileRes.template.data.subject.replace('{{provider}}',compileRes.payment.metadata.provider),
           // console.log('compileRes: ', compileRes);
+              const { compiled, template: { subject, priority, name }, params, template_id } = compileRes.template?.data
 
           return combineLatest({
             payment: of (compileRes.payment),
             template: of (compileRes.template.data),
+            subject: compileRes.template.data.template.subject.replace('{{provider}}', compileRes.payment.metadata.provider),
             send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-              template: compileRes.template.data.compiled,
-              subject: compileRes.template.data.template.subject.replace('{{provider}}', compileRes.payment.metadata.provider),
-              toAddress: compileRes.payment.email,
-              priority: compileRes.template.data.template.priority
+              template: compiled,
+              subject: compileRes.template.data.subject.replace('{{provider}}',compileRes.payment.metadata.provider),
+              toAddress: compileRes.payment.attributes.email,
+              priority: priority,
+              template_id,
+              params,
+              scope: 'enrollment',
+              template_name: name
             })
           })
         })

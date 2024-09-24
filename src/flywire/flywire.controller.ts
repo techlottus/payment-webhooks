@@ -38,7 +38,7 @@ export class FlywireController {
       response.status(HttpStatus.OK).json([]);
       return [];
     }
-    const payerPhone = !!data.data.payer.phone ? data.data.payer.phone.split(' ')[1] : data.data.fields.student_phone ;
+    const payerPhone = !!data.data.payer.phone ? data.data.payer.phone.split(' ').join() : data.data.fields.student_phone ;
     const strapiReq = {
       cs_id: data.data.payment_id,
       payment_id: data.data.payment_id,
@@ -120,6 +120,7 @@ export class FlywireController {
         mergeMap((res) => {
           if (res.error) return of(res);
           // console.log('res: ', res);
+          const { compiled, template: { subject, priority, name }, params, template_id } = res.template?.data
           console.log('res: ', res.payment);
           return combineLatest({
             payment: of(res.payment),
@@ -127,10 +128,14 @@ export class FlywireController {
             send: !!res.template
               ? this.utilsService
                   .postSelfWebhook('/email/salesforce/send', {
-                    template: res.template.data.compiled,
-                    subject: res.template.data.template.subject,
+                    template: compiled,
+                    subject: subject,
                     toAddress: res.payment.attributes.email,
-                    priority: res.template.data.template.priority,
+                    priority: priority,
+                    template_id,
+                    params,
+                    scope: 'enrollment',
+                    template_name: name
                   })
                   .pipe(
                     catchError((err, caught) => {
@@ -142,10 +147,14 @@ export class FlywireController {
             send_invoice: !!res.template_invoice
               ? this.utilsService
                   .postSelfWebhook('/email/salesforce/send', {
-                    template: res.template_invoice.data.compiled,
-                    subject: res.template_invoice.data.template.subject,
+                    template: compiled,
+                    subject: subject,
                     toAddress: res.payment?.attributes.email,
-                    priority: res.template_invoice.data.template.priority,
+                    priority: priority,
+                    template_id,
+                    params,
+                    scope: 'enrollment',
+                    template_name: name
                   })
                   .pipe(
                     catchError((err, caught) => {
@@ -255,17 +264,22 @@ export class FlywireController {
     })
       .pipe(
         mergeMap((compileRes: any) => {
+          const { compiled, template: { subject, priority, name }, params, template_id } = compileRes.template?.data
           return combineLatest({
             payment: of(compileRes.payment),
             template: of(compileRes.template.data),
             send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-              template: compileRes.template.data.compiled,
-              subject: compileRes.template.data.template.subject.replace(
+              template: compiled,
+              subject: subject.replace(
                 '{{provider}}',
                 compileRes.payment.metadata.provider,
               ),
               toAddress: compileRes.payment.email,
-              priority: compileRes.template.data.template.priority,
+              priority: priority,
+              template_id,
+              params,
+              scope: 'enrollment',
+              template_name: name
             }),
           });
         }),
