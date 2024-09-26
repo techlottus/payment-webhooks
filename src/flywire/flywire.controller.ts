@@ -134,7 +134,7 @@ export class FlywireController {
                     priority: priority,
                     template_id,
                     params,
-                    scope: 'enrollment',
+                    scope: 'payment',
                     template_name: name
                   })
                   .pipe(
@@ -153,7 +153,7 @@ export class FlywireController {
                     priority: priority,
                     template_id,
                     params,
-                    scope: 'enrollment',
+                    scope: 'payment',
                     template_name: name
                   })
                   .pipe(
@@ -278,7 +278,7 @@ export class FlywireController {
               priority: priority,
               template_id,
               params,
-              scope: 'enrollment',
+              scope: 'payment',
               template_name: name
             }),
           });

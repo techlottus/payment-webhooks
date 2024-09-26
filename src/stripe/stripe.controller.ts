@@ -107,7 +107,7 @@ export class StripeController {
                     priority: priority,
                     template_id,
                     params,
-                    scope: 'enrollment',
+                    scope: 'payment',
                     template_name: name
                   }).pipe(catchError((err, caught) => {
                     console.log('err: ', err);
@@ -122,7 +122,7 @@ export class StripeController {
                     priority: priority,
                     template_id,
                     params,
-                    scope: 'enrollment',
+                    scope: 'payment',
                     template_name: name
                   }).pipe(catchError((err, caught) => {
                     console.log('err: ', err);
@@ -253,7 +253,7 @@ export class StripeController {
               priority: priority,
               template_id,
               params,
-              scope: 'enrollment',
+              scope: 'payment',
               template_name: name
             })
           })
