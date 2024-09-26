@@ -168,7 +168,7 @@ export class EnrollmentController {
         if (res.error) return of(res)
         if (res.template.error) return of(res)
 
-        const { compiled, template: { subject, priority } } = res.template?.data
+        const { compiled, template: { subject, priority, name }, params, template_id } = res.template?.data
         // console.log(JSON.parse(compiled));
         // console.dir(res.template.data.compiled);
         
@@ -183,7 +183,12 @@ export class EnrollmentController {
             subject,
             toAddress: res.email,
             priority,
-            ccToAddress: res.payment.metadata.backup_email || null
+            ccToAddress: res.payment.metadata.backup_email || null,
+            template_id,
+            params,
+            scope: 'enrollment',
+            template_name: name
+
           })
         })
       })
