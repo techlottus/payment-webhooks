@@ -80,7 +80,7 @@ export class EmailController {
         // console.log(errors);
         return this.utils.postStrapi('track-send-emails', {
           template: template_name,
-          template_id,
+          template_id: `${template_id}`,
           params,
           scope,
           compiled_template: template,
@@ -91,9 +91,14 @@ export class EmailController {
           sending_limit: limit,
           errors
         })
+      }),
+      catchError(err => {
+        console.log(err);
+        
+        return of(err)
       })
     ).subscribe(res => {
-      console.log(res);
+      // console.log(res);
       
         response.send()
       
