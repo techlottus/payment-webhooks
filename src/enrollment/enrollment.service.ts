@@ -3,21 +3,44 @@ import { Injectable } from '@nestjs/common';
 import { env } from 'process';
 import { config } from "dotenv";
 config()
+
+const brands = {
+  ULA: {
+    url: env.ENROLLMENT_URL_ULA,
+    token: env.ENROLLMENT_TOKEN_ULA
+  },
+  UANE: {
+    url: env.ENROLLMENT_URL_UANE,
+    token: env.ENROLLMENT_TOKEN_UANE
+  },
+  UTEG: {
+    url: env.ENROLLMENT_URL_UTEG,
+    token: env.ENROLLMENT_TOKEN_UTEG
+  },
+  UTC: {
+    url: env.ENROLLMENT_URL_UTC,
+    token: env.ENROLLMENT_TOKEN_UTC
+  },
+  BEDU: {
+    url: env.ENROLLMENT_URL_BEDU,
+    token: env.ENROLLMENT_TOKEN_BEDU
+  },
+}
 @Injectable()
 export class EnrollmentService {
   constructor(private http: HttpService) {}
 
-  checkUser(email: string) {
+  checkUser(email: string, provider: string) {
     const wsfunction = 'core_user_get_users_by_field'
     const req = {
       field: 'email',
       'values[0]': email,
       wsfunction
     }
-    return this.callEnrollmentService(req)
+    return this.callEnrollmentService(req, provider)
 
   }
-  UserCreate(email: string, first_name: string, last_name: string, password:string ) {
+  UserCreate(email: string, first_name: string, last_name: string, password:string, provider: string) {
     const wsfunction = 'core_user_create_users'
     const req = {
       'users[0][username]': email.toLowerCase(),
@@ -29,21 +52,21 @@ export class EnrollmentService {
       wsfunction
     }
 
-    return this.callEnrollmentService(req)
+    return this.callEnrollmentService(req, provider)
 
 
   }
-  getProgram(shortname) {
+  getProgram(shortname: string, provider: string) {
     const wsfunction = 'core_course_get_courses_by_field'
     const req = {
       field: 'shortname',
       value: shortname,
       wsfunction
     }
-    return this.callEnrollmentService(req)
+    return this.callEnrollmentService(req, provider)
 
   }
-  enrollStudent(user: number, course: number) {
+  enrollStudent(user: number, course: number, provider: string) {
     const wsfunction = 'enrol_manual_enrol_users'
     const req = {
       'enrolments[0][roleid]': 5, // 5: student roleId moodle
@@ -51,13 +74,17 @@ export class EnrollmentService {
       'enrolments[0][courseid]': course,
       wsfunction
     }
-    return this.callEnrollmentService(req)
+    return this.callEnrollmentService(req, provider)
 
   }
-  callEnrollmentService(req) {
+  callEnrollmentService(req, provider:string) {
     console.log('req: ', req);
-     
-    return this.http.post(env.ENROLLMENT_URL, {...req, wstoken: env.ENROLLMENT_TOKEN,  moodlewsrestformat: 'json'}, {
+
+    
+    const url = brands[provider].url || env.ENROLLMENT_URL
+    const token = brands[provider].token || env.ENROLLMENT_TOKEN
+
+    return this.http.post(url, {...req, wstoken: token,  moodlewsrestformat: 'json'}, {
       headers: {
         "Content-Type": "multipart/form-data"
       }

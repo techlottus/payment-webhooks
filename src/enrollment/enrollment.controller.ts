@@ -30,7 +30,7 @@ export class EnrollmentController {
         const DataError = `No data found in strapi for cs_id: ${request.body.cs_id}.`
         if (DataHasError) return combineLatest({
           error: of(DataError),
-          scope: of('Data Strapi'),
+          scope: of('Missing Strapi data'),
         })
         
         const inscription = { id: responses.inscription.data.data[0].id, ...responses.inscription.data.data[0].attributes }
@@ -47,7 +47,7 @@ export class EnrollmentController {
         const ProgramError = `Missing parameters: LMSprogram in stripe metadata, add it manually or contact admin for bulk edit.`
         
         const error = EnrollmentHasError ? EnrollmentError : ProgramHasError ? ProgramError : DataHasError ? DataError : null
-        const scope = EnrollmentHasError ? 'Enrollment data' : ProgramHasError ? 'Program data' : DataHasError ? 'Data Strapi' : null
+        const scope = EnrollmentHasError ? 'Missing inscription data' : ProgramHasError ? 'Missing LMSProgram' : DataHasError ? 'Missing Strapi data' : null
 
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const passwordLength = 10;
@@ -60,9 +60,9 @@ export class EnrollmentController {
         // console.log(password);
         console.log('request.body.email || inscription.email: ', request.body.email || inscription.email);
         
-        const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password)
-        const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram)
-        const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email).pipe(switchMap(res=> {
+        const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password, payment.metadata.provider)
+        const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram, payment.metadata.provider)
+        const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email, payment.metadata.provider).pipe(switchMap(res=> {
           console.log('res.data: ', res.data);
           
           return !!res.data[0] ? of({...res, exist: true }) : createUserObs
@@ -109,9 +109,14 @@ export class EnrollmentController {
         const ProgramHasError =  !program?.id
         const ProgramError = `Program ${ payment.metadata.LMSprogram }: not found, please check shortname.`
         const error = ProgramHasError ? ProgramError : null
-        const scope = ProgramHasError ?  'Program response' : null
+        const scope = ProgramHasError ?  'Aula Program' : null
         
-        return ProgramHasError ? combineLatest([of({inscription, payment, user, error, scope, password})]) : combineLatest([of({inscription, payment, user, error, scope, password}), this.enrollmentsService.enrollStudent(user?.id, program?.id) ])
+        return ProgramHasError
+          ? combineLatest([of({inscription, payment, user, error, scope, password})])
+          : combineLatest([
+              of({inscription, payment, user, error, scope, password}),
+              this.enrollmentsService.enrollStudent(user?.id, program?.id, payment.metadata.provider)
+            ])
       }),
       mergeMap((responses: any) => {
 
