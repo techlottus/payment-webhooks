@@ -3,13 +3,24 @@ import { UtilsService } from 'src/utils/utils.service';
 import { EmailService } from './email.service';
 import { catchError, mergeMap, of, take } from 'rxjs';
 import Handlebars from "handlebars";
-
+// import formData from 'form-data';
+import * as formData from "form-data";
+import Mailgun from 'mailgun.js';
 @Controller('email')
 export class EmailController {
   constructor(public utils: UtilsService, public email: EmailService) {}
 
   @Post('/salesforce/send')
-  sendEmail(@Body() body: {template: string, subject: string, toAddress: string, priority?: string, ccToAddress: string }, @Res() response: any ) {
+  sendSFEmail(
+    @Body() 
+      body: {
+        template: string,
+        subject: string,
+        toAddress: string,
+        priority?: string,
+        ccToAddress: string
+      }, 
+    @Res() response: any ) {
     // console.log(body);
     const {
       template, 
@@ -30,6 +41,75 @@ export class EmailController {
     ).subscribe(res => {
       response.send(res.data)
     })
+  }
+  @Post('/send')
+  sendMailgunEmail(
+    @Body() body: {
+      template_id: number,
+      params: {
+        [key:string]: any
+      },
+      to: [string],
+      from: string,
+      subject: string,
+      priority?: string,
+      cc?: [string],
+      bcc?: [string]
+    },
+    @Res() response: any ) {
+    // console.log(body);
+
+    if (!body.template_id) {
+      response.status(400).send("please send a template_id")
+    }
+    if (!body.to) {
+      response.status(400).send("please send a to")
+    }
+    if (!body.from) {
+      response.status(400).send("please send a from")
+    }
+    if (!body.subject) {
+      response.status(400).send("please send a subject")
+    }
+
+    const mailgun = new Mailgun(formData);
+    const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY || 'key-yourkeyhere'});
+
+    const domain = process.env.NODE_ENV === 'staging'
+      ? 'sandbox36f0ec835fa345f9b2fe25ad8b9b55b3.mailgun.org'
+      : process.env.MAILGUN_DOMAIN    
+    
+    this.utils.fetchEmailTemplate({ id: body.template_id })
+      .pipe(
+        catchError((err, caught) => {console.log(err); return caught})
+      )
+      .subscribe((res) => {
+        // console.log(res);
+        const template_data = res.data.data.attributes
+        const template = Handlebars.compile(template_data.html, { noEscape: true });
+        // use params only if staging or throw an error
+        let params = (body.params || template_data.params) || {}
+        // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
+
+        const compiled = template(params)
+        // console.log(compiled);
+        mg.messages.create(domain, {
+          ...body,
+          from: `${body.from}@${domain}`,
+          html: compiled
+        })
+        .then(msg => {
+          console.log(msg)
+          response.send(JSON.stringify(msg))
+        }) // logs response data
+        .catch(err => {
+          console.log(err)
+          response.send(JSON.stringify(err))
+        }); // logs any error
+        
+      })
+
+    
   }
 
   @Post('/compile')
