@@ -92,61 +92,44 @@ export class EmailController {
           // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
 
           const compiled = template(params)
-          // console.log(compiled);
-          
-          // .then(msg => {
-          //   console.log(msg)
-          // }) // logs response data
-          // .catch(err => {
-          //   console.log(err)
-          //   response.send(JSON.stringify(err))
-          // }); // logs any error
+
           return combineLatest({
             send: from(mg.messages.create(domain, {
               ...body,
               from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
-              html: compiled
+              html: compiled,
             })).pipe(
-              catchError((err, caught) => {console.log(err); return of(err)}),
+              catchError((err, caught) => {console.log(err); return of({...err, error: true})}),
             ),
             compiled: of(compiled),
-            template_data: of(template_data)
+            template_data: of(template_data),
           })
         }),
+        mergeMap(res => {
 
-        mergeMap(sendRes => {
-          console.log('sendRes: ', sendRes); 
-
-          // const { current, limit } = Res.headers[0].LimitInfoHeader[0].limitInfo[0]
-
-          // const errors = Res.errors?.map(error => {
-          //   const { fields, message, statusCode } = error
-          //   const newfields = fields.map( field => { return {field} });
-          //   console.log(newfields);
-          //   return {
-          //     fields: newfields,
-          //     message: message[0],
-          //     statusCode: statusCode[0],
-          //   }
-          // })
-          // console.log(errors);
-          return this.utils.postStrapi('track-send-emails', {
-            template: sendRes.template_data.template_name,
+        const trackEmailsData = {
+            template: res.template_data.name,
             template_id: `${body.template_id}`,
             params: body.params,
             scope: body.scope,
-            compiled_template: sendRes.compiled,
-            email: body.to,
+            compiled_template: res.compiled,
+            email: body.to.join(', '),
             subject: body.subject,
-            delivered: sendRes.send.status,
-            errors: sendRes.send.details
-          })
+            delivered: !res.send?.error,
+            error: res.send.details || '',
+            statusCode: `${res.send.status}`,
+            send_id: res.send.id || ''
+          }
+
+          return this.utils.postStrapi('track-send-emails', trackEmailsData)
         }),
+        catchError((err, caught) => {console.log(err); return of(err)}),
+
       )
       .subscribe((res) => {
-       
-          response.send(JSON.stringify(res))
-        
+        const status = res.status || res.response.status
+        const msg = JSON.stringify(res.data || res)
+          response.status(status).send(msg)
       })
 
     
