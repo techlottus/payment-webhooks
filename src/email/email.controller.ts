@@ -95,7 +95,7 @@ export class EmailController {
         // console.log(compiled);
         mg.messages.create(domain, {
           ...body,
-          from: `${body.from}@${domain}`,
+          from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
           html: compiled
         })
         .then(msg => {
