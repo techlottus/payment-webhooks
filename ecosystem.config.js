@@ -34,7 +34,8 @@ module.exports = {
         SF_EMAIL_ORG_ID: env.SF_EMAIL_ORG_ID1,
         CD_SANTANDER_TOKEN: env.CD_SANTANDER_TOKEN1,
         CD_SANTANDER_URL: env.CD_SANTANDER_URL1,
-
+        MAILGUN_API_KEY: env.MAILGUN_API_KEY1,
+        MAILGUN_DOMAIN: env.MAILGUN_DOMAIN1
       }
     },
     {
@@ -69,6 +70,8 @@ module.exports = {
         SF_EMAIL_ORG_ID: env.SF_EMAIL_ORG_ID2,
         CD_SANTANDER_TOKEN: env.CD_SANTANDER_TOKEN2,
         CD_SANTANDER_URL: env.CD_SANTANDER_URL2,
+        MAILGUN_API_KEY: env.MAILGUN_API_KEY2,
+        MAILGUN_DOMAIN: env.MAILGUN_DOMAIN2
       }
     },
     {
@@ -103,6 +106,8 @@ module.exports = {
         SF_EMAIL_ORG_ID: env.SF_EMAIL_ORG_ID3,
         CD_SANTANDER_TOKEN: env.CD_SANTANDER_TOKEN3,
         CD_SANTANDER_URL: env.CD_SANTANDER_URL3,
+        MAILGUN_API_KEY: env.MAILGUN_API_KEY3,
+        MAILGUN_DOMAIN: env.MAILGUN_DOMAIN3
       }
     },
     {
@@ -137,6 +142,8 @@ module.exports = {
         SF_EMAIL_ORG_ID: env.SF_EMAIL_ORG_ID4,
         CD_SANTANDER_TOKEN: env.CD_SANTANDER_TOKEN4,
         CD_SANTANDER_URL: env.CD_SANTANDER_URL4,
+        MAILGUN_API_KEY: env.MAILGUN_API_KEY4,
+        MAILGUN_DOMAIN: env.MAILGUN_DOMAIN4
 
       }
     },
