@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { UtilsService } from 'src/utils/utils.service';
 import { EmailService } from './email.service';
-import { catchError, mergeMap, of, take } from 'rxjs';
+import { catchError, combineLatest, from, mergeMap, of, take } from 'rxjs';
 import Handlebars from "handlebars";
 // import formData from 'form-data';
 import * as formData from "form-data";
@@ -45,6 +45,7 @@ export class EmailController {
   @Post('/send')
   sendMailgunEmail(
     @Body() body: {
+      scope: string,
       template_id: number,
       params: {
         [key:string]: any
@@ -81,31 +82,70 @@ export class EmailController {
     
     this.utils.fetchEmailTemplate({ id: body.template_id })
       .pipe(
-        catchError((err, caught) => {console.log(err); return caught})
+        catchError((err, caught) => {console.log(err); return caught}),
+        mergeMap(res => {
+           // console.log(res);
+          const template_data = res.data.data.attributes
+          const template = Handlebars.compile(template_data.html, { noEscape: true });
+          // use params only if staging or throw an error
+          let params = (body.params || template_data.params) || {}
+          // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
+
+          const compiled = template(params)
+          // console.log(compiled);
+          
+          // .then(msg => {
+          //   console.log(msg)
+          // }) // logs response data
+          // .catch(err => {
+          //   console.log(err)
+          //   response.send(JSON.stringify(err))
+          // }); // logs any error
+          return combineLatest({
+            send: from(mg.messages.create(domain, {
+              ...body,
+              from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
+              html: compiled
+            })).pipe(
+              catchError((err, caught) => {console.log(err); return of(err)}),
+            ),
+            compiled: of(compiled),
+            template_data: of(template_data)
+          })
+        }),
+
+        mergeMap(sendRes => {
+          console.log('sendRes: ', sendRes); 
+
+          // const { current, limit } = Res.headers[0].LimitInfoHeader[0].limitInfo[0]
+
+          // const errors = Res.errors?.map(error => {
+          //   const { fields, message, statusCode } = error
+          //   const newfields = fields.map( field => { return {field} });
+          //   console.log(newfields);
+          //   return {
+          //     fields: newfields,
+          //     message: message[0],
+          //     statusCode: statusCode[0],
+          //   }
+          // })
+          // console.log(errors);
+          return this.utils.postStrapi('track-send-emails', {
+            template: sendRes.template_data.template_name,
+            template_id: `${body.template_id}`,
+            params: body.params,
+            scope: body.scope,
+            compiled_template: sendRes.compiled,
+            email: body.to,
+            subject: body.subject,
+            delivered: sendRes.send.status,
+            errors: sendRes.send.details
+          })
+        }),
       )
       .subscribe((res) => {
-        // console.log(res);
-        const template_data = res.data.data.attributes
-        const template = Handlebars.compile(template_data.html, { noEscape: true });
-        // use params only if staging or throw an error
-        let params = (body.params || template_data.params) || {}
-        // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
-
-        const compiled = template(params)
-        // console.log(compiled);
-        mg.messages.create(domain, {
-          ...body,
-          from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
-          html: compiled
-        })
-        .then(msg => {
-          console.log(msg)
-          response.send(JSON.stringify(msg))
-        }) // logs response data
-        .catch(err => {
-          console.log(err)
-          response.send(JSON.stringify(err))
-        }); // logs any error
+       
+          response.send(JSON.stringify(res))
         
       })
 
