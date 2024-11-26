@@ -119,8 +119,8 @@ export class EmailController {
             error: res.send.details || '',
             statusCode: `${res.send.status}`,
             send_id: res.send.id || '',
-            cc: body.cc,
-            bcc: body.bcc,
+            cc: body.cc.join(', '),
+            bcc: body.bcc.join(', '),
           }
 
           return this.utils.postStrapi('track-send-emails', trackEmailsData)
@@ -131,7 +131,7 @@ export class EmailController {
       .subscribe((res) => {
         const status = res.status || res.response.status
         const msg = JSON.stringify(res.data || res)
-          response.status(status).send(msg)
+        response.status(status).send(msg)
       })
 
     
