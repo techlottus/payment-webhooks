@@ -118,7 +118,9 @@ export class EmailController {
             delivered: !res.send?.error,
             error: res.send.details || '',
             statusCode: `${res.send.status}`,
-            send_id: res.send.id || ''
+            send_id: res.send.id || '',
+            cc: body.cc,
+            bcc: body.bcc,
           }
 
           return this.utils.postStrapi('track-send-emails', trackEmailsData)
