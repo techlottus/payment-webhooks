@@ -88,15 +88,18 @@ export class EmailController {
            // console.log(res);
           const template_data = res.data.data.attributes
           const template = Handlebars.compile(template_data.html, { noEscape: true });
+          const presubject = Handlebars.compile(body.subject, { noEscape: true })
           // use params only if staging or throw an error
           let params = (body.params || template_data.params) || {}
           // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
 
           const compiled = template(params)
+          const subject = presubject(params)
 
           return combineLatest({
             send: from(mg.messages.create(domain, {
               ...body,
+              subject,
               from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
               html: compiled,
             })).pipe(
@@ -104,6 +107,7 @@ export class EmailController {
             ),
             compiled: of(compiled),
             template_data: of(template_data),
+            subject: of(subject)
           })
         }),
         mergeMap(res => {
@@ -114,7 +118,7 @@ export class EmailController {
             scope: body.scope,
             compiled_template: res.compiled,
             email: body.to.join(', '),
-            subject: body.subject,
+            subject: res.subject,
             delivered: !res.send?.error,
             error: res.send.details || '',
             statusCode: `${res.send.status}`,
