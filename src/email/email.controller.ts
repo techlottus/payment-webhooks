@@ -6,9 +6,10 @@ import Handlebars from "handlebars";
 // import formData from 'form-data';
 import * as formData from "form-data";
 import Mailgun from 'mailgun.js';
+import { ErrorManagerService } from 'src/error-manager/error-manager.service';
 @Controller('email')
 export class EmailController {
-  constructor(public utils: UtilsService, public email: EmailService) {}
+  constructor(public utils: UtilsService, public email: EmailService, public errorManager: ErrorManagerService) {}
 
   @Post('/salesforce/send')
   sendSFEmail(
@@ -106,7 +107,6 @@ export class EmailController {
           })
         }),
         mergeMap(res => {
-
         const trackEmailsData = {
             template: res.template_data.name,
             template_id: `${body.template_id}`,
@@ -123,14 +123,28 @@ export class EmailController {
             bcc: body.bcc.join(', '),
           }
 
-          return this.utils.postStrapi('track-send-emails', trackEmailsData)
+          return combineLatest({
+            send: of(res.send),
+            compiled: of(res.compiled),
+            template_data: of(res.template_data),
+            track: this.utils.postStrapi('track-send-emails', trackEmailsData).pipe(
+              catchError((err, caught) => {console.log(err); return of({...err, error: true})}),
+            )
+          }) 
         }),
-        catchError((err, caught) => {console.log(err); return of(err)}),
 
       )
       .subscribe((res) => {
-        const status = res.status || res.response.status
-        const msg = JSON.stringify(res.data || res)
+        const status = res.track.status || res.track.response.status
+        const msg = JSON.stringify(res.track.data || res)
+        if (res.send.error) {
+          this.errorManager.ManageError({ to: body.to.join(", ") }, {
+            scope: 'send email',
+            error: `${res.send.message}: ${res.send.details}`,
+            emailID: res.track.data.id,
+            email_template: res.template_data.name
+          })
+        }
         response.status(status).send(msg)
       })
 

@@ -130,8 +130,8 @@ export class UtilsService {
         }
       }
     }
-    const buttons = [
-      {
+    const buttons = []
+    const paymentButton = {
         "type": "section",
         "text": {
           "type": "mrkdwn",
@@ -149,7 +149,6 @@ export class UtilsService {
           "action_id": "button-action"
         }
       }
-    ]
     const invoiceButton = {
       "type": "section",
       "text": {
@@ -186,8 +185,45 @@ export class UtilsService {
         "action_id": "button-action"
       }
     }
+    const emailButton = {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Acceso a track emails"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Navegar a strapi",
+          "emoji": true
+        },
+        "value": "click_me_123",
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-email.track-email/${metadata.emailID}`,
+        "action_id": "button-action"
+      }
+    }
+    if (metadata.paymentsID) buttons.push(paymentButton)
     if (metadata.invoicesID) buttons.push(invoiceButton)
     if (metadata.inscriptionsID) buttons.push(inscriptionsButton)
+    if (metadata.emailID) buttons.push(emailButton)
+    const middleFields = [
+      {
+        "type": "plain_text",
+        "text": `Parte del proceso: ${metadata.scope}`,
+        "emoji": true
+      }
+    ]
+    if (metadata.product_name) middleFields.push({
+      "type": "plain_text",
+      "text": `Producto: ${metadata.product_name}`,
+      "emoji": true
+    })
+    if (metadata.email_template) middleFields.push({
+      "type": "plain_text",
+      "text": `Plantilla de Correo: ${metadata.email_template}`,
+      "emoji": true
+    })
   
     // Block template for Slack notification
     const notificationBlock = {
@@ -195,18 +231,7 @@ export class UtilsService {
         env.NODE_ENV !== 'staging' ? headerBlock : testBlock,
         {
           "type": "section",
-          "fields": [
-            {
-              "type": "plain_text",
-              "text": `Parte del proceso: ${metadata.scope}`,
-              "emoji": true
-            },
-            {
-              "type": "plain_text",
-              "text": `Producto: ${metadata.product_name}`,
-              "emoji": true
-            },
-          ]
+          "fields": middleFields
         },
         {
           "type": "divider"
