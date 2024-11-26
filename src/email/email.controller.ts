@@ -136,12 +136,13 @@ export class EmailController {
       )
       .subscribe((res) => {
         const status = res.track.status || res.track.response.status
+        
         const msg = JSON.stringify(res.track.data || res)
         if (res.send.error) {
           this.errorManager.ManageError({ to: body.to.join(", ") }, {
             scope: 'send email',
             error: `${res.send.message}: ${res.send.details}`,
-            emailID: res.track.data.id,
+            emailID: res.track.data.data.id,
             email_template: res.template_data.name
           })
         }

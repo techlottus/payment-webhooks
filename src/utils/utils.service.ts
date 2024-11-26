@@ -199,7 +199,7 @@ export class UtilsService {
           "emoji": true
         },
         "value": "click_me_123",
-        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-email.track-email/${metadata.emailID}`,
+        "url": `${env.STRAPI_TRACKING_URL}/admin/content-manager/collectionType/api::track-send-email.track-send-email/${metadata.emailID}`,
         "action_id": "button-action"
       }
     }
@@ -212,7 +212,12 @@ export class UtilsService {
         "type": "plain_text",
         "text": `Parte del proceso: ${metadata.scope}`,
         "emoji": true
-      }
+      },
+      {
+        "type": "plain_text",
+        "text": `Fecha :spiral_calendar_pad:: ${new Date().toLocaleDateString('es-mx')}`,
+        "emoji": true
+      },
     ]
     if (metadata.product_name) middleFields.push({
       "type": "plain_text",
