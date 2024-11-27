@@ -6,7 +6,7 @@ import Handlebars from "handlebars";
 // import formData from 'form-data';
 import * as formData from "form-data";
 import Mailgun from 'mailgun.js';
-import { ErrorManagerService } from 'src/error-manager/error-manager.service';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 @Controller('email')
 export class EmailController {
   constructor(public utils: UtilsService, public email: EmailService, public errorManager: ErrorManagerService) {}

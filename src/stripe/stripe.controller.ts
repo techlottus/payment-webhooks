@@ -4,7 +4,7 @@ import { catchError, combineLatest, mergeMap, of } from 'rxjs';
 require('dotenv').config();
 import { UtilsService } from 'src/utils/utils.service';
 import { StripeService } from './stripe.service';
-import { ErrorManagerService } from 'src/error-manager/error-manager.service';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 const stripe = require('stripe')(env.STRIPE_API_KEY);
 
 @Controller('stripe')
