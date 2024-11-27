@@ -165,8 +165,6 @@ export class StripeController {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
-
-
   }
 
 }
