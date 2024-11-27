@@ -9,7 +9,8 @@ export class SalesforceController {
   constructor(
     private readonly salesforceService: SalesforceService,
     private utilsService: UtilsService,
-    public errorManager: ErrorManagerService) {}
+    public errorManager: ErrorManagerService
+  ) {}
 
   @Post('/inscription')
   inscription(@Body() body: any) {
