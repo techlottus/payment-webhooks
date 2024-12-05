@@ -2,10 +2,15 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { SalesforceService } from './salesforce.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { catchError, combineLatest, forkJoin, mergeMap, of, take } from 'rxjs';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 
 @Controller('salesforce')
 export class SalesforceController {
-  constructor(private readonly salesforceService: SalesforceService, private utilsService: UtilsService) {}
+  constructor(
+    private readonly salesforceService: SalesforceService,
+    private utilsService: UtilsService,
+    public errorManager: ErrorManagerService
+  ) {}
 
   @Post('/inscription')
   inscription(@Body() body: any) {
@@ -56,7 +61,24 @@ export class SalesforceController {
 
         // console.log('enrrollments: ', enrrollments);
         if (res.inscription?.data?.Exitoso === 'False' || res.inscription?.error) {
-          this.SendSlackMessage(data, 'Salesforce', res.inscription?.data?.Error || res.inscription?.message)
+
+          const fields = {
+            cs_id: data.track_payments?.attributes?.cs_id,
+            name: data.track_inscriptions?.attributes?.name,
+            last_name: data.track_inscriptions?.attributes?.last_name,
+            phone: data.track_inscriptions?.attributes?.phone,
+            email: data.track_inscriptions?.attributes?.email,
+          }
+          const metadata = {
+            scope: 'Salesforce',
+            product_name: data.track_payments?.attributes?.product_name,
+            error:  res.inscription?.data?.Error || res.inscription?.message,
+            inscriptionsID: data.track_inscriptions.id,
+            paymentsID: data.track_payments.id,
+            invoicesID: data.track_invoices?.id,
+          }
+    
+          this.errorManager.ManageError(fields, metadata)
         } else {
           if (data.track_payments?.attributes?.metadata?.flow !== "ATR" ) {
             // call enrollment webhook if not atr
@@ -66,36 +88,5 @@ export class SalesforceController {
           }
         }
       })
-  }
-  SendSlackMessage(data: any, scope: string, error: string) {
-
-    const labels = {
-      email: 'Correo electrónico',
-      name: 'Nombres',
-      phone: 'Teléfono',
-      last_name: 'Apellidos',
-      cs_id: 'Checkout Session Id',
-    }
-    const fields = {
-      cs_id: data.track_payments?.attributes?.cs_id,
-      name: data.track_inscriptions?.attributes?.name,
-      last_name: data.track_inscriptions?.attributes?.last_name,
-      phone: data.track_inscriptions?.attributes?.phone,
-      email: data.track_inscriptions?.attributes?.email,
-    }
-    const metadata = {
-      scope: scope,
-      product_name: data.track_payments?.attributes?.product_name,
-      error,
-      inscriptionsID: data.track_inscriptions.id,
-      paymentsID: data.track_payments.id,
-      invoicesID: data.track_invoices?.id,
-    }
-    const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-    // console.log('slackMessage: ', slackMessage);
-    
-    this.utilsService.postSlackMessage(slackMessage).subscribe()
-    
-
   }
 }

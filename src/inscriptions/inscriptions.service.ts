@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { error } from 'console';
 import { catchError, combineLatest, forkJoin, mergeMap, of } from 'rxjs';
 import { StripeService } from 'src/stripe/stripe.service';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class InscriptionsService {
   constructor(
     private utilsService: UtilsService,
     private stripeService: StripeService,
+    public errorManager: ErrorManagerService
   ) {}
   async populateStrapi(body: any, response: any) {
     console.log('body: ', body);
@@ -20,7 +22,7 @@ export class InscriptionsService {
     if (!cs_id) {
       response
         .status(400)
-        .send(`Webhook Error: Not checkout session id has been provided`);
+        .send(`Webhook Error: No checkout session id has been provided`);
       response.send();
     } else {
       const submitted_at = new Date();
@@ -144,14 +146,7 @@ export class InscriptionsService {
                 ? this.utilsService
                     .postSelfWebhook('/curp/validate', { curp })
                     .pipe(
-                      catchError((err, caught) => {
-                        // console.log('track_payments: ', track_payments);
-                        // console.log('track_inscriptions: ', track_inscriptions);
-                        // console.log('err: ', err);
-                        // this.SendSlackMessage({ track_payments: track_payments, track_inscriptions }, 'CURP', err.response.data)
-                        // response.status(err.response.status).send(err.response.data);
-                        return of({ error: true, err });
-                      }),
+                      catchError((err, caught) => of({ error: true, err })),
                     )
                 : of(false);
             const observables = {
@@ -168,15 +163,21 @@ export class InscriptionsService {
 
             if (res.curp?.error || res.curp?.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
-              this.SendSlackMessage(
-                {
-                  track_payments: res.track_payments,
-                  track_inscriptions: { cs_id, submitted_at },
-                },
-                'CURP',
-                res.curp.response?.data ||
-                  JSON.parse(res.curp.err?.errorMessage).error,
-              );
+              const fields = {
+                cs_id: res.track_payments?.attributes?.cs_id,
+                name: res.track_inscriptions?.attributes?.name,
+                last_name: res.track_inscriptions?.attributes?.last_name,
+                phone: res.track_inscriptions?.attributes?.phone,
+                email: res.track_inscriptions?.attributes?.email,
+              };
+              const metadata = {
+                scope: "Curp",
+                product_name: res.track_payments?.attributes?.product_name,
+                error: res.curp.response?.data || JSON.parse(res.curp.err?.errorMessage).error,
+                paymentsID: res.track_payments.id,
+              };
+
+              this.errorManager.ManageError(fields, metadata)
               return of(res);
             }
             // console.log('res.curp.error: ', res.curp.error);
@@ -296,35 +297,5 @@ export class InscriptionsService {
           response.send();
         });
     }
-  }
-  SendSlackMessage(data: any, scope: string, error: string) {
-    const labels = {
-      email: 'Correo electrónico',
-      name: 'Nombres',
-      phone: 'Teléfono',
-      last_name: 'Apellidos',
-      cs_id: 'Checkout Session Id',
-    };
-    const fields = {
-      cs_id: data.track_payments?.attributes?.cs_id,
-      name: data.track_inscriptions?.attributes?.name,
-      last_name: data.track_inscriptions?.attributes?.last_name,
-      phone: data.track_inscriptions?.attributes?.phone,
-      email: data.track_inscriptions?.attributes?.email,
-    };
-    const metadata = {
-      scope: scope,
-      product_name: data.track_payments?.attributes?.product_name,
-      error,
-      paymentsID: data.track_payments.id,
-    };
-    const slackMessage = this.utilsService.generateSlackErrorMessage(
-      labels,
-      metadata,
-      fields,
-    );
-    // console.log('slackMessage: ', slackMessage);
-
-    this.utilsService.postSlackMessage(slackMessage).subscribe();
   }
 }
