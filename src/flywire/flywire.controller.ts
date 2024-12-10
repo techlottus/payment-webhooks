@@ -83,7 +83,7 @@ export class FlywireController {
                     template_id: metadata.payment_template,
                     params: {
                       amount: attrs.amount,
-                      course: attrs.program_name,
+                      course: attrs.name,
                       First_name: name,
                       file_number: attrs.payment_id,
                       payment_date: attrs.date,
