@@ -6,7 +6,7 @@ import Handlebars from "handlebars";
 // import formData from 'form-data';
 import * as formData from "form-data";
 import Mailgun from 'mailgun.js';
-import { ErrorManagerService } from 'src/error-manager/error-manager.service';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 @Controller('email')
 export class EmailController {
   constructor(public utils: UtilsService, public email: EmailService, public errorManager: ErrorManagerService) {}
@@ -85,11 +85,13 @@ export class EmailController {
            // console.log(res);
           const template_data = res.data.data.attributes
           const template = Handlebars.compile(template_data.html, { noEscape: true });
+          const presubject = Handlebars.compile(body.subject, { noEscape: true })
           // use params only if staging or throw an error
           let params = (body.params || template_data.params) || {}
           // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
 
           const compiled = template(params)
+          const subject = presubject(params)
 
           return combineLatest({
             send: from(mg.messages.create(domain, {
@@ -102,6 +104,7 @@ export class EmailController {
             ),
             compiled: of(compiled),
             template_data: of(template_data),
+            subject: of(subject)
           })
         }),
         mergeMap(res => {
@@ -112,7 +115,7 @@ export class EmailController {
             scope: body.scope,
             compiled_template: res.compiled,
             email: body.to.join(', '),
-            subject: body.subject,
+            subject: res.subject,
             delivered: !res.send?.error,
             error: res.send.details || '',
             statusCode: `${res.send.status}`,

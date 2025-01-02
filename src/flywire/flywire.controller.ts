@@ -1,7 +1,6 @@
 import { Controller, Post, Req, Res, HttpStatus } from '@nestjs/common';
 import { catchError, of, mergeMap, combineLatest } from 'rxjs';
 import { Request, Response } from 'express';
-import * as schedule from 'node-schedule';
 import { createHmac } from 'crypto';
 import * as xml2js from 'xml2js';
 import { env } from 'process';
@@ -68,180 +67,112 @@ export class FlywireController {
     );
     paymentObs
       .pipe(
-        mergeMap((paymentRes) => {
-          // if (paymentRes.error) return of(paymentRes);
-          const payment = paymentRes.data.data;
-          const attrs = payment.attributes;
-          const metadata = attrs.metadata;
-          const name = attrs.extra_fields.student_first_name;
 
-          return combineLatest({
-            payment: of(payment),
-            template: !!metadata.payment_template
-              ? this.utilsService
-                  .postSelfWebhook('/email/compile', {
-                    template_id: metadata.payment_template,
-                    params: {
-                      amount: attrs.amount,
-                      course: attrs.name,
-                      First_name: name,
-                      file_number: attrs.payment_id,
-                      payment_date: attrs.date,
-                      provider: metadata.provider,
-                    },
-                  })
-                  .pipe(
-                    catchError((err, caught) => {
-                      console.log('err: ', err);
-                      return caught;
-                    }),
-                  )
-              : of(false),
-            template_invoice: !!metadata.invoice_template
-              ? this.utilsService
-                  .postSelfWebhook('/email/compile', {
-                    template_id: metadata.invoice_template,
-                    params: {
-                      first_name: name,
-                    },
-                  })
-                  .pipe(
-                    catchError((err, caught) => {
-                      console.log('err: ', err);
-                      return caught;
-                    }),
-                  )
-              : of(false),
-          });
-        }),
-        catchError((err) => {
-          console.log('compile error', err.response.data);
-          console.log('err.response.data.error.details', err.response.data.error.details);
-          return of({
-            error: true,
-            ...err.response.data,
-          });
-        }),
-        mergeMap((res) => {
-          if (res.error) return of(res);
-          // console.log('res: ', res);
-          console.log('res: ', res.payment);
-          return combineLatest({
-            payment: of(res.payment),
-            template: of(res.template),
-            send: !!res.template
-              ? this.utilsService
-                  .postSelfWebhook('/email/salesforce/send', {
-                    template: res.template.data.compiled,
-                    subject: res.template.data.template.subject,
-                    toAddress: res.payment.attributes.email,
-                    priority: res.template.data.template.priority,
-                  })
-                  .pipe(
-                    catchError((err, caught) => {
-                      console.log('err: ', err);
-                      return caught;
-                    }),
-                  )
-              : of(false),
-            send_invoice: !!res.template_invoice
-              ? this.utilsService
-                  .postSelfWebhook('/email/salesforce/send', {
-                    template: res.template_invoice.data.compiled,
-                    subject: res.template_invoice.data.template.subject,
-                    toAddress: res.payment?.attributes.email,
-                    priority: res.template_invoice.data.template.priority,
-                  })
-                  .pipe(
-                    catchError((err, caught) => {
-                      console.log('err: ', err);
-                      return caught;
-                    }),
-                  )
-              : of(false),
-          });
-        }),
-      )
-      .subscribe((res) => {
-        if (res.error) return of(res);
 
-        console.log('res: ', res);
-        console.log('res.payment: ', res.payment);
-        
-        const data = {
-          payment: {
-            ...res.payment.attributes,
-            id: res.payment.id,
-            name: `${res.payment.attributes.extra_fields.student_first_name} ${res.payment.attributes.extra_fields.student_last_name}`,
-            curp: res.payment.attributes.extra_fields.curp,
-          },
-          send: {},
-        };
-        if (data.payment.metadata.flow === 'EUONLINE') {
-          this.utilsService
-            .postSelfWebhook('/inscriptions/new', {
-              cs_id: res.payment.attributes.cs_id,
-            })
-            .subscribe();
-        }
-        const sendMessage = (data, scope, error) => {
-          this.SendSlackMessage(data, scope, error);
-        };
-        const sendFollowUpMail = (data) => {
-          this.sendFollowUpMail(data);
-        };
-        xml2js.parseString(res.send.data, function (err, result) {
-          // console.dir(result);
-          // console.dir(result['soapenv:Envelope']);
-          if (
-            result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0]
-              .result[0].success[0] === 'false'
-          ) {
-            // treat error
-            data.send = {
-              fields:
-                result['soapenv:Envelope']['soapenv:Body'][0]
-                  .sendEmailResponse[0].result[0].errors[0].fields,
-              message:
-                result['soapenv:Envelope']['soapenv:Body'][0]
-                  .sendEmailResponse[0].result[0].errors[0].message,
-              statusCode:
-                result['soapenv:Envelope']['soapenv:Body'][0]
-                  .sendEmailResponse[0].result[0].errors[0].statusCode,
-            };
-            sendMessage(data, 'payment email', data.send);
-            // console.dir(data);
-          } else {
-            data.send = {
-              current:
-                result['soapenv:Envelope']['soapenv:Header'][0]
-                  .LimitInfoHeader[0].limitInfo[0].current[0],
-              limit:
-                result['soapenv:Envelope']['soapenv:Header'][0]
-                  .LimitInfoHeader[0].limitInfo[0].limit[0],
-              type: result['soapenv:Envelope']['soapenv:Header'][0]
-                .LimitInfoHeader[0].limitInfo[0].type[0],
-            };
-          }
-          if (data.payment.metadata.flow === 'EUPROVIDER') {
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth();
-            const day = new Date().getDate();
-            const hours = new Date().getHours();
-            const minutes = new Date().getMinutes();
-            const seconds = new Date().getSeconds();
 
-            const date =
-              env.NODE_ENV === 'production'
-                ? new Date(year, month, day, hours + 24, minutes, seconds)
-                : new Date(year, month, day, hours, minutes, seconds + 30);
+    mergeMap(paymentRes => {
+      // console.log('paymentRes: ', paymentRes);
 
-            const job = schedule.scheduleJob(date, function () {
-              sendFollowUpMail(data);
-            });
-          }
-        });
-      });
+      // if (paymentRes.error) return of(paymentRes)
+
+      const payment = paymentRes.data.data;
+      const attrs = payment.attributes;
+      const metadata = attrs.metadata;
+      const name = attrs.extra_fields.student_first_name;
+      // console.log('name: ', name);
+      // return of(paymentRes)
+      const year = new Date().getFullYear()
+      const month = new Date().getMonth()
+      const day = new Date().getDate()
+      const hours = new Date().getHours()
+      const minutes = new Date().getMinutes()
+      const seconds = new Date().getSeconds()
+
+      const date = env.NODE_ENV === 'production' ?
+        new Date(year, month, day, hours + 24, minutes, seconds) :
+        new Date(year, month, day, hours, minutes, seconds + 30)
+      // console.log(date);
+
+      return combineLatest({
+        payment: of (payment),
+        template: !!metadata.payment_template
+          ? this.utilsService.postSelfWebhook('/email/send', {
+              template_id: metadata.payment_template,
+              params: {
+                "amount": attrs.amount,
+                "course": attrs.product_name,
+                "First_name": name,
+                "file_number": attrs.payment_id,
+                "payment_date": attrs.date,
+                "provider": metadata.provider
+              },
+              to: [attrs.email],
+              from: "admisiones",
+              scope: "payment",
+            }).pipe(catchError((err, caught) => {
+              console.log('err: ', err);
+              return caught
+            }))
+          : of(false),
+        template_invoice: !!metadata.invoice_template ?
+          this.utilsService.postSelfWebhook('/email/send', {
+            template_id: metadata.invoice_template,
+            params: {
+              "first_name": name
+            },
+            to: [attrs.email],
+            from: "admisiones",
+            scope: "invoice",
+          }).pipe(catchError((err, caught) => {
+            console.log('err: ', err);
+            return caught
+          })) : of (false),
+        follow_up_template: metadata.flow === "EUPROVIDER" ?
+          this.utilsService.postSelfWebhook('/email/send', {
+            template_id: metadata.follow_up_template,
+            params: {
+              "provider": metadata.provider,
+              "first_name": attrs.name,
+              "program_name": attrs.product_name
+            },
+            to: [attrs.email],
+            from: "admisiones",
+            scope: "invoice",
+            "o:deliverytime": date
+          }).pipe(catchError((err, caught) => {
+            console.log('err: ', err);
+            return caught
+          })) : of (false)
+      
+      })
+    }),
+    catchError((err) => {
+      console.log('compile error', err?.data?.error)
+      return of({
+        error: true,
+        ...err?.data?.error
+      })
+    }),
+    mergeMap(res => {
+      const data = {
+        payment: {
+          ...res.payment.attributes,
+          id: res.payment.id,
+          name: `${res.payment.attributes.extra_fields.student_first_name} ${res.payment.attributes.extra_fields.student_last_name}`,
+          curp: res.payment.attributes.extra_fields.curp,
+        },
+        send: {},
+      };
+      if (data.payment.metadata.flow === 'EUONLINE') {
+        return this.utilsService.postSelfWebhook('/inscriptions/new', {
+          cs_id: res.payment.attributes.cs_id
+        })
+      } else {
+        return of(res)
+      }
+    })).subscribe(res => {
+      response.send();
+    })
     response.status(HttpStatus.OK).json(strapiReq);
   }
 
