@@ -97,6 +97,7 @@ export class EmailController {
           return combineLatest({
             send: from(mg.messages.create(domain, {
               ...body,
+              subject: body.subject || template_data.subject,
               from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
               html: compiled,
             })).pipe(
