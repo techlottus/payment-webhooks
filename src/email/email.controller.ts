@@ -77,7 +77,7 @@ export class EmailController {
     const mailgun = new Mailgun(formData);
     const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY || 'key-yourkeyhere'});
 
-    const domain = !!process.env.MAILGUN_DOMAIN 
+    const domain = !process.env.MAILGUN_DOMAIN 
       ? 'sandbox36f0ec835fa345f9b2fe25ad8b9b55b3.mailgun.org'
       : process.env.MAILGUN_DOMAIN    
     
