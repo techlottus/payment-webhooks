@@ -94,8 +94,8 @@ export class EmailController {
           return combineLatest({
             send: from(mg.messages.create(domain, {
               ...body,
-              subject: body.subject || template_data.subject,
-              from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
+              subject: `${process.env.NODE_ENV === 'staging' && 'Prueba ' + process.env.NAME + ': '}${body.subject || template_data.subject}`,
+              from: `${process.env.NODE_ENV === 'staging' && 'test.'}${body.from}@${domain}`,
               html: compiled,
             })).pipe(
               catchError((err, caught) => {console.log(err); return of({...err, error: true})}),
