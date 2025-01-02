@@ -1,7 +1,6 @@
 import { Controller, Post, Req, Res, HttpStatus } from '@nestjs/common';
 import { catchError, of, mergeMap, combineLatest } from 'rxjs';
 import { Request, Response } from 'express';
-import * as schedule from 'node-schedule';
 import { createHmac } from 'crypto';
 import * as xml2js from 'xml2js';
 import { env } from 'process';
