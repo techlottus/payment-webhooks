@@ -70,14 +70,13 @@ export class EmailController {
     if (!body.from) {
       response.status(400).send("please send a from")
     }
-    if (!body.subject) {
-      response.status(400).send("please send a subject")
-    }
 
     const mailgun = new Mailgun(formData);
     const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY || 'key-yourkeyhere'});
 
-    const domain = process.env.MAILGUN_DOMAIN    
+    const domain = !process.env.MAILGUN_DOMAIN 
+      ? 'sandbox36f0ec835fa345f9b2fe25ad8b9b55b3.mailgun.org'
+      : process.env.MAILGUN_DOMAIN    
     
     this.utils.fetchEmailTemplate({ id: body.template_id })
       .pipe(
@@ -97,8 +96,8 @@ export class EmailController {
           return combineLatest({
             send: from(mg.messages.create(domain, {
               ...body,
-              subject,
-              from: `${process.env.NODE_ENV === 'staging' && 'Envío de prueba: test.'}${body.from}@${domain}`,
+              subject: `${process.env.NODE_ENV === 'staging' ? 'Prueba ' + process.env.NAME + ': ' : ''}${body.subject || template_data.subject}`,
+              from: `${process.env.NODE_ENV === 'staging' ? 'test.' : ''}${body.from}@${domain}`,
               html: compiled,
             })).pipe(
               catchError((err, caught) => {console.log(err); return of({...err, error: true})}),
