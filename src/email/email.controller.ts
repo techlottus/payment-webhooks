@@ -70,9 +70,6 @@ export class EmailController {
     if (!body.from) {
       response.status(400).send("please send a from")
     }
-    if (!body.subject) {
-      response.status(400).send("please send a subject")
-    }
 
     const mailgun = new Mailgun(formData);
     const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY || 'key-yourkeyhere'});
