@@ -114,14 +114,14 @@ export class EmailController {
             params: body.params,
             scope: body.scope,
             compiled_template: res.compiled,
-            email: body.to.join(', '),
+            email: body.to?.join(', ') || '',
             subject: res.subject,
             delivered: !res.send?.error,
             error: res.send.details || '',
             statusCode: `${res.send.status}`,
             send_id: res.send.id || '',
-            cc: body.cc.join(', '),
-            bcc: body.bcc.join(', '),
+            cc: body.cc?.join(', ') || '',
+            bcc: body.bcc?.join(', ') || '',
           }
 
           return combineLatest({
