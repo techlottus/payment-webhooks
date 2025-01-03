@@ -85,7 +85,7 @@ export class EmailController {
            // console.log(res);
           const template_data = res.data.data.attributes
           const template = Handlebars.compile(template_data.html, { noEscape: true });
-          const presubject = Handlebars.compile(body.subject, { noEscape: true })
+          const presubject = Handlebars.compile(template_data.subject, { noEscape: true })
           // use params only if staging or throw an error
           let params = (body.params || template_data.params) || {}
           // const message = (!body.params && template_data.params) && "No params where sent, will use default params from template." 
