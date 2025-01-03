@@ -35,6 +35,8 @@ export class StripeController {
 
           paymentObs.pipe(
             catchError((err) => {
+              console.log('payment data error', err)
+              console.log('payment data error', err.data)
               console.log('payment data error', err.data.error)
               return of({
                 error: true,
