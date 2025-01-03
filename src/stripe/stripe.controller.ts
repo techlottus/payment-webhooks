@@ -116,7 +116,8 @@ export class StripeController {
               })
             }),
             catchError((err) => {
-              console.log('compile error', err?.data?.error)
+              console.log('compile error', err)
+              console.log('compile error', err?.data)
               return of({
                 error: true,
                 ...err?.data?.error
