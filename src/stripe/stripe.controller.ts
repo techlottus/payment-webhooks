@@ -71,7 +71,7 @@ export class StripeController {
                       template_id: attrs.metadata.payment_template,
                       params: {
                         "amount": attrs.amount,
-                        "course": attrs.name,
+                        "course": attrs.metadata.name,
                         "First_name": name,
                         "file_number": attrs.payment_id,
                         "payment_date": attrs.date,
