@@ -63,6 +63,7 @@ export class StripeController {
                 new Date(year, month, day, hours + 24, minutes, seconds) :
                 new Date(year, month, day, hours, minutes, seconds + 30)
               console.log('attrs: ', attrs);
+              console.log('attrs.product_name: ', attrs.product_name);
 
               return combineLatest({
                 payment: of (payment),
@@ -72,7 +73,8 @@ export class StripeController {
                       params: {
                         "amount": attrs.amount,
                         "course": attrs.product_name,
-                        "First_name": name,
+                        "program": attrs.product_name,
+                        "first_name": name,
                         "file_number": attrs.payment_id,
                         "payment_date": attrs.date,
                         "provider": attrs.metadata.provider
@@ -103,7 +105,7 @@ export class StripeController {
                     template_id: attrs.metadata.follow_up_template,
                     params: {
                       "provider": attrs.metadata.provider,
-                      "first_name": attrs.name,
+                      "first_name": name,
                       "program_name": attrs.product_name
                     },
                     to: [attrs.email],
