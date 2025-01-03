@@ -111,7 +111,7 @@ export class InscriptionsService {
             // console.log('track_payments: ', track_payments);
             // const curp = track_payments?.attributes?.extra_fields;
 
-            let curp;
+            let curp: string;
             let residence;
             let username;
             if (track_payments?.attributes?.payment_gateway === 'Flywire') {
@@ -144,7 +144,7 @@ export class InscriptionsService {
             const curpObservable =
               !!curp && residence === 'Nacional' && !track_inscriptions.filled
                 ? this.utilsService
-                    .postSelfWebhook('/curp/validate', { curp })
+                    .postSelfWebhook('/curp/validate', { curp: curp.toUpperCase() })
                     .pipe(
                       catchError((err, caught) => of({ error: true, err })),
                     )
