@@ -123,6 +123,9 @@ export class StripeController {
               })
             }),
             mergeMap(res => {
+              if (res.error) {
+                return of(res)
+              }
               const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno').value
               const curp = this.stripeService.getField(res.payment.attributes?.extra_fields, 'curp').value
               const data = {
@@ -144,7 +147,7 @@ export class StripeController {
               }
             })
           ).subscribe(res => {
-            response.send();
+            response.send(res);
           })
         } else {
           response.status(200).send('product managed by other pipeline')
