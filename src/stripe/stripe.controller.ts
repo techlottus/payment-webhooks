@@ -150,7 +150,7 @@ export class StripeController {
               }
             })
           ).subscribe(res => {
-            response.send(res);
+            response.send();
           })
         } else {
           response.status(200).send('product managed by other pipeline')
