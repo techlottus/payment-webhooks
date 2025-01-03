@@ -62,7 +62,7 @@ export class StripeController {
               const date = env.NODE_ENV === 'production' ?
                 new Date(year, month, day, hours + 24, minutes, seconds) :
                 new Date(year, month, day, hours, minutes, seconds + 30)
-              // console.log(date);
+              console.log('attrs: ', attrs);
 
               return combineLatest({
                 payment: of (payment),
