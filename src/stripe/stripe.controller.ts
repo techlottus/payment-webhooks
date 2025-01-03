@@ -42,7 +42,7 @@ export class StripeController {
               })
             }),
             mergeMap(paymentRes => {
-              // console.log('paymentRes: ', paymentRes);
+              console.log('paymentRes: ', paymentRes);
 
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
