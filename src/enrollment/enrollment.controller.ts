@@ -4,11 +4,16 @@ import { EnrollmentService } from './enrollment.service';
 import { catchError, combineLatest, mergeMap, of, switchMap } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 import * as xml2js from "xml2js"
+import { ErrorManagerService } from 'src/utils/error-manager.service';
 
 
 @Controller('enrollment')
 export class EnrollmentController {
-  constructor(private readonly enrollmentsService: EnrollmentService, private readonly utilsService: UtilsService) {}
+  constructor(
+    private readonly enrollmentsService: EnrollmentService,
+    private readonly utilsService: UtilsService,
+    public errorManager: ErrorManagerService
+  ) {}
 
   @Post('/new')
   webhook(@Req() request: any, @Res() response: any ) {
@@ -151,14 +156,17 @@ export class EnrollmentController {
         responseObs = !error
           ? {
               ...responseObs,
-              template: this.utilsService.postSelfWebhook('/email/compile', { template_id: data.payment.metadata.enrollment_template,
+              send: this.utilsService.postSelfWebhook('/email/send', {
+                template_id: data.payment.metadata.enrollment_template,
                 params: {
                   "email": data.email,
                   "campus": data.payment.metadata.SFcampus,
                   "password": !data.user.exist ? data.password : '',
                   "first_name": data.inscription.name,
                   "start_date": data.payment.date.split('T')[0]
-                }
+                },
+                to: [data.email],
+                cc: data.payment.metadata.backup_email ? [data.payment.metadata.backup_email] : []
               }).pipe(catchError((err, caught) => {
                 // console.log('err: ', err);
                 
@@ -167,105 +175,36 @@ export class EnrollmentController {
             }
           : responseObs
         return combineLatest(responseObs)
-      }),
-      mergeMap(res => {
-        
-        if (res.error) return of(res)
-        if (res.template.error) return of(res)
-
-        const { compiled, template: { subject, priority } } = res.template?.data
-        // console.log(JSON.parse(compiled));
-        // console.dir(res.template.data.compiled);
-        
-        return combineLatest({
-          payment: of(res.payment),
-          template: of(res.template),
-          email: of(res.email),
-          inscription: of(res.inscription),
-          enrollment: of(res.enrollment),
-          send: this.utilsService.postSelfWebhook('/email/salesforce/send', {
-            template: compiled,
-            subject,
-            toAddress: res.email,
-            priority,
-            ccToAddress: res.payment.metadata.backup_email || null
-          })
-        })
       })
     )
     .subscribe(responses => {
       if (responses.error) {
-        this.SendSlackMessage(responses, responses.scope, responses.error)
+
+        const fields = {
+          cs_id: responses.payment?.cs_id,
+          name: responses.inscription?.name,
+          last_name: responses.inscription?.last_name,
+          phone: responses.inscription?.phone,
+          email: responses.email,
+        }
+        // console.log(data);
+        
+        // send slack message with error
+        const metadata = {
+          scope: responses.scope,
+          error: responses.error,
+          product_name: responses.payment?.product_name,
+          inscriptionsID: responses.inscription?.id,
+          paymentsID: responses.payment?.id,
+        }
+
+        this.errorManager.ManageError(fields, metadata)
 
         // response.status(400)
         // response.send(responses.error)
       } else {
-
-        
-        const sendMessage = (data, scope, error) => {
-          this.SendSlackMessage(data, scope, error)
-        }
-        xml2js.parseString(responses.send.data,  function (err, result) {
-          // console.dir(result);
-          // console.dir(result['soapenv:Envelope']);
-  
-          const SendEmailHasError = result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].success[0] === 'false'
-          if (SendEmailHasError) {
-            const SendEmailError = {
-              fields: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].fields,
-              message: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].message,
-              statusCode: result['soapenv:Envelope']['soapenv:Body'][0].sendEmailResponse[0].result[0].errors[0].statusCode,
-            }
-            const error = SendEmailHasError ? SendEmailError : null
-            const scope = SendEmailHasError ?  'enrollment email' : null
-  
-            if (error) {
-              sendMessage(responses, scope, error)
-              response.status(400)
-              response.send(responses.error)
-            } else {
-              response.status(201)
-              response.send(responses.enrollment)
-            }
-          } 
-          
-        });
         response.send(responses.enrollment)
       }
     })
-  }
-  SendSlackMessage(data: any, scope: string, error: string) {
-    console.log('slack message data: ', data);
-    
-
-    const labels = {
-      email: 'Correo electrónico inscripción',
-      name: 'Nombres',
-      phone: 'Teléfono',
-      last_name: 'Apellidos',
-      cs_id: 'Checkout Session Id',
-    }
-    const fields = {
-      cs_id: data.payment?.cs_id,
-      name: data.inscription?.name,
-      last_name: data.inscription?.last_name,
-      phone: data.inscription?.phone,
-      email: data.email,
-    }
-    // console.log(data);
-    
-    // send slack message with error
-    const metadata = {
-      scope,
-      error,
-      product_name: data.payment?.product_name,
-      inscriptionsID: data.inscription?.id,
-      paymentsID: data.payment?.id,
-    }
-    const slackMessage = this.utilsService.generateSlackErrorMessage(labels, metadata, fields)
-    // console.log('slackMessage: ', slackMessage);
-    
-    this.utilsService.postSlackMessage(slackMessage).subscribe()
-
   }
 }

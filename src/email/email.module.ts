@@ -3,11 +3,11 @@ import { EmailService } from './email.service';
 import { EmailController } from './email.controller';
 import { UtilsService } from 'src/utils/utils.service';
 import { HttpModule } from '@nestjs/axios';
-import { ErrorManagerService } from 'src/error-manager/error-manager.service';
-import { ErrorManagerModule } from 'src/error-manager/error-manager.module';
+import { ErrorManagerService } from 'src/utils/error-manager.service';
+import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
-  imports: [HttpModule, ErrorManagerModule],
+  imports: [HttpModule, UtilsModule],
   providers: [EmailService, UtilsService, ErrorManagerService],
   controllers: [EmailController]
 })
