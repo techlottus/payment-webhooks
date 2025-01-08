@@ -60,8 +60,8 @@ export class StripeController {
               const seconds = new Date().getSeconds()
 
               const date = env.NODE_ENV === 'production' ?
-                new Date(year, month, day, hours + 24, minutes, seconds) :
-                new Date(year, month, day, hours, minutes, seconds + 30)
+                new Date(year, month, day, hours + 24, minutes, seconds).toUTCString() :
+                new Date(year, month, day, hours, minutes, seconds + 30).toUTCString()
               console.log('attrs: ', attrs);
               console.log('attrs.product_name: ', attrs.product_name);
 

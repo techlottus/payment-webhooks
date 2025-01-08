@@ -166,7 +166,7 @@ export class EnrollmentController {
                   "start_date": data.payment.date.split('T')[0]
                 },
                 to: [data.email],
-                cc: data.payment.metadata.backup_email && [data.payment.metadata.backup_email] || []
+                cc: data.payment.metadata.backup_email ? [data.payment.metadata.backup_email] : []
               }).pipe(catchError((err, caught) => {
                 // console.log('err: ', err);
                 
