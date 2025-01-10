@@ -49,8 +49,9 @@ export class StripeController {
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
+              console.log('attrs.extra_fields: ', attrs.extra_fields);
               const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno', 'name').value
-              // console.log('name: ', name);
+              console.log('name: ', name);
               // return of(paymentRes)
               const year = new Date().getFullYear()
               const month = new Date().getMonth()
