@@ -127,6 +127,7 @@ export class InscriptionsService {
                 this.stripeService.getField(
                   track_payments?.attributes?.extra_fields,
                   'residencia',
+                  'residence'
                 )?.value,
               );
               username = this.utilsService.capitalizeText(
