@@ -120,12 +120,19 @@ export class StripeService {
   }
   getField(fields: any[], key: string, optkey?: string) {
     console.log('fields: ', fields);
-    
+
     return fields?.reduce((acc, field) => {
       if (field.key === key) {
         acc = field[field.type]
       } else if (field.key === optkey) {
         acc = field[field.type]
+      }
+      return acc
+    }, '') || Object.keys(fields).map(key => ({[key]: fields[key], key})).reduce((acc, field) => {
+      if (field.key === key) {
+        acc = field[key]
+      } else if (field.key === optkey) {
+        acc = field[key]
       }
       return acc
     }, '')
