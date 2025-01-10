@@ -133,6 +133,7 @@ export class InscriptionsService {
                 this.stripeService.getField(
                   track_payments?.attributes?.extra_fields,
                   'nombredelalumno',
+                  'name'
                 )?.value,
               );
             }

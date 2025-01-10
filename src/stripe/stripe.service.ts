@@ -54,7 +54,7 @@ export class StripeService {
     const MExtraFields = JSON.parse(checkoutSessionCompleted?.metadata?.extra_fields) || {}
     
     const extra_fields = { ...customFields, ...MExtraFields }
-    console.log('extra_fields: ', extra_fields);
+    // console.log('extra_fields: ', extra_fields);
     
     // console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
@@ -128,7 +128,7 @@ export class StripeService {
           acc = field[field.type]
         }
         return acc
-      }, '') 
+      }, '')
     } catch (error) {
       return { value: Object.keys(fields).filter(innerkey => innerkey === key).map(key => fields[key])[0] }
     }
