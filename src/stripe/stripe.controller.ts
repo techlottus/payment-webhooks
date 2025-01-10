@@ -133,7 +133,11 @@ export class StripeController {
                 return of(res)
               }
               const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno', 'name').value
+              console.log('name: ', name);
+
               const curp = this.stripeService.getField(res.payment.attributes?.extra_fields, 'curp').value
+              console.log('curp: ', curp);
+
               const data = {
                 payment: {
                   ...res.payment.attributes,
