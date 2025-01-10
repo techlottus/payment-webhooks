@@ -49,7 +49,7 @@ export class StripeController {
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
-              const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno').value
+              const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno', 'name').value
               // console.log('name: ', name);
               // return of(paymentRes)
               const year = new Date().getFullYear()
@@ -131,7 +131,7 @@ export class StripeController {
               if (res.error) {
                 return of(res)
               }
-              const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno').value
+              const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno', 'name').value
               const curp = this.stripeService.getField(res.payment.attributes?.extra_fields, 'curp').value
               const data = {
                 payment: {
