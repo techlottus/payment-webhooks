@@ -157,6 +157,7 @@ export class EnrollmentController {
           ? {
               ...responseObs,
               send: this.utilsService.postSelfWebhook('/email/send', {
+                from: "admisiones",
                 template_id: data.payment.metadata.enrollment_template,
                 params: {
                   "email": data.email,
@@ -200,8 +201,8 @@ export class EnrollmentController {
 
         this.errorManager.ManageError(fields, metadata)
 
-        // response.status(400)
-        // response.send(responses.error)
+        response.status(400)
+        response.send(responses.error)
       } else {
         response.send(responses.enrollment)
       }
