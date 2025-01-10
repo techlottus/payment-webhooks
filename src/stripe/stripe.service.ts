@@ -130,7 +130,7 @@ export class StripeService {
         return acc
       }, '') 
     } catch (error) {
-      return Object.keys(fields).filter(innerkey => innerkey === key).map(key => fields[key])[0]
+      return { value: Object.keys(fields).filter(innerkey => innerkey === key).map(key => fields[key])[0] }
     }
   }
 }
