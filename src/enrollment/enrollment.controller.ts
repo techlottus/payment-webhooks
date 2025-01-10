@@ -167,9 +167,10 @@ export class EnrollmentController {
                   "start_date": data.payment.date.split('T')[0]
                 },
                 to: [data.email],
-                cc: data.payment.metadata.backup_email ? [data.payment.metadata.backup_email] : []
+                cc: data.payment.metadata.backup_email ? [data.payment.metadata.backup_email] : [],
+                scope: "enrollment"
               }).pipe(catchError((err, caught) => {
-                // console.log('err: ', err);
+                console.log('err: ', err);
                 
                 return of({error: true, ...err})
               }))
@@ -201,8 +202,8 @@ export class EnrollmentController {
 
         this.errorManager.ManageError(fields, metadata)
 
-        response.status(400)
-        response.send(responses.error)
+        // response.status(400)
+        // response.send(responses.error)
       } else {
         response.send(responses.enrollment)
       }
