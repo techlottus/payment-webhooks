@@ -51,7 +51,7 @@ export class StripeService {
     const metadata = checkoutSessionCompleted.metadata
     // console.log('metadata: ', metadata);
     const customFields = checkoutSessionCompleted?.custom_fields || {}
-    const MExtraFields = checkoutSessionCompleted?.metadata?.extra_fields || {}
+    const MExtraFields = JSON.parse(checkoutSessionCompleted?.metadata?.extra_fields) || {}
     
     const extra_fields = { ...customFields, ...MExtraFields }
     console.log('extra_fields: ', extra_fields);
