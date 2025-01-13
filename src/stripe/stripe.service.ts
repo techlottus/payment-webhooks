@@ -85,7 +85,7 @@ export class StripeService {
         'payment_method'
       ]
     })
-    // console.log('payment_intent: ', payment_intent);
+    console.log('payment_intent: ', payment_intent);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     // console.log('order_id: ', order_id);
     // if (metadata.SFlevel === 'Educación Continua' || metadata.SFcampus === 'UTC A TU RITMO' ) {
