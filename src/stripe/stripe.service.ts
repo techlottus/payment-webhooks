@@ -27,7 +27,8 @@ export class StripeService {
         ],
       }
     );
-    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    console.log('checkoutSessionCompleted.total_details: ', checkoutSessionCompleted.total_details);
     
     
     const cs_id = checkoutSessionCompleted.id
@@ -74,6 +75,7 @@ export class StripeService {
     const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
     // console.log('payment_id: ', payment_id);
     
+    console.log('checkoutSessionCompleted.subscription: ', checkoutSessionCompleted.subscription);
     const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.id : null
     // console.log('subscription_id: ', subscription_id);
 
