@@ -23,11 +23,12 @@ export class StripeService {
           'subscription',
           'subscription.latest_invoice',
           'subscription.latest_invoice.charge',
-          'invoice'
+          'invoice',
+          'total_details.breakdown'
         ],
       }
     );
-    console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
+    // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     console.log('checkoutSessionCompleted.total_details: ', checkoutSessionCompleted.total_details);
     
     
@@ -35,9 +36,9 @@ export class StripeService {
     // console.log('cs_id: ', cs_id);
     
     const line_items = checkoutSessionCompleted.line_items
-    console.log('line_items: ', line_items);
-    console.log('line_items.data[0]: ', line_items.data[0]);
-    console.log('line_items.data[0][0]: ', line_items.data[0][0]);
+    // console.log('line_items: ', line_items);
+    // console.log('line_items.data[0]: ', line_items.data[0]);
+    // console.log('line_items.data[0][0]: ', line_items.data[0][0]);
     
     const status = checkoutSessionCompleted.payment_status
     // console.log('status: ', status);
@@ -77,7 +78,7 @@ export class StripeService {
     const payment_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.payment_intent : checkoutSessionCompleted.payment_intent
     // console.log('payment_id: ', payment_id);
     
-    console.log('checkoutSessionCompleted.subscription: ', checkoutSessionCompleted.subscription);
+    // console.log('checkoutSessionCompleted.subscription: ', checkoutSessionCompleted.subscription);
     const subscription_id = !!checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.id : null
     // console.log('subscription_id: ', subscription_id);
 
@@ -89,7 +90,7 @@ export class StripeService {
         'payment_method'
       ]
     })
-    console.log('payment_intent: ', payment_intent);
+    // console.log('payment_intent: ', payment_intent);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     // console.log('order_id: ', order_id);
     // if (metadata.SFlevel === 'Educación Continua' || metadata.SFcampus === 'UTC A TU RITMO' ) {
@@ -123,7 +124,7 @@ export class StripeService {
     return false
   }
   getField(fields: any[], key: string, optkey?: string) {
-    console.log('fields: ', fields);
+    // console.log('fields: ', fields);
     try {
       return fields?.reduce((acc, field) => {
         if (field.key === key) {
