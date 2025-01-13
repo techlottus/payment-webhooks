@@ -35,7 +35,9 @@ export class StripeService {
     // console.log('cs_id: ', cs_id);
     
     const line_items = checkoutSessionCompleted.line_items
-    // console.log('line_items: ', line_items);
+    console.log('line_items: ', line_items);
+    console.log('line_items.data[0]: ', line_items.data[0]);
+    console.log('line_items.data[0][0]: ', line_items.data[0][0]);
     
     const status = checkoutSessionCompleted.payment_status
     // console.log('status: ', status);
