@@ -30,6 +30,7 @@ export class StripeService {
     );
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
     console.log('checkoutSessionCompleted.total_details: ', checkoutSessionCompleted.total_details);
+    console.log('checkoutSessionCompleted.total_details.breakdown.discounts[0]: ', checkoutSessionCompleted.total_details.breakdown.discounts[0]);
     
     
     const cs_id = checkoutSessionCompleted.id
