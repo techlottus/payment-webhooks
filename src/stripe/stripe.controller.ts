@@ -44,7 +44,7 @@ export class StripeController {
               })
             }),
             mergeMap(paymentRes => {
-              console.log('paymentRes: ', paymentRes);
+              // console.log('paymentRes: ', paymentRes);
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
@@ -64,9 +64,9 @@ export class StripeController {
               
               const payment = subscriptionRes.payment.data.data
               const attrs = payment.attributes
-              console.log('attrs.extra_fields: ', attrs.extra_fields);
+              // console.log('attrs.extra_fields: ', attrs.extra_fields);
               const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno', 'name').value
-              console.log('name: ', name);
+              // console.log('name: ', name);
               // return of(subscriptionRes)
               const year = new Date().getFullYear()
               const month = new Date().getMonth()
@@ -78,8 +78,8 @@ export class StripeController {
               const date = env.NODE_ENV === 'production' ?
                 new Date(year, month, day, hours + 24, minutes, seconds).toUTCString() :
                 new Date(year, month, day, hours, minutes, seconds + 30).toUTCString()
-              console.log('attrs: ', attrs);
-              console.log('attrs.product_name: ', attrs.product_name);
+              // console.log('attrs: ', attrs);
+              // console.log('attrs.product_name: ', attrs.product_name);
 
               return combineLatest({
                 payment: of (payment),
@@ -148,10 +148,10 @@ export class StripeController {
                 return of(res)
               }
               const name = this.stripeService.getField(res.payment.attributes?.extra_fields, 'nombredelalumno', 'name').value
-              console.log('name: ', name);
+              // console.log('name: ', name);
 
               const curp = this.stripeService.getField(res.payment.attributes?.extra_fields, 'curp').value
-              console.log('curp: ', curp);
+              // console.log('curp: ', curp);
 
               const data = {
                 payment: {
@@ -183,9 +183,9 @@ export class StripeController {
         // console.log('checkoutSessionExpired: ', checkoutSessionExpired);
         // Then define and call a function to handle the event checkout.session.expired
         break;
-      case 'subscription_schedule.updated':
-        const subscriptionScheduleUpdated = event.data.object;
-        // console.log('subscriptionScheduleUpdated: ', subscriptionScheduleUpdated);
+      case 'customer.subscription.updated':
+        const subscriptionUpdated = event.data.object;
+        console.log('subscriptionUpdated: ', subscriptionUpdated);
 
         // Then define and call a function to handle the event subscription_schedule.updated
         break;

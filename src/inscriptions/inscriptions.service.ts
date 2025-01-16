@@ -55,10 +55,10 @@ export class InscriptionsService {
                     res.inscription.data.data[0].attributes.last_name &&
                     res.inscription.data.data[0].attributes.birthdate,
                 };
-            console.log('res.payment: ', res.payment);
+            // console.log('res.payment: ', res.payment);
             const track_payments = res.payment.data.data[0];
-            console.log('formResponse: ', formResponse);
-            console.log('track payments: ', track_payments);
+            // console.log('formResponse: ', formResponse);
+            // console.log('track payments: ', track_payments);
 
             const answers = !formResponse
               ? null
@@ -139,9 +139,9 @@ export class InscriptionsService {
               );
             }
 
-            console.log('curp: ', curp);
-            console.log('residence: ', residence);
-            console.log('username: ', username);
+            // console.log('curp: ', curp);
+            // console.log('residence: ', residence);
+            // console.log('username: ', username);
 
             const curpObservable =
               !!curp && residence === 'Nacional' && !track_inscriptions.filled
@@ -161,7 +161,7 @@ export class InscriptionsService {
           }),
 
           mergeMap((res: any) => {
-            console.log('res: ', res);
+            // console.log('res: ', res);
 
             if (res.curp?.error || res.curp?.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
@@ -278,7 +278,7 @@ export class InscriptionsService {
             });
           }),
           mergeMap((res) => {
-            console.log('res: ', res);
+            // console.log('res: ', res);
             // console.log('res.inscription.data?.data[0]: ', res.inscription.data?.data[0]);
 
             if (

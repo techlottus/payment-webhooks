@@ -29,8 +29,8 @@ export class StripeService {
       }
     );
     // console.log('checkoutSessionCompleted: ', checkoutSessionCompleted);
-    console.log('checkoutSessionCompleted.total_details: ', checkoutSessionCompleted.total_details);
-    console.log('checkoutSessionCompleted.total_details.breakdown.discounts[0]: ', checkoutSessionCompleted.total_details.breakdown.discounts[0]);
+    // console.log('checkoutSessionCompleted.total_details: ', checkoutSessionCompleted.total_details);
+    // console.log('checkoutSessionCompleted.total_details.breakdown.discounts[0]: ', checkoutSessionCompleted.total_details.breakdown.discounts[0]);
     
     
     const cs_id = checkoutSessionCompleted.id
@@ -146,6 +146,7 @@ export class StripeService {
       ],
       end_behavior: 'cancel',
     })
+    console.log('new_subscription_schedule: ', new_subscription_schedule);
     return await new_subscription_schedule
     
   }
