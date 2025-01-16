@@ -187,7 +187,7 @@ export class StripeController {
         const subscriptionUpdated = event.data.object;
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
-        const sub = rawSub.json()
+        const sub = await rawSub
         console.log('sub: ', sub);
 
         // sub.subscribe(res => {
