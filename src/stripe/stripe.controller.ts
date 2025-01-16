@@ -189,6 +189,7 @@ export class StripeController {
         const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         const sub = await rawSub
         console.log('sub: ', sub);
+        console.log('sub.phases[0]: ', sub.phases[0]);
 
         // sub.subscribe(res => {
           
