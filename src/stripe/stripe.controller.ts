@@ -45,14 +45,28 @@ export class StripeController {
             }),
             mergeMap(paymentRes => {
               console.log('paymentRes: ', paymentRes);
-
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
+              const attrs = payment.attributes
+              return combineLatest({
+                payment: of (paymentRes),
+                subscription: !!attrs.metadata.iterations ?
+                    of(this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations))
+                   : of (false)
+              })              
+
+            }),
+            mergeMap(subscriptionRes => { 
+
+              const subscription = subscriptionRes.subscription_id
+              console.log('subscription: ', subscription);
+              
+              const payment = subscriptionRes.payment.data.data
               const attrs = payment.attributes
               console.log('attrs.extra_fields: ', attrs.extra_fields);
               const name = this.stripeService.getField(attrs.extra_fields, 'nombredelalumno', 'name').value
               console.log('name: ', name);
-              // return of(paymentRes)
+              // return of(subscriptionRes)
               const year = new Date().getFullYear()
               const month = new Date().getMonth()
               const day = new Date().getDate()
