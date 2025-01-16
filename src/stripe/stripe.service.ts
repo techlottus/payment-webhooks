@@ -125,14 +125,14 @@ export class StripeService {
     return false
   }
   generateSubscriptionSchedule(subscription_id: string, iterations: number) {
-    const subscription_schedule = stripe.subscription_schedules.create({
+    const subscription_schedule = stripe.subscriptionSchedules.create({
       from_subscription: subscription_id,
     })
     console.log('subscription_schedule: ', subscription_schedule);
 
     const { phases, id, current_phase } = subscription_schedule
 
-    const new_subscription_schedule = stripe.subscription_schedules.update(id, {
+    const new_subscription_schedule = stripe.subscriptionSchedules.update(id, {
       phases: [
         {
           items: [
