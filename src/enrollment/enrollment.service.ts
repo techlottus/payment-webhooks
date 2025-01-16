@@ -66,13 +66,16 @@ export class EnrollmentService {
     return this.callEnrollmentService(req, provider)
 
   }
-  enrollStudent(user: number, course: number, provider: string) {
+  enrollStudent(user: number, course: number, provider: string, time_end?: string) {
     const wsfunction = 'enrol_manual_enrol_users'
     const req = {
       'enrolments[0][roleid]': 5, // 5: student roleId moodle
       'enrolments[0][userid]': user,
       'enrolments[0][courseid]': course,
       wsfunction
+    }
+    if (time_end) {
+      req['enrolments[0][timeend]'] = time_end
     }
     return this.callEnrollmentService(req, provider)
 
