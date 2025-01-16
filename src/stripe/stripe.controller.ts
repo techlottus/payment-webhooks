@@ -51,8 +51,8 @@ export class StripeController {
               return combineLatest({
                 payment: of (paymentRes),
                 subscription: !!attrs.metadata.iterations ?
-                    of(this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations))
-                   : of (false)
+                  of(this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations, {...attrs.metadata, cs_id: attrs.cs_id})) :
+                  of (false)
               })              
 
             }),

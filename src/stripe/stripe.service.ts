@@ -124,7 +124,7 @@ export class StripeService {
     // }
     return false
   }
-  async generateSubscriptionSchedule(subscription_id: string, iterations: number) {
+  async generateSubscriptionSchedule(subscription_id: string, iterations: number, metadata: any) {
     const subscription_schedule = await stripe.subscriptionSchedules.create({
       from_subscription: subscription_id,
     })
@@ -144,6 +144,10 @@ export class StripeService {
           start_date: current_phase.start_date,
         },
       ],
+      metadata: {
+        iterations,
+        ...metadata
+      },
       end_behavior: 'cancel',
     })
     console.log('new_subscription_schedule: ', new_subscription_schedule);
