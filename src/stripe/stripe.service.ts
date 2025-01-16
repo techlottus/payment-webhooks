@@ -150,6 +150,15 @@ export class StripeService {
     return await new_subscription_schedule
     
   }
+
+
+  async getSubscription(subscription_id: string) {
+    return await stripe.subscriptions.retrieve(subscription_id,{
+        expand: [
+          'schedule',
+        ],
+      })
+  }
   getField(fields: any[], key: string, optkey?: string) {
     // console.log('fields: ', fields);
     try {

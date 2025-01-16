@@ -185,7 +185,15 @@ export class StripeController {
         break;
       case 'customer.subscription.updated':
         const subscriptionUpdated = event.data.object;
-        console.log('subscriptionUpdated: ', subscriptionUpdated);
+        // console.log('subscriptionUpdated: ', subscriptionUpdated);
+        const sub =  of(this.stripeService.getSubscription(subscriptionUpdated.id))
+
+
+        sub.subscribe(res => {
+          console.log('res: ', res);
+          
+        })
+        response.status(200).send('product managed by other pipeline')
 
         // Then define and call a function to handle the event subscription_schedule.updated
         break;
