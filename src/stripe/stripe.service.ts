@@ -124,6 +124,31 @@ export class StripeService {
     // }
     return false
   }
+  generateSubscriptionSchedule(subscription_id: string, iterations: number) {
+    const subscription_schedule = stripe.subscription_schedule.create({
+      from_subscription: subscription_id,
+    })
+    console.log('subscription_schedule: ', subscription_schedule);
+
+    const { phases, id, current_phase } = subscription_schedule
+
+    const new_subscription_schedule = stripe.subscription_schedule.update(id, {
+      phases: [
+        {
+          items: [
+            {
+              price: phases[0].items[0].price,
+            },
+          ],
+          iterations,
+          start_date: current_phase.start_date,
+        },
+      ],
+      end_behavior: 'cancel',
+    })
+    return new_subscription_schedule
+    
+  }
   getField(fields: any[], key: string, optkey?: string) {
     // console.log('fields: ', fields);
     try {
