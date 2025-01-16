@@ -59,6 +59,7 @@ export class StripeController {
             mergeMap(subscriptionRes => { 
 
               const subscription = subscriptionRes.subscription_id
+              
               console.log('subscription: ', subscription);
               
               const payment = subscriptionRes.payment.data.data
