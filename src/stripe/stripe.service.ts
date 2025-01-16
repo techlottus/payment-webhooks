@@ -146,7 +146,7 @@ export class StripeService {
       ],
       end_behavior: 'cancel',
     })
-    return new_subscription_schedule
+    return await new_subscription_schedule
     
   }
   getField(fields: any[], key: string, optkey?: string) {
