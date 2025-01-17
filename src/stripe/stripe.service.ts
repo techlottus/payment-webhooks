@@ -133,7 +133,8 @@ export class StripeService {
 
     const { phases, id, current_phase } = subscription_schedule
 
-    let date = null
+    let start_date = null
+    let end_date = null
     const year = new Date(current_phase.start_date).getFullYear()
     const month = new Date(current_phase.start_date).getMonth()
     const day = new Date(current_phase.start_date).getDay()
@@ -141,13 +142,16 @@ export class StripeService {
     for (let index = 0; index < iterations - 1; index++) {
       switch (subscription.plan.interval) {
         case 'day':
-          date = new Date(year, month, day + (subscription.plan.interval_count * (index)))
+          start_date = new Date(year, month, day + (subscription.plan.interval_count * (index)))
+          end_date = new Date(year, month, day + (subscription.plan.interval_count * (index + 1)))
           break;
         case 'month':
-          date = new Date(year, month + (subscription.plan.interval_count * (index)), day)
+          start_date = new Date(year, month + (subscription.plan.interval_count * (index)), day)
+          end_date = new Date(year, month + (subscription.plan.interval_count * (index + 1)), day)
           break;
         case 'year':
-          date = new Date(year + (subscription.plan.interval_count * (index)), month, day)
+          start_date = new Date(year + (subscription.plan.interval_count * (index)), month, day)
+          end_date = new Date(year + (subscription.plan.interval_count * (index + 1)), month, day)
           break;
       
         default:
@@ -159,7 +163,8 @@ export class StripeService {
               price: phases[0].items[0].price,
             },
           ],
-          start_date: current_phase.start_date,
+          start_date,
+          end_date,
         })
       
     }
