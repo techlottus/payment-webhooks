@@ -130,19 +130,42 @@ export class StripeService {
     })
     console.log('subscription_schedule: ', subscription_schedule);
 
-    const { phases, id, current_phase } = subscription_schedule
+    const { phases, id, current_phase, plan } = subscription_schedule
 
-    const new_subscription_schedule = await stripe.subscriptionSchedules.update(id, {
-      phases: [
-        {
+    let date = null
+    const year = new Date(current_phase.start_date).getFullYear()
+    const month = new Date(current_phase.start_date).getMonth()
+    const day = new Date(current_phase.start_date).getDay()
+    const phasesArray = []
+    for (let index = 0; index < iterations - 1; index++) {
+      switch (plan.interval) {
+        case 'day':
+          date = new Date(year, month, day + (plan.interval_count * (index)))
+          break;
+        case 'month':
+          date = new Date(year, month + (plan.interval_count * (index)), day)
+          break;
+        case 'year':
+          date = new Date(year + (plan.interval_count * (index)), month, day)
+          break;
+      
+        default:
+          break;
+      }
+      phasesArray.push({
           items: [
             {
               price: phases[0].items[0].price,
             },
           ],
-          iterations,
           start_date: current_phase.start_date,
-        },
+        })
+      
+    }
+
+    const new_subscription_schedule = await stripe.subscriptionSchedules.update(id, {
+      phases: [
+        
       ],
       metadata: {
         iterations,
