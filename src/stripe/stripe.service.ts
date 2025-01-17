@@ -125,12 +125,13 @@ export class StripeService {
     return false
   }
   async generateSubscriptionSchedule(subscription_id: string, iterations: number, metadata: any) {
+    const subscription = await stripe.subscriptions.retrieve(subscription_id)
     const subscription_schedule = await stripe.subscriptionSchedules.create({
       from_subscription: subscription_id,
     })
     console.log('subscription_schedule: ', subscription_schedule);
 
-    const { phases, id, current_phase, plan } = subscription_schedule
+    const { phases, id, current_phase } = subscription_schedule
 
     let date = null
     const year = new Date(current_phase.start_date).getFullYear()
@@ -138,15 +139,15 @@ export class StripeService {
     const day = new Date(current_phase.start_date).getDay()
     const phasesArray = []
     for (let index = 0; index < iterations - 1; index++) {
-      switch (plan.interval) {
+      switch (subscription.plan.interval) {
         case 'day':
-          date = new Date(year, month, day + (plan.interval_count * (index)))
+          date = new Date(year, month, day + (subscription.plan.interval_count * (index)))
           break;
         case 'month':
-          date = new Date(year, month + (plan.interval_count * (index)), day)
+          date = new Date(year, month + (subscription.plan.interval_count * (index)), day)
           break;
         case 'year':
-          date = new Date(year + (plan.interval_count * (index)), month, day)
+          date = new Date(year + (subscription.plan.interval_count * (index)), month, day)
           break;
       
         default:
