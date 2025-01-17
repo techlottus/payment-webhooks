@@ -165,9 +165,7 @@ export class StripeService {
     }
 
     const new_subscription_schedule = await stripe.subscriptionSchedules.update(id, {
-      phases: [
-        
-      ],
+      phases: phasesArray,
       metadata: {
         iterations,
         ...metadata
