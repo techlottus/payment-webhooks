@@ -163,8 +163,8 @@ export class StripeService {
               price: phases[0].items[0].price,
             },
           ],
-          start_date,
-          end_date,
+          start_date: start_date.getTime(),
+          end_date: end_date.getTime(),
         })
       
     }
