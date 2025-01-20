@@ -67,6 +67,9 @@ export class EmailController {
     if (!body.to) {
       response.status(400).send("please send a to")
     }
+    if (typeof body.to !== 'object') {
+      response.status(400).send("please send an array of to")
+    }
     if (!body.from) {
       response.status(400).send("please send a from")
     }
