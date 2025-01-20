@@ -29,31 +29,32 @@ export class StripeController {
       case 'checkout.session.completed':
 
         const strapiReq = await this.stripeService.populateCS(event)
-        const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq)
+        const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq) 
         if (strapiReq) {
           // console.log('strapiReq: ', strapiReq);
 
           paymentObs.pipe(
             catchError((err) => {
-              console.log('payment data error', err)
-              console.log('payment data error', err.response.data)
-              console.log('payment data error', err.response.data.error)
+              console.log('payment data error', err.response.data.error.details.errors)
               return of({
                 error: true,
                 ...err.data.error
               })
             }),
-            mergeMap(paymentRes => {
+            mergeMap( paymentRes => {
               // console.log('paymentRes: ', paymentRes);
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
+              const getsub = async () => {
+                return await this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations, {...attrs.metadata, cs_id: attrs.cs_id})
+              }
               return combineLatest({
                 payment: of (paymentRes),
                 subscription: !!attrs.metadata.iterations ?
-                  of(this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations, {...attrs.metadata, cs_id: attrs.cs_id})) :
+                  of(getsub()) :
                   of (false)
-              })              
+              })
 
             }),
             mergeMap(subscriptionRes => { 
@@ -189,7 +190,7 @@ export class StripeController {
         const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         const sub = await rawSub
         console.log('sub: ', sub);
-        console.log('sub.schedule.phases[0]: ', sub.schedule.phases[0]);
+        console.log('sub.default_payment_method: ', sub.default_payment_method);
 
         // sub.subscribe(res => {
           

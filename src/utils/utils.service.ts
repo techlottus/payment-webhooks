@@ -9,7 +9,6 @@ export class UtilsService {
   constructor(private readonly http: HttpService) {}
   StrapiTrackingConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
   StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
-  
 
   postStrapi (endpoint: string, data: any) {
     return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.StrapiTrackingConfig)

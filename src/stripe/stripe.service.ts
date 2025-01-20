@@ -53,7 +53,10 @@ export class StripeService {
     const phone = checkoutSessionCompleted.customer_details.phone
     // console.log('phone: ', phone);
     
-    const metadata = checkoutSessionCompleted.metadata
+    const metadata = checkoutSessionCompleted.metadata.extra_fields 
+      ? {...checkoutSessionCompleted.metadata, extra_fields: null}
+      : checkoutSessionCompleted.metadata
+
     // console.log('metadata: ', metadata);
     const customFields = checkoutSessionCompleted?.custom_fields || {}
     const MExtraFields = JSON.parse(checkoutSessionCompleted?.metadata?.extra_fields) || {}
@@ -91,7 +94,7 @@ export class StripeService {
         'payment_method'
       ]
     })
-    // console.log('payment_intent: ', payment_intent);
+    console.log('payment_intent: ', payment_intent);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     // console.log('order_id: ', order_id);
     // if (metadata.SFlevel === 'Educación Continua' || metadata.SFcampus === 'UTC A TU RITMO' ) {
@@ -135,37 +138,68 @@ export class StripeService {
 
     let start_date = null
     let end_date = null
-    const year = new Date(current_phase.start_date).getFullYear()
-    const month = new Date(current_phase.start_date).getMonth()
-    const day = new Date(current_phase.start_date).getDay()
+    const currentDate = new Date(current_phase.start_date * 1000)
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    const day = currentDate.getDate()
+    const hours = currentDate.getHours()
+    const minutes = currentDate.getMinutes()
+    const seconds = currentDate.getSeconds()
+    const miliseconds = currentDate.getMilliseconds()
+    console.log('year: ', year);
+    console.log('month: ', month);
+    console.log('day: ', day);
+    console.log('hours: ', hours);
+    console.log('minutes: ', minutes);
+    console.log('seconds: ', seconds);
+    console.log('miliseconds: ', miliseconds);
+
     const phasesArray = []
-    for (let index = 0; index < iterations - 1; index++) {
+    for (let index = 0; index < iterations; index++) {
       switch (subscription.plan.interval) {
         case 'day':
-          start_date = new Date(year, month, day + (subscription.plan.interval_count * (index)))
-          end_date = new Date(year, month, day + (subscription.plan.interval_count * (index + 1)))
+          start_date = new Date(year, month, day + (subscription.plan.interval_count * (index)), hours, minutes, seconds, miliseconds)
+          end_date = new Date(year, month, day + (subscription.plan.interval_count * (index + 1)), hours, minutes, seconds, miliseconds)
           break;
         case 'month':
-          start_date = new Date(year, month + (subscription.plan.interval_count * (index)), day)
-          end_date = new Date(year, month + (subscription.plan.interval_count * (index + 1)), day)
+          start_date = new Date(year, month + (subscription.plan.interval_count * (index)), day, hours, minutes, seconds, miliseconds)
+          end_date = new Date(year, month + (subscription.plan.interval_count * (index + 1)), day, hours, minutes, seconds, miliseconds)
           break;
         case 'year':
-          start_date = new Date(year + (subscription.plan.interval_count * (index)), month, day)
-          end_date = new Date(year + (subscription.plan.interval_count * (index + 1)), month, day)
+          start_date = new Date(year + (subscription.plan.interval_count * (index)), month, day, hours, minutes, seconds, miliseconds)
+          end_date = new Date(year + (subscription.plan.interval_count * (index + 1)), month, day, hours, minutes, seconds, miliseconds)
           break;
       
         default:
           break;
       }
-      phasesArray.push({
+      if (index === 0) {
+        phasesArray.push({
           items: [
             {
               price: phases[0].items[0].price,
             },
           ],
-          start_date: start_date.getTime(),
-          end_date: end_date.getTime(),
+          start_date: phases[0].start_date,
+          end_date: end_date.getTime() / 1000,
         })
+      } else {
+
+        
+        console.log('start_date: ', start_date);
+        console.log('end_date: ', end_date);
+        
+        phasesArray.push({
+          items: [
+            {
+              price: phases[0].items[0].price,
+            },
+          ],
+          proration_behavior: 'none',
+          start_date: start_date.getTime() / 1000,
+          end_date: end_date.getTime() / 1000,
+        })
+      }
       
     }
 
@@ -176,6 +210,7 @@ export class StripeService {
         ...metadata
       },
       end_behavior: 'cancel',
+      proration_behavior: 'none',
     })
     console.log('new_subscription_schedule: ', new_subscription_schedule);
     return await new_subscription_schedule
@@ -187,6 +222,7 @@ export class StripeService {
     return await stripe.subscriptions.retrieve(subscription_id,{
         expand: [
           'schedule',
+          'default_payment_method',  
         ],
       })
   }

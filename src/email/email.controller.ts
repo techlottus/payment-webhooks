@@ -92,6 +92,9 @@ export class EmailController {
 
           const compiled = template(params)
           const subject = presubject(params)
+          console.log('body: ', body);
+          console.log('body.to: ', body.to);
+          console.log('typeof body.to: ', typeof body.to);
 
           return combineLatest({
             send: from(mg.messages.create(domain, {
@@ -108,6 +111,15 @@ export class EmailController {
           })
         }),
         mergeMap(res => {
+          if (res.send.error) {
+            return combineLatest({
+              send: of(res.send),
+              compiled: of(res.compiled),
+              template_data: of(res.template_data),
+              track: null
+            }) 
+          }
+          
         const trackEmailsData = {
             template: res.template_data.name,
             template_id: `${body.template_id}`,
@@ -136,18 +148,24 @@ export class EmailController {
 
       )
       .subscribe((res) => {
-        const status = res.track.status || res.track.response.status
-        
-        const msg = JSON.stringify(res.track.data || res)
         if (res.send.error) {
-          this.errorManager.ManageError({ to: body.to.join(", ") }, {
-            scope: 'send email',
-            error: `${res.send.message}: ${res.send.details}`,
-            emailID: res.track.data.data.id,
-            email_template: res.template_data.name
-          })
+          return of(res)
+        } else if(res.track) {
+
+          const status = res.track.status || res.track.response.status
+          
+          const msg = JSON.stringify(res.track.data || res)
+          if (res.send.error) {
+            this.errorManager.ManageError({ to: body.to?.join(", ") }, {
+              scope: 'send email',
+              error: `${res.send.message}: ${res.send.details}`,
+              emailID: res.track.data.data.id,
+              email_template: res.template_data.name
+            })
+          }
+          response.status(status).send(msg)
         }
-        response.status(status).send(msg)
+
       })
 
     
