@@ -213,7 +213,8 @@ export class StripeService {
       proration_behavior: 'none',
     })
     console.log('new_subscription_schedule: ', new_subscription_schedule);
-    return await new_subscription_schedule
+
+    return await stripe.subscriptions.retrieve(new_subscription_schedule.subscription)
     
   }
 
