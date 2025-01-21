@@ -199,6 +199,21 @@ export class StripeController {
 
         // Then define and call a function to handle the event subscription_schedule.updated
         break;
+      case 'invoice.upcoming':
+        const invoice = event.data.object;
+        // console.log('subscriptionUpdated: ', subscriptionUpdated);
+        // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
+        // const sub = await rawSub
+        console.log('invoice: ', invoice);
+        // console.log('sub.default_payment_method: ', sub.default_payment_method);
+
+        // sub.subscribe(res => {
+          
+        // })
+        response.status(200).send('product managed by other pipeline')
+
+        // Then define and call a function to handle the event subscription_schedule.updated
+        break;
         // ... handle other event types
       default:
         console.log(`Unhandled event type ${event.type}`);
