@@ -46,8 +46,8 @@ export class StripeController {
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
-              const getsub = async () => {
-                return await this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations, {...attrs.metadata, cs_id: attrs.cs_id})
+              const getsub = () => {
+                return this.stripeService.generateSubscriptionSchedule(attrs.subscription_id, attrs.metadata.iterations, {...attrs.metadata, cs_id: attrs.cs_id})
               }
               return combineLatest({
                 payment: of (paymentRes),
