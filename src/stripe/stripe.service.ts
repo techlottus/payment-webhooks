@@ -231,7 +231,7 @@ export class StripeService {
     })
     console.log('new_subscription_schedule: ', new_subscription_schedule);
 
-    return await stripe.subscriptions.retrieve(new_subscription_schedule.subscription)
+    return new_subscription_schedule
     
   }
 

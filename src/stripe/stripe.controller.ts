@@ -42,7 +42,7 @@ export class StripeController {
               })
             }),
             mergeMap( paymentRes => {
-              console.log('paymentRes: ', paymentRes);
+              // console.log('paymentRes: ', paymentRes);
               if (paymentRes.error) return of(paymentRes)
               const payment = paymentRes.data.data
               const attrs = payment.attributes
@@ -59,9 +59,9 @@ export class StripeController {
             }),
             mergeMap(subscriptionRes => { 
 
-              const subscription = subscriptionRes.subscription
+              const subscriptionSchedule = subscriptionRes.subscription
 
-              console.log('subscription: ', subscription);
+              // console.log('subscriptionSchedule: ', subscriptionSchedule);
               
               const payment = subscriptionRes.payment.data.data
               const attrs = payment.attributes
@@ -186,7 +186,7 @@ export class StripeController {
         break;
       case 'customer.subscription.updated':
         const subscriptionUpdated = event.data.object;
-        // console.log('subscriptionUpdated: ', subscriptionUpdated);
+        console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
         // console.log('sub: ', sub);
