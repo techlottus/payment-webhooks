@@ -238,9 +238,42 @@ export class StripeController {
 
         console.log('p_succeeded: ', p_succeeded);
           // p_succeeded.subscription
-          // p_succeeded.invoice
-        const payment = await stripe.payment_intents.retrieve(p_succeeded.id)
-        console.log('payment: ', payment);
+          // p_succeeded.id
+          // p_succeeded.charge
+          // p_succeeded.status
+
+          // p_succeeded.period_start
+          // p_succeeded.period_end
+
+        const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`]).pipe(
+          catchError((err, caught) => {
+            console.log(err);
+            
+            return caught
+          })
+        )
+
+
+        tracksub.pipe(
+          mergeMap(tracksub => {
+            console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
+            const track = tracksub.data.data[0]
+            const phases = track.phases.map(phase => {
+              console.log('is start same');
+              console.log(phase.start_date === new Date(p_succeeded.period_start * 1000));
+              console.log(phase.end_date === new Date(p_succeeded.period_end * 1000));
+              
+              const newPhase = phase
+              return newPhase
+            })
+            return of(tracksub)
+          })
+        ).subscribe(res => {
+          console.log(res);
+          
+        })
+
+        // console.log('payment: ', payment);
 
         response.status(200).send('product managed by other pipeline')
 
