@@ -187,23 +187,24 @@ export class StripeController {
       case 'customer.subscription.updated':
         const subscriptionUpdated = event.data.object;
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
-        const sub =  this.stripeService.getSubscription(subscriptionUpdated.id)
+        const sub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         console.log('sub: ', sub);
+        if (sub) {
+          const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
 
-        const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
-        
-        trackingObs.pipe(
-          catchError((err) => {
-            console.log('subscription data error', err.response.data.error.details.errors)
-            return of({
-              error: true,
-              ...err.data.error
-            })
-          }),
-        ).subscribe(res => {
-          console.log(res);
-          
-        })
+          trackingObs.pipe(
+            catchError((err) => {
+              console.log('subscription data error', err.response.data.error.details.errors)
+              return of({
+                error: true,
+                ...err.data.error
+              })
+            }),
+          ).subscribe(res => {
+            console.log(res);
+            
+          })
+        }
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
         // console.log('sub.schedule: ', sub.schedule);
         // console.log('sub..schedule.phases: ', sub.schedule.phases);
