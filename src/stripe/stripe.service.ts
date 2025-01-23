@@ -120,14 +120,7 @@ export class StripeService {
       card_type: payment_intent.payment_method.card.funding,
       extra_fields,
       payment_gateway: 'Stripe',
-      coupons: {
-        discount_id: discount?.id,
-        amount_off: discount?.coupon?.amount_off,
-        percent_off: discount?.coupon?.percent_off,
-        promotion_code: discount?.promotion_code,
-        coupon_id: discount?.coupon?.id,
-      },
-      card_last_4: payment_intent.payment_method.card?.card?.last4,
+      card_last_4: payment_intent.payment_method.card?.last4,
     }
     // console.log('request: ', request);
 
@@ -135,9 +128,21 @@ export class StripeService {
     // console.log('charge: ', charge , '\n');
     // console.log('latest_invoice: ', latest_invoice , '\n');
     // console.log('line_items.data[0]: ', line_items.data[0] , '\n');
-    return request
+    if (discount) {
+      return {
+        ...request,
+        coupons: {
+          discount_id: discount?.id,
+          amount_off: discount?.coupon?.amount_off,
+          percent_off: discount?.coupon?.percent_off,
+          promotion_code: discount?.promotion_code,
+          coupon_id: discount?.coupon?.id,
+        }
+      }
+    } else {
+      return request
+    }
     // }
-    return false
   }
   async generateSubscriptionSchedule(subscription_id: string, iterations: number, metadata: any) {
     const subscription = await stripe.subscriptions.retrieve(subscription_id)
