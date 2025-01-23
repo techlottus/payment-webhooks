@@ -120,7 +120,7 @@ export class StripeService {
       card_type: payment_intent.payment_method.card.funding,
       extra_fields,
       payment_gateway: 'Stripe',
-      discount: {
+      coupons: {
         discount_id: discount?.id,
         amount_off: discount?.coupon?.amount_off,
         percent_off: discount?.coupon?.percent_off,
