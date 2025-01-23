@@ -273,7 +273,7 @@ export class StripeService {
             invoice_id: index === 0 ? sub.latest_invoice.id : null,
             invoice_status: index === 0 ? sub.latest_invoice.status : null,
             phase_status: sub.current_period_start === phase.start_date ? 'active' : 'pending',
-            charge_id: index === 0 ? sub.latest_charge : null
+            charge_id: index === 0 ? sub.latest_invoice.charge : null
           }
         }),
       }
