@@ -245,7 +245,7 @@ export class StripeController {
           // p_succeeded.period_start
           // p_succeeded.period_end
 
-        const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`]).pipe(
+        const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`, 'populate=*']).pipe(
           catchError((err, caught) => {
             console.log(err);
             
@@ -257,12 +257,14 @@ export class StripeController {
         tracksub.pipe(
           mergeMap(tracksub => {
             console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
-            const track = tracksub.data.data[0]
+            const track = tracksub.data.data[0].attributes
             const phases = track.phases.map(phase => {
               console.log('is start same');
               console.log(phase.start_date === new Date(p_succeeded.period_start * 1000));
               console.log(phase.end_date === new Date(p_succeeded.period_end * 1000));
-              
+              // p_succeeded.id
+              // p_succeeded.charge
+              // p_succeeded.status
               const newPhase = phase
               return newPhase
             })
