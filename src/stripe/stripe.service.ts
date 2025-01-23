@@ -98,7 +98,7 @@ export class StripeService {
     })
     console.log('payment_intent: ', payment_intent);
     console.log('payment_intent.payment_method: ', payment_intent.payment_method);
-    console.log('payment_intent.payment_method.last4: ', payment_intent.payment_method.last4);
+    console.log('payment_intent.payment_method?.card?.last4: ', payment_intent.payment_method?.card?.last4);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     // console.log('order_id: ', order_id);
     // if (metadata.SFlevel === 'Educación Continua' || metadata.SFcampus === 'UTC A TU RITMO' ) {
@@ -128,7 +128,7 @@ export class StripeService {
         coupon_id: discount?.coupon?.id,
 
       },
-      last4: payment_intent.payment_method.card.last4,
+      last4: payment_intent.payment_method.card?.card?.last4,
     }
     // console.log('request: ', request);
 
