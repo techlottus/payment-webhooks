@@ -200,7 +200,7 @@ export class StripeController {
               ? combineLatest({
                   tracking: trackingObs.pipe(
                     catchError((err) => {
-                      console.log('subscription data error', err.response.data.error.details.errors)
+                      console.log('subscription data error', err)
                       return of({
                         error: true,
                         ...err.data.error
@@ -212,7 +212,7 @@ export class StripeController {
               : combineLatest({
                   tracking: trackingUpdateObs.pipe(
                     catchError((err) => {
-                      console.log('subscription data error', err.response.data.error.details.errors)
+                      console.log('subscription data error', err)
                       return of({
                         error: true,
                         ...err.data.error
