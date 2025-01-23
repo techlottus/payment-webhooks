@@ -251,46 +251,48 @@ export class StripeService {
       })
 
     const sub = await rawSub
-    const trackSubs = this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] )
-    console.log('subscription: ', sub);
-    if (trackSubs[0]) {
-      return false
-    }
     if (!flows.includes(sub?.schedule?.metadata?.flow)) {
       return false
     }
-    if (sub.schedule) {
-      
-      const test = {
-        cs_id: sub.schedule.metadata.cs_id,
-        subscription_id: sub.id,
-        metadata:sub.schedule.metadata ,
-        customer_id: sub.customer,
-        email: sub.default_payment_method.billing_details.email,
-        start_date: new Date(sub.start_date * 1000),
-        end_date: new Date(sub.schedule.phases[sub.schedule.phases.length - 1]?.end_date * 1000),
-        phase_quantity: sub.schedule.phases.length,
-        status: sub.status,
-        current_phase_end: new Date(sub.current_period_end * 1000),
-        current_phase_start: new Date(sub.current_period_start * 1000),
-        card_last_4: sub.default_payment_method.card.last4,
-        phases: sub.schedule.phases.map((phase, index) => {
-          return  {
-            start_date: new Date(phase.start_date * 1000),
-            end_date: new Date(phase.end_date * 1000),
-            phase_index: index + 1,
-            invoice_id: index === 0 ? sub.latest_invoice.id : null,
-            invoice_status: index === 0 ? sub.latest_invoice.status : null,
-            phase_status: sub.current_period_start === phase.start_date ? 'active' : 'pending',
-            charge_id: index === 0 ? sub.latest_invoice.charge : null
-          }
-        }),
+    const trackSubs = this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] ).subscribe(tracksub => {
+
+      if (trackSubs[0]) {
+        return false
       }
-      console.log(test);
-      return test
-    } else {
-      return false
-    }
+      if (sub.schedule) {
+        
+        const test = {
+          cs_id: sub.schedule.metadata.cs_id,
+          subscription_id: sub.id,
+          metadata:sub.schedule.metadata ,
+          customer_id: sub.customer,
+          email: sub.default_payment_method.billing_details.email,
+          start_date: new Date(sub.start_date * 1000),
+          end_date: new Date(sub.schedule.phases[sub.schedule.phases.length - 1]?.end_date * 1000),
+          phase_quantity: sub.schedule.phases.length,
+          status: sub.status,
+          current_phase_end: new Date(sub.current_period_end * 1000),
+          current_phase_start: new Date(sub.current_period_start * 1000),
+          card_last_4: sub.default_payment_method.card.last4,
+          phases: sub.schedule.phases.map((phase, index) => {
+            return  {
+              start_date: new Date(phase.start_date * 1000),
+              end_date: new Date(phase.end_date * 1000),
+              phase_index: index + 1,
+              invoice_id: index === 0 ? sub.latest_invoice.id : null,
+              invoice_status: index === 0 ? sub.latest_invoice.status : null,
+              phase_status: sub.current_period_start === phase.start_date ? 'active' : 'pending',
+              charge_id: index === 0 ? sub.latest_invoice.charge : null
+            }
+          }),
+        }
+        console.log(test);
+        return test
+      } else {
+        return false
+      }
+    })
+    console.log('subscription: ', sub);
 
 
   }
