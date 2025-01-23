@@ -255,9 +255,9 @@ export class StripeService {
       return false
     }
     this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] ).subscribe(tracksub => {
-      console.log('tracksub: ', tracksub);
+      console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
       
-      if (tracksub[0]) {
+      if (tracksub.data.data[0]) {
         return false
       }
       if (sub.schedule) {
