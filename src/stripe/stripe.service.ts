@@ -193,8 +193,6 @@ export class StripeService {
             {
               price: phases[0].items[0].price,
               discounts: [{
-                coupon: subscription.discount?.coupon?.id,
-                discount: subscription.discount?.id,
                 promotion_code: subscription.discount?.promotion_code
               }]
             },
@@ -212,6 +210,9 @@ export class StripeService {
           items: [
             {
               price: phases[0].items[0].price,
+              discounts: [{
+                promotion_code: subscription.discount?.promotion_code
+              }]
             },
           ],
           proration_behavior: 'none',
