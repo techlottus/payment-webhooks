@@ -254,9 +254,9 @@ export class StripeService {
     if (!flows.includes(sub?.schedule?.metadata?.flow)) {
       return false
     }
-    const trackSubs = this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] ).subscribe(tracksub => {
+    this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] ).subscribe(tracksub => {
 
-      if (trackSubs[0]) {
+      if (tracksub[0]) {
         return false
       }
       if (sub.schedule) {
