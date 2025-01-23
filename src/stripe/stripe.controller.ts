@@ -29,7 +29,7 @@ export class StripeController {
       case 'checkout.session.completed':
 
         const strapiReq = await this.stripeService.populateCS(event)
-        const paymentObs = this.utilsService.postStrapi('track-payments', strapiReq) 
+        const paymentObs = this.utilsService.postStrapi('track-payments?populate=*', strapiReq) 
         if (strapiReq) {
           // console.log('strapiReq: ', strapiReq);
 
