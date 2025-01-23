@@ -132,11 +132,11 @@ export class StripeService {
       return {
         ...request,
         coupons: {
-          discount_id: discount?.id,
-          amount_off: discount?.coupon?.amount_off,
-          percent_off: discount?.coupon?.percent_off,
-          promotion_code: discount?.promotion_code,
-          coupon_id: discount?.coupon?.id,
+          discount_id: discount?.discount?.id,
+          amount_off: discount?.discount?.coupon?.amount_off,
+          percent_off: discount?.discount?.coupon?.percent_off,
+          promotion_code: discount?.discount?.promotion_code,
+          coupon_id: discount?.discount?.coupon?.id,
         }
       }
     } else {
