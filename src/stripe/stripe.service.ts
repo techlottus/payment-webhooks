@@ -163,13 +163,10 @@ export class StripeService {
     const minutes = currentDate.getMinutes()
     const seconds = currentDate.getSeconds()
     const miliseconds = currentDate.getMilliseconds()
-    console.log('year: ', year);
-    console.log('month: ', month);
-    console.log('day: ', day);
-    console.log('hours: ', hours);
-    console.log('minutes: ', minutes);
-    console.log('seconds: ', seconds);
-    console.log('miliseconds: ', miliseconds);
+    console.log('subscription.discount: ', subscription.discount?.id);
+    console.log('subscription.discount?.coupon: ', subscription.discount?.coupon?.id);
+    console.log('subscription.discount?.promotion_code: ', subscription.discount?.promotion_code);
+
 
     const phasesArray = []
     for (let index = 0; index < iterations; index++) {
@@ -195,6 +192,11 @@ export class StripeService {
           items: [
             {
               price: phases[0].items[0].price,
+              discounts: [{
+                coupon: subscription.discount?.coupon?.id,
+                discount: subscription.discount?.id,
+                promotion_code: subscription.discount?.promotion_code
+              }]
             },
           ],
           start_date: phases[0].start_date,
@@ -279,7 +281,7 @@ export class StripeService {
     } else {
       return false
     }
-    
+
 
   }
   getField(fields: any[], key: string, optkey?: string) {
