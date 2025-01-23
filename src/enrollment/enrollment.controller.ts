@@ -30,7 +30,7 @@ export class EnrollmentController {
     combineLatest(baseObservables).pipe(
       // catchError((err, caught) => { console.error(err); return caught }),
       mergeMap(responses => {
-        console.log('responses: ', responses);
+        // console.log('responses: ', responses);
         const DataHasError =  !responses.inscription.data.data[0]?.id || !responses.payment.data.data[0]?.id
         const DataError = `No data found in strapi for cs_id: ${request.body.cs_id}.`
         if (DataHasError) return combineLatest({
@@ -40,8 +40,8 @@ export class EnrollmentController {
         
         const inscription = { id: responses.inscription.data.data[0].id, ...responses.inscription.data.data[0].attributes }
         const payment = { id: responses.payment.data.data[0].id, ...responses.payment.data.data[0].attributes }
-        console.log('inscription: ', inscription);
-        console.log('payment: ', payment);
+        // console.log('inscription: ', inscription);
+        // console.log('payment: ', payment);
 
         // error correo, nombre, apellidos o LMSprogram
         const EnrollmentHasError =  [!!(request.body.email || inscription.email),  !!inscription.name, !!inscription.last_name].includes(false)
@@ -63,12 +63,12 @@ export class EnrollmentController {
           password += chars.substring(randomNumber, randomNumber +1);
          }
         // console.log(password);
-        console.log('request.body.email || inscription.email: ', request.body.email || inscription.email);
+        // console.log('request.body.email || inscription.email: ', request.body.email || inscription.email);
         
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password, payment.metadata.provider)
         const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram, payment.metadata.provider)
         const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email, payment.metadata.provider).pipe(switchMap(res=> {
-          console.log('res.data: ', res.data);
+          // console.log('res.data: ', res.data);
           
           return !!res.data[0] ? of({...res, exist: true }) : createUserObs
         }))
@@ -90,12 +90,12 @@ export class EnrollmentController {
         return combineLatest(responseObs)
       }),
       mergeMap((responses: any) => {
-        console.log('responses: ', responses);
+        // console.log('responses: ', responses);
         
         const inscription = responses.inscription
         const payment = responses.payment
         if (!!responses.user.data.exception) {
-          console.log('responses.user.data: ', responses.user.data);
+          // console.log('responses.user.data: ', responses.user.data);
           
           return combineLatest([of({inscription, payment ,error: responses.user.data.message, scope: "User get or create"})])
           

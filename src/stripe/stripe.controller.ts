@@ -221,7 +221,7 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
-        console.log('invoice: ', invoice);
+        // console.log('invoice: ', invoice);
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
 
         // sub.subscribe(res => {
@@ -236,7 +236,7 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
-        console.log('p_succeeded: ', p_succeeded);
+        // console.log('p_succeeded: ', p_succeeded);
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
 
         // sub.subscribe(res => {
@@ -252,7 +252,7 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
-        console.log('p_failed: ', p_failed);
+        // console.log('p_failed: ', p_failed);
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
 
         // sub.subscribe(res => {

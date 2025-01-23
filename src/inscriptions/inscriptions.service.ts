@@ -13,7 +13,7 @@ export class InscriptionsService {
     public errorManager: ErrorManagerService
   ) {}
   async populateStrapi(body: any, response: any) {
-    console.log('body: ', body);
+    // console.log('body: ', body);
     const formResponse = body.form_response || null;
     const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id;
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime'];
