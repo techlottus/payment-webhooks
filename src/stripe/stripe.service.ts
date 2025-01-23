@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { env } from 'process';
+import { UtilsService } from 'src/utils/utils.service';
 require('dotenv').config();
 
 const stripe = require('stripe')(env.STRIPE_API_KEY);
@@ -7,6 +8,7 @@ const flows = ['ATR', 'EUONLINE', 'EUPROVIDER']
 
 @Injectable()
 export class StripeService {
+  constructor(private utils: UtilsService) {}
   async populateCS(event: any) {
     
     if (!flows.includes(event.data.object.metadata.flow)) {
@@ -249,7 +251,14 @@ export class StripeService {
       })
 
     const sub = await rawSub
+    const trackSubs = this.utils.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscription_id}`] )
     console.log('subscription: ', sub);
+    if (trackSubs[0]) {
+      return false
+    }
+    if (!flows.includes(sub?.schedule?.metadata?.flow)) {
+      return false
+    }
     if (sub.schedule) {
       
       const test = {
