@@ -187,13 +187,14 @@ export class StripeController {
       case 'customer.subscription.updated':
         const subscriptionUpdated = event.data.object;
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
-        const sub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // console.log('sub: ', sub);
+        const sub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
 
         this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${subscriptionUpdated.id}`] ).pipe(
           mergeMap(tracksub => {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
+            const trackingUpdateObs = this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.id}?populate=*`, {...sub, phases: tracksub.data.data[0].attributes.phases})
 
             return sub && !tracksub.data.data[0]
               ? combineLatest({
@@ -208,7 +209,18 @@ export class StripeController {
                   ),
                   tracksub: of(tracksub)
                 })
-              : of(false)
+              : combineLatest({
+                  tracking: trackingUpdateObs.pipe(
+                    catchError((err) => {
+                      console.log('subscription data error', err.response.data.error.details.errors)
+                      return of({
+                        error: true,
+                        ...err.data.error
+                      })
+                    }),
+                  ),
+                  tracksub: of(tracksub)
+                })
           })
         ).subscribe(res => {
           console.log(res);
@@ -260,7 +272,11 @@ export class StripeController {
             const track = tracksub.data.data[0].attributes
             const phases = track.phases.map(phase => {
               console.log('is start same');
+              console.log(phase.start_date);
+              console.log(new Date(p_succeeded.period_start * 1000));
               console.log(phase.start_date === new Date(p_succeeded.period_start * 1000));
+              console.log(phase.end_date);
+              console.log(new Date(p_succeeded.period_end * 1000));
               console.log(phase.end_date === new Date(p_succeeded.period_end * 1000));
               // p_succeeded.id
               // p_succeeded.charge

@@ -240,7 +240,7 @@ export class StripeService {
   }
 
 
-  async getSubscription(subscription_id: string) {
+  async getSubscription(subscription_id: string, phases?: any) {
     const rawSub = await stripe.subscriptions.retrieve(subscription_id,{
         expand: [
           'schedule',
@@ -268,17 +268,19 @@ export class StripeService {
         current_phase_end: new Date(sub.current_period_end * 1000),
         current_phase_start: new Date(sub.current_period_start * 1000),
         card_last_4: sub.default_payment_method.card.last4,
-        phases: sub.schedule.phases.map((phase, index) => {
-          return  {
-            start_date: new Date(phase.start_date * 1000),
-            end_date: new Date(phase.end_date * 1000),
-            phase_index: index + 1,
-            invoice_id: index === 0 ? sub.latest_invoice.id : null,
-            invoice_status: index === 0 ? sub.latest_invoice.status : null,
-            phase_status: sub.current_period_start === phase.start_date ? 'active' : 'pending',
-            charge_id: index === 0 ? sub.latest_invoice.charge : null
-          }
-        }),
+        phases: phases
+          ? phases
+          : sub.schedule.phases.map((phase, index) => {
+              return  {
+                start_date: new Date(phase.start_date * 1000),
+                end_date: new Date(phase.end_date * 1000),
+                phase_index: index + 1,
+                invoice_id: index === 0 ? sub.latest_invoice.id : null,
+                invoice_status: index === 0 ? sub.latest_invoice.status : null,
+                phase_status: sub.current_period_start === phase.start_date ? 'active' : 'pending',
+                charge_id: index === 0 ? sub.latest_invoice.charge : null
+              }
+            }),
       }
       console.log(test);
       return test
