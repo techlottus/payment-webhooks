@@ -8,7 +8,6 @@ const flows = ['ATR', 'EUONLINE', 'EUPROVIDER']
 
 @Injectable()
 export class StripeService {
-  constructor(private utils: UtilsService) {}
   async populateCS(event: any) {
     
     if (!flows.includes(event.data.object.metadata.flow)) {
