@@ -186,11 +186,13 @@ export class StripeController {
         break;
       case 'customer.subscription.updated':
         const subscriptionUpdated = event.data.object;
-        console.log('subscriptionUpdated: ', subscriptionUpdated);
-        // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
-        // const sub = await rawSub
-        // console.log('sub: ', sub);
-        // console.log('sub.default_payment_method: ', sub.default_payment_method);
+        // console.log('subscriptionUpdated: ', subscriptionUpdated);
+        const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
+        const sub = await rawSub
+        console.log('sub: ', sub);
+        console.log('sub.default_payment_method: ', sub.default_payment_method);
+        console.log('sub.schedule: ', sub.schedule);
+        console.log('sub..schedule.phases: ', sub.schedule.phases);
 
         // sub.subscribe(res => {
           
