@@ -120,14 +120,13 @@ export class StripeService {
       card_type: payment_intent.payment_method.card.funding,
       extra_fields,
       payment_gateway: 'Stripe',
-      coupons: [{
+      coupons: {
         discount_id: discount?.id,
         amount_off: discount?.coupon?.amount_off,
         percent_off: discount?.coupon?.percent_off,
         promotion_code: discount?.promotion_code,
         coupon_id: discount?.coupon?.id,
-
-      }],
+      },
       card_last_4: payment_intent.payment_method.card?.card?.last4,
     }
     // console.log('request: ', request);
