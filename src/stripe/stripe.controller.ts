@@ -94,7 +94,7 @@ export class StripeController {
                         "first_name": name,
                         "file_number": attrs.payment_id,
                         "payment_date": attrs.date,
-                        "provider": attrs.metadata.provider
+                        "provider": attrs.metadata.provider,
                       },
                       to: [attrs.email],
                       from: "admisiones",
@@ -189,6 +189,21 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         const sub =  this.stripeService.getSubscription(subscriptionUpdated.id)
         console.log('sub: ', sub);
+
+        const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
+        
+        trackingObs.pipe(
+          catchError((err) => {
+            console.log('subscription data error', err.response.data.error.details.errors)
+            return of({
+              error: true,
+              ...err.data.error
+            })
+          }),
+        ).subscribe(res => {
+          console.log(res);
+          
+        })
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
         // console.log('sub.schedule: ', sub.schedule);
         // console.log('sub..schedule.phases: ', sub.schedule.phases);
