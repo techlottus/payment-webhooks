@@ -63,6 +63,8 @@ export class StripeService {
     
     const extra_fields = { ...customFields, ...MExtraFields }
     // console.log('extra_fields: ', extra_fields);
+    const discount = checkoutSessionCompleted.total_details.breakdown.discounts[0]
+    console.log('discount: ', discount);
     
     // console.log('checkoutSessionCompleted.customer: ', checkoutSessionCompleted.customer);
     const customer_id = checkoutSessionCompleted.customer ?  checkoutSessionCompleted.customer.id : ''
@@ -95,6 +97,8 @@ export class StripeService {
       ]
     })
     console.log('payment_intent: ', payment_intent);
+    console.log('payment_intent.payment_method: ', payment_intent.payment_method);
+    console.log('payment_intent.payment_method.last4: ', payment_intent.payment_method.last4);
     const order_id = checkoutSessionCompleted.subscription ? checkoutSessionCompleted?.subscription?.latest_invoice?.charge?.id : payment_intent.latest_charge
     // console.log('order_id: ', order_id);
     // if (metadata.SFlevel === 'Educación Continua' || metadata.SFcampus === 'UTC A TU RITMO' ) {
@@ -115,7 +119,16 @@ export class StripeService {
       payment_method_type: payment_method_types[0],
       card_type: payment_intent.payment_method.card.funding,
       extra_fields,
-      payment_gateway: 'Stripe'
+      payment_gateway: 'Stripe',
+      discount: {
+        discount_id: discount?.id,
+        amount_off: discount?.coupon?.amount_off,
+        percent_off: discount?.coupon?.percent_off,
+        promotion_code: discount?.promotion_code,
+        coupon_id: discount?.coupon?.id,
+
+      },
+      last4: payment_intent.payment_method.card.last4,
     }
     // console.log('request: ', request);
 
