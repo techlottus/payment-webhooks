@@ -271,13 +271,11 @@ export class StripeController {
             console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const track = tracksub.data.data[0]?.attributes
             const phases = track?.phases.map(phase => {
+
               console.log('is start same');
-              console.log(phase.start_date);
-              console.log(new Date(phase.start_date).toDateString());
-              console.log(new Date(p_succeeded.period_start * 1000).toDateString());
               console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_start * 1000).toDateString());
-              console.log(new Date(phase.end_date).toDateString());
-              console.log(new Date(p_succeeded.period_end * 1000).toDateString());
+
+              console.log('is end same');
               console.log(new Date(phase.end_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
               // p_succeeded.id
               // p_succeeded.charge
