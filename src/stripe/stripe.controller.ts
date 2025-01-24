@@ -195,7 +195,7 @@ export class StripeController {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
             const trackingUpdateObs = tracksub.data.data[0].id 
-              ? this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.data[0].id}?populate=*`, {...sub, phases: tracksub?.data?.data[0]?.attributes?.phases})
+              ? this.utilsService.putStrapi(`track-subscriptions/?populate=*`, {...sub, phases: tracksub?.data?.data[0]?.attributes?.phases}, tracksub.data.data[0].id)
               : of(tracksub)
             return sub && !tracksub.data.data[0]
               ? combineLatest({
