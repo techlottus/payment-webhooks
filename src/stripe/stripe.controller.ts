@@ -95,6 +95,9 @@ export class StripeController {
                         "file_number": attrs.payment_id,
                         "payment_date": attrs.date,
                         "provider": attrs.metadata.provider,
+                        "card": attrs.card_last_4,
+                        "total_payment": attrs.metadata.iterations,
+                        "current_payment": 1
                       },
                       to: [attrs.email],
                       from: "admisiones",
