@@ -272,11 +272,9 @@ export class StripeController {
             const track = tracksub.data.data[0]?.attributes
             const phases = track?.phases.map(phase => {
 
-              console.log('is start same');
-              console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_start * 1000).toDateString());
+              console.log('is start same as period end');
+              console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
 
-              console.log('is end same');
-              console.log(new Date(phase.end_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
               // p_succeeded.id
               // p_succeeded.charge
               // p_succeeded.status
