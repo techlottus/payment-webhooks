@@ -194,8 +194,9 @@ export class StripeController {
           mergeMap(tracksub => {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
-            const trackingUpdateObs = this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.id}?populate=*`, {...sub, phases: tracksub?.data?.data[0]?.attributes?.phases})
-
+            const trackingUpdateObs = tracksub.data.data[0].id 
+              ? this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.data[0].id}?populate=*`, {...sub, phases: tracksub?.data?.data[0]?.attributes?.phases})
+              : of(tracksub)
             return sub && !tracksub.data.data[0]
               ? combineLatest({
                   tracking: trackingObs.pipe(
@@ -278,7 +279,12 @@ export class StripeController {
               // p_succeeded.id
               // p_succeeded.charge
               // p_succeeded.status
-              const newPhase = phase
+              const newPhase = {
+                ...phase,
+                charge_id: p_succeeded.charge,
+                invoice_id: p_succeeded.id,
+                status: p_succeeded.status,
+              }
               return newPhase
             })
             return of(tracksub)
