@@ -250,24 +250,16 @@ export class StripeController {
         const p_succeeded = event.data.object;
 
         console.log('p_succeeded: ', p_succeeded);
-          // p_succeeded.subscription
-          // p_succeeded.id
-          // p_succeeded.charge
-          // p_succeeded.status
+        if (p_succeeded.billing_reason === 'subscription_cycle') {
+          const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`, 'populate=*']).pipe(
+            catchError((err, caught) => {
+              console.log(err);
+              
+              return caught
+            })
+          )
 
-          // p_succeeded.period_start
-          // p_succeeded.period_end
-
-        const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`, 'populate=*']).pipe(
-          catchError((err, caught) => {
-            console.log(err);
-            
-            return caught
-          })
-        )
-
-
-        tracksub.pipe(
+          tracksub.pipe(
           mergeMap(tracksub => {
             console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const track = tracksub.data.data[0]?.attributes
@@ -308,12 +300,28 @@ export class StripeController {
           })
         ).subscribe(res => {
           // console.log(res);
+          response.status(200).send()
           
         })
+        } else {
 
-        // console.log('payment: ', payment);
 
-        response.status(200).send('product managed by other pipeline')
+          
+
+          // console.log('payment: ', payment);
+
+          response.status(200).send('product managed by other pipeline')
+          
+        }
+          // p_succeeded.subscription
+          // p_succeeded.id
+          // p_succeeded.charge
+          // p_succeeded.status
+
+          // p_succeeded.period_start
+          // p_succeeded.period_end
+          // p_succeeded.billing_reason: 'subscription_create',
+
 
         // Then define and call a function to handle the event subscription_schedule.updated
         break;
