@@ -204,7 +204,7 @@ export class StripeController {
                       console.log('subscription data error', err)
                       return of({
                         error: true,
-                        ...err.data.error
+                        ...err
                       })
                     }),
                   ),
@@ -216,7 +216,7 @@ export class StripeController {
                       console.log('subscription data error', err)
                       return of({
                         error: true,
-                        ...err.data.error
+                        ...err
                       })
                     }),
                   ),
