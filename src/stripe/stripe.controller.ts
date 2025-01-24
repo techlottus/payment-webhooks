@@ -296,24 +296,24 @@ export class StripeController {
                 return newPhase
               }
             })
-            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id)
+            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id, ['populate=*'])
           }),
-          mergeMap(tracksub => {
-            return this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${tracksub.data.data.id}`, 'populate=*']).pipe(
-              catchError((err, caught) => {
-                console.log(err);
+          // mergeMap(tracksub => {
+          //   return this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${tracksub.data.data.id}`, 'populate=*']).pipe(
+          //     catchError((err, caught) => {
+          //       console.log(err);
                 
-                return caught
-              })
-            )
-          }),
+          //       return caught
+          //     })
+          //   )
+          // }),
           mergeMap(tracksub => {
 
             // template: !!attrs.metadata.payment_template
             //       ? 
             console.log('tracksub: ', tracksub);
             console.log('tracksub.data: ', tracksub.data);
-            const track = tracksub.data.data[0]?.attributes
+            const track = tracksub.data.data?.attributes
             console.log('track: ', track);
             
             this.utilsService.postSelfWebhook('/email/send', {
