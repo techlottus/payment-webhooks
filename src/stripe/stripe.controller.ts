@@ -293,7 +293,7 @@ export class StripeController {
                 return newPhase
               }
             })
-            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases}, tracksub.data.data[0]?.id)
+            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id)
           }),
           mergeMap(tracksub => {
             return of(tracksub)
@@ -326,39 +326,38 @@ export class StripeController {
         tracksub.pipe(
           mergeMap(tracksub => {
             console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
-            // const track = tracksub.data.data[0]?.attributes
-            // const phases = track?.phases.map(phase => {
+            const track = tracksub.data.data[0]?.attributes
+            const phases = track?.phases.map(phase => {
 
-            //   // console.log('is start same as period end');
-            //   // console.log(new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString());
-            //   const phase_status = () => {
-            //     if (new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString()) {
-            //       return 'active'
-            //     } else if (new Date(phase.start_date).toDateString() < new Date(p_failed.period_end * 1000).toDateString()) {
-            //       return 'finished'
-            //     } else if (new Date(phase.start_date).toDateString() > new Date(p_failed.period_end * 1000).toDateString()) {
-            //       return 'pending'
-            //     }
-            //   }
-            //   const newPhase = {
-            //     ...phase,
-            //     phase_status: phase_status()
-            //   }
+              // console.log('is start same as period end');
+              // console.log(new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString());
+              const phase_status = () => {
+                if (new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString()) {
+                  return 'unpaid'
+                } else if (new Date(phase.start_date).toDateString() < new Date(p_failed.period_end * 1000).toDateString()) {
+                  return 'finished'
+                } else if (new Date(phase.start_date).toDateString() > new Date(p_failed.period_end * 1000).toDateString()) {
+                  return 'pending'
+                }
+              }
+              const newPhase = {
+                ...phase,
+                phase_status: phase_status()
+              }
 
               
-            //   if (newPhase.phase_status === 'active') {
-            //     return {
-            //       ...newPhase,
-            //       charge_id: p_failed.charge,
-            //       invoice_id: p_failed.id,
-            //       invoice_status: p_failed.status,
-            //     }
-            //   } else {
-            //     return newPhase
-            //   }
-            // })
-            // return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases}, tracksub.data.data[0]?.id)
-            return of(tracksub)
+              if (newPhase.phase_status === 'active') {
+                return {
+                  ...newPhase,
+                  charge_id: p_failed.charge,
+                  invoice_id: p_failed.id,
+                  invoice_status: p_failed.status,
+                }
+              } else {
+                return newPhase
+              }
+            })
+            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'unpaid'}, tracksub.data.data[0]?.id)
           }),
           mergeMap(tracksub => {
             return of(tracksub)

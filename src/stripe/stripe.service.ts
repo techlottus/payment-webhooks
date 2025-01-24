@@ -260,7 +260,7 @@ export class StripeService {
         subscription_id: sub.id,
         metadata:sub.schedule.metadata ,
         customer_id: sub.customer,
-        email: sub.default_payment_method.billing_details.email,
+        email: sub?.default_payment_method?.billing_details?.email,
         start_date: new Date(sub.start_date * 1000),
         end_date: new Date(sub.schedule.phases[sub.schedule.phases.length - 1]?.end_date * 1000),
         phase_quantity: sub.schedule.phases.length,
