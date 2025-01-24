@@ -305,29 +305,74 @@ export class StripeController {
         })
         } else {
 
-
-          
-
-          // console.log('payment: ', payment);
-
           response.status(200).send('product managed by other pipeline')
           
         }
-          // p_succeeded.subscription
-          // p_succeeded.id
-          // p_succeeded.charge
-          // p_succeeded.status
-
-          // p_succeeded.period_start
-          // p_succeeded.period_end
-          // p_succeeded.billing_reason: 'subscription_create',
-
-
-        // Then define and call a function to handle the event subscription_schedule.updated
+ 
         break;
 
       case 'invoice.payment_failed':
         const p_failed = event.data.object;
+        console.log('p_failed: ', p_failed);
+        if (p_failed.billing_reason === 'subscription_cycle') {
+          const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_failed.subscription}`, 'populate=*']).pipe(
+            catchError((err, caught) => {
+              console.log(err);
+              
+              return caught
+            })
+          )
+
+        tracksub.pipe(
+          mergeMap(tracksub => {
+            console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
+            // const track = tracksub.data.data[0]?.attributes
+            // const phases = track?.phases.map(phase => {
+
+            //   // console.log('is start same as period end');
+            //   // console.log(new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString());
+            //   const phase_status = () => {
+            //     if (new Date(phase.start_date).toDateString() === new Date(p_failed.period_end * 1000).toDateString()) {
+            //       return 'active'
+            //     } else if (new Date(phase.start_date).toDateString() < new Date(p_failed.period_end * 1000).toDateString()) {
+            //       return 'finished'
+            //     } else if (new Date(phase.start_date).toDateString() > new Date(p_failed.period_end * 1000).toDateString()) {
+            //       return 'pending'
+            //     }
+            //   }
+            //   const newPhase = {
+            //     ...phase,
+            //     phase_status: phase_status()
+            //   }
+
+              
+            //   if (newPhase.phase_status === 'active') {
+            //     return {
+            //       ...newPhase,
+            //       charge_id: p_failed.charge,
+            //       invoice_id: p_failed.id,
+            //       invoice_status: p_failed.status,
+            //     }
+            //   } else {
+            //     return newPhase
+            //   }
+            // })
+            // return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases}, tracksub.data.data[0]?.id)
+            return of(tracksub)
+          }),
+          mergeMap(tracksub => {
+            return of(tracksub)
+          })
+        ).subscribe(res => {
+          // console.log(res);
+          response.status(200).send()
+          
+        })
+        } else {
+
+          response.status(200).send('product managed by other pipeline')
+          
+        }
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
