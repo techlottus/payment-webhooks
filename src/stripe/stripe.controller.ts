@@ -304,7 +304,7 @@ export class StripeController {
             //       ? 
             console.log('tracksub: ', tracksub);
             console.log('tracksub.data: ', tracksub.data);
-            const track = tracksub.data.data[0]?.attributes
+            const track = tracksub.data.data?.attributes
             console.log('track: ', track);
             
             this.utilsService.postSelfWebhook('/email/send', {
