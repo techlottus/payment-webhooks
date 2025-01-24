@@ -269,8 +269,8 @@ export class StripeController {
         tracksub.pipe(
           mergeMap(tracksub => {
             console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
-            const track = tracksub.data.data[0].attributes
-            const phases = track.phases.map(phase => {
+            const track = tracksub.data.data[0]?.attributes
+            const phases = track?.phases.map(phase => {
               console.log('is start same');
               console.log(phase.start_date);
               console.log(new Date(phase.start_date).toTimeString());
