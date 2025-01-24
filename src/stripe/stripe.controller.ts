@@ -279,14 +279,22 @@ export class StripeController {
               // p_succeeded.id
               // p_succeeded.charge
               // p_succeeded.status
-              const newPhase = {
-                ...phase,
-                charge_id: p_succeeded.charge,
-                invoice_id: p_succeeded.id,
-                status: p_succeeded.status,
+              if (new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString()) {
+                
+                const newPhase = {
+                  ...phase,
+                  charge_id: p_succeeded.charge,
+                  invoice_id: p_succeeded.id,
+                  status: p_succeeded.status,
+                }
+                return newPhase
+              } else {
+                return phase
               }
-              return newPhase
             })
+            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases}, tracksub.data.data[0]?.id)
+          }),
+          mergeMap(tracksub => {
             return of(tracksub)
           })
         ).subscribe(res => {
