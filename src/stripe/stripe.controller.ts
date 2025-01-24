@@ -194,7 +194,7 @@ export class StripeController {
           mergeMap(tracksub => {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
-            const trackingUpdateObs = this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.id}?populate=*`, {...sub, phases: tracksub.data.data[0].attributes.phases})
+            const trackingUpdateObs = this.utilsService.postStrapi(`track-subscriptions/${tracksub.data.id}?populate=*`, {...sub, phases: tracksub?.data?.data[0]?.attributes?.phases})
 
             return sub && !tracksub.data.data[0]
               ? combineLatest({
@@ -273,17 +273,17 @@ export class StripeController {
             const phases = track.phases.map(phase => {
               console.log('is start same');
               console.log(phase.start_date);
-              console.log(phase.start_date.toTimeString());
+              console.log(new Date(phase.start_date).toTimeString());
               console.log(new Date(p_succeeded.period_start * 1000));
               console.log(new Date(p_succeeded.period_start * 1000).toTimeString());
               console.log(phase.start_date === new Date(p_succeeded.period_start * 1000));
-              console.log(phase.start_date.toTimeString() === new Date(p_succeeded.period_start * 1000).toTimeString());
+              console.log(new Date(phase.start_date).toTimeString() === new Date(p_succeeded.period_start * 1000).toTimeString());
               console.log(phase.end_date);
-              console.log(phase.end_date.toTimeString());
+              console.log(new Date(phase.end_date).toTimeString());
               console.log(new Date(p_succeeded.period_end * 1000));
               console.log(new Date(p_succeeded.period_end * 1000).toTimeString());
               console.log(phase.end_date === new Date(p_succeeded.period_end * 1000));
-              console.log(phase.end_date.toTimeString() === new Date(p_succeeded.period_end * 1000).toTimeString());
+              console.log(new Date(phase.end_date).toTimeString() === new Date(p_succeeded.period_end * 1000).toTimeString());
               // p_succeeded.id
               // p_succeeded.charge
               // p_succeeded.status
