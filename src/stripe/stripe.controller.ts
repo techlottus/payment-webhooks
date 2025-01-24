@@ -392,9 +392,9 @@ export class StripeController {
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
         console.log('sub_deleted: ', sub_deleted);
-        const subs =  await this.stripeService.getSubscription(sub_deleted.subscription)
+        const subs =  await this.stripeService.getSubscription(sub_deleted.id)
 
-        this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${sub_deleted.subscription}`] ).pipe(
+        this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${sub_deleted.id}`] ).pipe(
           mergeMap(tracksub => {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', subs)
