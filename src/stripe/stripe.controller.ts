@@ -223,7 +223,7 @@ export class StripeController {
                 })
           })
         ).subscribe(res => {
-          console.log(res);
+          // console.log(res);
           
         })
         response.status(200).send('product managed by other pipeline')
@@ -288,7 +288,7 @@ export class StripeController {
             return of(tracksub)
           })
         ).subscribe(res => {
-          console.log(res);
+          // console.log(res);
           
         })
 
