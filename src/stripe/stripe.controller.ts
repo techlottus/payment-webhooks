@@ -299,6 +299,34 @@ export class StripeController {
             return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id)
           }),
           mergeMap(tracksub => {
+
+            // template: !!attrs.metadata.payment_template
+            //       ? 
+            const track = tracksub.data.data[0]?.attributes
+            this.utilsService.postSelfWebhook('/email/send', {
+                template_id: track.metadata.payment_template,
+                params: {
+                  "amount": p_succeeded.amount_total,
+                  "course": track.metadata.name,
+                  "program": track.metadata.name,
+                  "first_name": p_succeeded.customer_name,
+                  "file_number": p_succeeded.payment_intent,
+                  "payment_date": new Date(p_succeeded.created * 1000),
+                  "provider": p_succeeded.metadata.provider,
+                  "card": track.card_last_4,
+                  "total_payment": track.metadata.iterations,
+                  "current_payment": track.phases.filter(phase => phase.status === 'active').phase_index
+                },
+                to: [track.email],
+                from: "admisiones",
+                scope: "payment",
+              }).pipe(catchError((err, caught) => {
+                console.log('err: ', err);
+                return caught
+              }))
+                  // : of(false),
+
+
             return of(tracksub)
           })
         ).subscribe(res => {
