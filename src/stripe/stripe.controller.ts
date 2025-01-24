@@ -302,6 +302,8 @@ export class StripeController {
 
             // template: !!attrs.metadata.payment_template
             //       ? 
+            console.log('tracksub: ', tracksub);
+            console.log('tracksub.data: ', tracksub.data);
             const track = tracksub.data.data[0]?.attributes
             console.log('track: ', track);
             
