@@ -299,6 +299,15 @@ export class StripeController {
             return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id)
           }),
           mergeMap(tracksub => {
+            return this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${tracksub.data.data.id}`, 'populate=*']).pipe(
+              catchError((err, caught) => {
+                console.log(err);
+                
+                return caught
+              })
+            )
+          }),
+          mergeMap(tracksub => {
 
             // template: !!attrs.metadata.payment_template
             //       ? 
