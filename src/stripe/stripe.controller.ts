@@ -346,7 +346,7 @@ export class StripeController {
               }
 
               
-              if (newPhase.phase_status === 'active') {
+              if (newPhase.phase_status === 'unpaid') {
                 return {
                   ...newPhase,
                   charge_id: p_failed.charge,
