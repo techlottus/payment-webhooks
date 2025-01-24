@@ -303,6 +303,8 @@ export class StripeController {
             // template: !!attrs.metadata.payment_template
             //       ? 
             const track = tracksub.data.data[0]?.attributes
+            console.log('track: ', track);
+            
             this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_template,
                 params: {
