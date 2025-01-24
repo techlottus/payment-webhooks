@@ -400,14 +400,17 @@ export class StripeController {
             if (tracksub?.data?.data[0]) {
               
               const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', subs)
-              const last_phase = tracksub?.data?.data[0]?.attributes?.phases[tracksub?.data?.data[0]?.attributes?.phases?.length - 1]
-              const phases = [
-                ...tracksub?.data?.data[0]?.attributes?.phases,
-                {
-                  ...last_phase,
-                  phase_status: last_phase.invoice_status === 'paid' ? 'finished' : last_phase.phase_status
-                }
-              ]
+              const subPhases = tracksub?.data?.data[0]?.attributes?.phases
+              const last_phase = subPhases && subPhases.length ? subPhases[subPhases?.length - 1] : null
+              const phases = last_phase
+                ? [
+                    ...tracksub?.data?.data[0]?.attributes?.phases,
+                    {
+                      ...last_phase,
+                      phase_status: last_phase.invoice_status === 'paid' ? 'finished' : last_phase.phase_status
+                    }
+                  ]
+                : tracksub?.data?.data[0]?.attributes?.phases
               const trackingUpdateObs = tracksub.data.data[0]?.id 
                 ? this.utilsService.putStrapi(`track-subscriptions`, {...subs, phases}, tracksub.data.data[0]?.id)
                 : of(tracksub)
