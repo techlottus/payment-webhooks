@@ -273,17 +273,12 @@ export class StripeController {
             const phases = track?.phases.map(phase => {
               console.log('is start same');
               console.log(phase.start_date);
-              console.log(new Date(phase.start_date).toTimeString());
-              console.log(new Date(p_succeeded.period_start * 1000));
-              console.log(new Date(p_succeeded.period_start * 1000).toTimeString());
-              console.log(phase.start_date === new Date(p_succeeded.period_start * 1000));
-              console.log(new Date(phase.start_date).toTimeString() === new Date(p_succeeded.period_start * 1000).toTimeString());
-              console.log(phase.end_date);
-              console.log(new Date(phase.end_date).toTimeString());
-              console.log(new Date(p_succeeded.period_end * 1000));
-              console.log(new Date(p_succeeded.period_end * 1000).toTimeString());
-              console.log(phase.end_date === new Date(p_succeeded.period_end * 1000));
-              console.log(new Date(phase.end_date).toTimeString() === new Date(p_succeeded.period_end * 1000).toTimeString());
+              console.log(new Date(phase.start_date).toDateString());
+              console.log(new Date(p_succeeded.period_start * 1000).toDateString());
+              console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_start * 1000).toDateString());
+              console.log(new Date(phase.end_date).toDateString());
+              console.log(new Date(p_succeeded.period_end * 1000).toDateString());
+              console.log(new Date(phase.end_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
               // p_succeeded.id
               // p_succeeded.charge
               // p_succeeded.status
