@@ -307,14 +307,14 @@ export class StripeController {
                 template_id: track.metadata.payment_template,
                 params: {
                   "amount": p_succeeded.amount_total,
-                  "course": track.metadata.name,
-                  "program": track.metadata.name,
+                  "course": track.metadata?.name,
+                  "program": track.metadata?.name,
                   "first_name": p_succeeded.customer_name,
                   "file_number": p_succeeded.payment_intent,
                   "payment_date": new Date(p_succeeded.created * 1000),
-                  "provider": p_succeeded.metadata.provider,
+                  "provider": p_succeeded.metadata?.provider,
                   "card": track.card_last_4,
-                  "total_payment": track.metadata.iterations,
+                  "total_payment": track.metadata?.iterations,
                   "current_payment": track.phases.filter(phase => phase.status === 'active').phase_index
                 },
                 to: [track.email],
@@ -417,7 +417,6 @@ export class StripeController {
         // Then define and call a function to handle the event subscription_schedule.updated
         break;
       case 'customer.subscription.deleted':
-      // runs when subscriptions ends
         const sub_deleted = event.data.object;
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
@@ -427,9 +426,7 @@ export class StripeController {
 
         this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${sub_deleted.id}`] ).pipe(
           mergeMap(tracksub => {
-            // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             if (tracksub?.data?.data[0]) {
-              
               const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', subs)
               const subPhases = tracksub?.data?.data[0]?.attributes?.phases
               const last_phase = subPhases && subPhases.length ? subPhases[subPhases?.length - 1] : null
