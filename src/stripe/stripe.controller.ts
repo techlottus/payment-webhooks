@@ -273,23 +273,32 @@ export class StripeController {
             const track = tracksub.data.data[0]?.attributes
             const phases = track?.phases.map(phase => {
 
-              console.log('is start same as period end');
-              console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
+              // console.log('is start same as period end');
+              // console.log(new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString());
+              const phase_status = () => {
+                if (new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString()) {
+                  return 'active'
+                } else if (new Date(phase.start_date).toDateString() < new Date(p_succeeded.period_end * 1000).toDateString()) {
+                  return 'finished'
+                } else if (new Date(phase.start_date).toDateString() > new Date(p_succeeded.period_end * 1000).toDateString()) {
+                  return 'pending'
+                }
+              }
+              const newPhase = {
+                ...phase,
+                phase_status: phase_status()
+              }
 
-              // p_succeeded.id
-              // p_succeeded.charge
-              // p_succeeded.status
-              if (new Date(phase.start_date).toDateString() === new Date(p_succeeded.period_end * 1000).toDateString()) {
-                
-                const newPhase = {
-                  ...phase,
+              
+              if (newPhase.phase_status === 'active') {
+                return {
+                  ...newPhase,
                   charge_id: p_succeeded.charge,
                   invoice_id: p_succeeded.id,
-                  status: p_succeeded.status,
+                  invoice_status: p_succeeded.status,
                 }
-                return newPhase
               } else {
-                return phase
+                return newPhase
               }
             })
             return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases}, tracksub.data.data[0]?.id)
