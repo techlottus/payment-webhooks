@@ -17,7 +17,7 @@ export class UtilsService {
     return this.http.put(`${env.STRAPI_TRACKING_URL}/api/${endpoint}/${id}${!!params?.length && '?' + params.join('&')}`, { data }, this.StrapiTrackingConfig)
   }
   fetchStrapi = (model: string, params: string[] ) => {
-    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)
+    return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length ? '?' + params.join('&') : ''}`, this.StrapiTrackingConfig)
   }
   postEmailTemplate = (data: any) => {
 
