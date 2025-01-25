@@ -243,6 +243,10 @@ export class StripeController {
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
 
         // sub.subscribe(res => {
+
+        // send reminder email
+        // "payment_reminder_template": 25
+
           
         // })
         response.status(200).send('product managed by other pipeline')
@@ -318,7 +322,7 @@ export class StripeController {
             
             
                   // : of(false),
-
+            const current_payment = track.phases.filter((phase) => phase.phase_status === 'active')[0].phase_index
 
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_template,
@@ -332,7 +336,7 @@ export class StripeController {
                   "provider": p_succeeded.metadata?.provider,
                   "card": track.card_last_4,
                   "total_payment": track.metadata?.iterations,
-                  "current_payment": track.phases.filter((phase) => phase.phase_status === 'active').phase_index
+                  "current_payment": current_payment
                 },
                 to: [track.email],
                 from: "admisiones",
@@ -401,10 +405,30 @@ export class StripeController {
                 return newPhase
               }
             })
-            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'unpaid'}, tracksub.data.data[0]?.id)
+            return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'unpaid'}, tracksub.data.data[0]?.id, ['populate=*'])
           }),
           mergeMap(tracksub => {
-            return of(tracksub)
+            console.log('tracksub: ', tracksub);
+            console.log('tracksub.data: ', tracksub.data);
+            const track = tracksub.data.data?.attributes
+            console.log('track: ', track);
+            
+
+            return this.utilsService.postSelfWebhook('/email/send', {
+                template_id: track.metadata.payment_error_template,
+                params: {
+                  "amount": p_succeeded.amount_total,
+                  "course": track.metadata?.name,
+                  "card": track.card_last_4,
+                  "payment_day": "data prueba, cambiar en strapi"
+                },
+                to: [track.email],
+                from: "admisiones",
+                scope: "payment",
+              }).pipe(catchError((err, caught) => {
+                console.log('err: ', err);
+                return caught
+              }))
           })
         ).subscribe(res => {
           // console.log(res);
