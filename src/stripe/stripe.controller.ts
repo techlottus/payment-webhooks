@@ -332,7 +332,7 @@ export class StripeController {
                   "provider": p_succeeded.metadata?.provider,
                   "card": track.card_last_4,
                   "total_payment": track.metadata?.iterations,
-                  "current_payment": track.phases.filter(phase => phase.status === 'active').phase_index
+                  "current_payment": track.phases.filter((phase) => phase.phase_status === 'active').phase_index
                 },
                 to: [track.email],
                 from: "admisiones",
