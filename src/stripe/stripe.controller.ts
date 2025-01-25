@@ -316,7 +316,11 @@ export class StripeController {
             const track = tracksub.data.data?.attributes
             console.log('track: ', track);
             
-            this.utilsService.postSelfWebhook('/email/send', {
+            
+                  // : of(false),
+
+
+            return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_template,
                 params: {
                   "amount": p_succeeded.amount_total,
@@ -337,10 +341,6 @@ export class StripeController {
                 console.log('err: ', err);
                 return caught
               }))
-                  // : of(false),
-
-
-            return of(tracksub)
           })
         ).subscribe(res => {
           // console.log(res);
