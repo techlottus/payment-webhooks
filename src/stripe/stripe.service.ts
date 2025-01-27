@@ -54,9 +54,7 @@ export class StripeService {
     const phone = checkoutSessionCompleted.customer_details.phone
     // console.log('phone: ', phone);
     
-    const metadata = checkoutSessionCompleted.metadata.extra_fields 
-      ? {...checkoutSessionCompleted.metadata, extra_fields: null}
-      : checkoutSessionCompleted.metadata
+    const metadata = checkoutSessionCompleted.metadata
 
     // console.log('metadata: ', metadata);
     const customFields = checkoutSessionCompleted?.custom_fields || {}
@@ -258,7 +256,7 @@ export class StripeService {
       const test = {
         cs_id: sub.schedule.metadata.cs_id,
         subscription_id: sub.id,
-        metadata:sub.schedule.metadata ,
+        metadata: sub.schedule.metadata ,
         customer_id: sub.customer,
         email: sub?.default_payment_method?.billing_details?.email,
         start_date: new Date(sub.start_date * 1000),
