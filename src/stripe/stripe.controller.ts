@@ -246,6 +246,8 @@ export class StripeController {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             // const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
             const track = tracksub.data.data[0].attributes
+            console.log('track: ', track);
+            
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_reminder_template,
                 params: {
