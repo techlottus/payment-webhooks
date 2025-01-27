@@ -54,7 +54,7 @@ export class StripeService {
     const phone = checkoutSessionCompleted.customer_details.phone
     // console.log('phone: ', phone);
     
-    const metadata = {...checkoutSessionCompleted.metadata, extra_fields: JSON.parse(checkoutSessionCompleted.metadata.extra_fields)}
+    const metadata = checkoutSessionCompleted.metadata
 
     // console.log('metadata: ', metadata);
     const customFields = checkoutSessionCompleted?.custom_fields || {}
