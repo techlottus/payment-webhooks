@@ -332,7 +332,7 @@ export class StripeController {
                   "program": track.metadata?.name,
                   "first_name": p_succeeded.customer_name,
                   "file_number": p_succeeded.payment_intent,
-                  "payment_date": new Date(p_succeeded.created * 1000),
+                  "payment_date": new Date(p_succeeded.created * 1000).toLocaleDateString(),
                   "provider": p_succeeded.metadata?.provider,
                   "card": track.card_last_4,
                   "total_payment": track.metadata?.iterations,
