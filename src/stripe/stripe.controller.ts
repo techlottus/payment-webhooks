@@ -256,7 +256,7 @@ export class StripeController {
       case 'invoice.payment_succeeded':
         const p_succeeded = event.data.object;
 
-        console.log('p_succeeded: ', p_succeeded);
+        // console.log('p_succeeded: ', p_succeeded);
         if (p_succeeded.billing_reason === 'subscription_cycle') {
           const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_succeeded.subscription}`, 'populate=*']).pipe(
             catchError((err, caught) => {
@@ -268,7 +268,7 @@ export class StripeController {
 
           tracksub.pipe(
           mergeMap(tracksub => {
-            console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
+            // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const track = tracksub.data.data[0]?.attributes
             const phases = track?.phases.map(phase => {
 
@@ -302,28 +302,17 @@ export class StripeController {
             })
             return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'active'}, tracksub.data.data[0]?.id, ['populate=*'])
           }),
-          // mergeMap(tracksub => {
-          //   return this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${tracksub.data.data.id}`, 'populate=*']).pipe(
-          //     catchError((err, caught) => {
-          //       console.log(err);
-                
-          //       return caught
-          //     })
-          //   )
-          // }),
           mergeMap(tracksub => {
 
             // template: !!attrs.metadata.payment_template
             //       ? 
-            console.log('tracksub: ', tracksub);
-            console.log('tracksub.data: ', tracksub.data);
+            // console.log('tracksub: ', tracksub);
+            // console.log('tracksub.data: ', tracksub.data);
             const track = tracksub.data.data?.attributes
-            console.log('track: ', track);
-            
-            
-                  // : of(false),
+            // console.log('track: ', track);
+
             const current_payment = track.phases.filter((phase) => phase.phase_status === 'active')[0].phase_index
-// revisar monto, no esta llegando en el correo
+
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_template,
                 params: {
