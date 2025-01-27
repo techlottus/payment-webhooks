@@ -323,11 +323,11 @@ export class StripeController {
             
                   // : of(false),
             const current_payment = track.phases.filter((phase) => phase.phase_status === 'active')[0].phase_index
-
+// revisar monto, no esta llegando en el correo
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_template,
                 params: {
-                  "amount": p_succeeded.amount_total,
+                  "amount": p_succeeded.amount_paid / 100,
                   "course": track.metadata?.name,
                   "program": track.metadata?.name,
                   "first_name": p_succeeded.customer_name,
@@ -360,6 +360,7 @@ export class StripeController {
         break;
 
       case 'invoice.payment_failed':
+        // hacer pruebas de correo de error
         const p_failed = event.data.object;
         console.log('p_failed: ', p_failed);
         if (p_failed.billing_reason === 'subscription_cycle') {
