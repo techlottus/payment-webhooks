@@ -407,7 +407,7 @@ export class StripeController {
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_error_template,
                 params: {
-                  "amount": p_failed.amount_due,
+                  "first_name": track.metadata?.extra_fields?.name,
                   "course": track.metadata?.name,
                   "card": track.card_last_4,
                   "payment_day": p_failed.next_payment_attempt ? new Date(p_failed.next_payment_attempt * 1000).toLocaleDateString() : '',
