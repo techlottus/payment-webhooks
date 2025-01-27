@@ -54,7 +54,7 @@ export class StripeService {
     const phone = checkoutSessionCompleted.customer_details.phone
     // console.log('phone: ', phone);
     
-    const metadata = checkoutSessionCompleted.metadata
+    const metadata = {...checkoutSessionCompleted.metadata, extra_fields: JSON.parse(checkoutSessionCompleted.metadata.extra_fields)}
 
     // console.log('metadata: ', metadata);
     const customFields = checkoutSessionCompleted?.custom_fields || {}
@@ -116,10 +116,10 @@ export class StripeService {
       email,
       metadata: {...metadata, typeform_url},
       payment_method_type: payment_method_types[0],
-      card_type: payment_intent.payment_method.card.funding,
+      card_type: payment_intent.payment_method?.card?.funding,
       extra_fields,
       payment_gateway: 'Stripe',
-      card_last_4: payment_intent.payment_method.card?.last4,
+      card_last_4: payment_intent.payment_method?.card?.last4,
     }
     // console.log('request: ', request);
 
@@ -265,7 +265,7 @@ export class StripeService {
         status: sub.status,
         current_phase_end: new Date(sub.current_period_end * 1000),
         current_phase_start: new Date(sub.current_period_start * 1000),
-        card_last_4: sub.default_payment_method.card.last4,
+        card_last_4: sub.default_payment_method?.card?.last4,
         phases: phases
           ? phases
           : sub.schedule.phases.map((phase, index) => {
