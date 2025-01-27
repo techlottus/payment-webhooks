@@ -239,23 +239,23 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
-        console.log('invoice: ', invoice);
+        // console.log('invoice: ', invoice);
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
         this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${invoice.subscription}`] ).pipe(
           mergeMap(tracksub => {
             // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             // const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
             const track = tracksub.data.data[0].attributes
-            console.log('track: ', track);
+            // console.log('track: ', track);
             
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_reminder_template,
                 params: {
                   "card": track.card_last_4,
                   "course": track.metadata?.name,
-                  "first_name": track.metadata?.extra_fields?.name,
+                  "first_name": JSON.parse(track.metadata?.extra_fields)?.name,
                   "payment_day": invoice.next_payment_attempt ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString() : '',
-                  "payment_amount": track.amount_due / 100,
+                  "payment_amount": invoice.amount_due / 100,
                 },
                 to: [track.email],
                 from: "admisiones",
@@ -436,7 +436,7 @@ export class StripeController {
             return this.utilsService.postSelfWebhook('/email/send', {
                 template_id: track.metadata.payment_error_template,
                 params: {
-                  "first_name": track.metadata?.extra_fields?.name,
+                  "first_name": JSON.parse(track.metadata?.extra_fields)?.name,
                   "course": track.metadata?.name,
                   "card": track.card_last_4,
                   "payment_day": p_failed.next_payment_attempt ? new Date(p_failed.next_payment_attempt * 1000).toLocaleDateString() : '',
