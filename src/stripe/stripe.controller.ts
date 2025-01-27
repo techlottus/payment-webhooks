@@ -239,8 +239,35 @@ export class StripeController {
         // console.log('subscriptionUpdated: ', subscriptionUpdated);
         // const rawSub =  await this.stripeService.getSubscription(subscriptionUpdated.id)
         // const sub = await rawSub
-        // console.log('invoice: ', invoice);
+        console.log('invoice: ', invoice);
         // console.log('sub.default_payment_method: ', sub.default_payment_method);
+        this.utilsService.fetchStrapi('track-subscriptions',[`filters[subscription_id][$eq]=${invoice.subscription}`] ).pipe(
+          mergeMap(tracksub => {
+            // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
+            // const trackingObs = this.utilsService.postStrapi('track-subscriptions?populate=*', sub)
+            const track = tracksub.data.data[0].attributes
+            return this.utilsService.postSelfWebhook('/email/send', {
+                template_id: track.metadata.payment_reminder_template,
+                params: {
+                  "card": track.card_last_4,
+                  "course": track.metadata?.name,
+                  "first_name": track.metadata?.extra_fields?.name,
+                  "payment_day": invoice.next_payment_attempt ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString() : '',
+                  "payment_amount": track.amount_total,
+                },
+                to: [track.email],
+                from: "admisiones",
+                scope: "payment",
+              }).pipe(catchError((err, caught) => {
+                console.log('err: ', err);
+                return caught
+              }))
+          })
+        ).subscribe(res => {
+          // console.log(res);
+          
+        })
+
 
         // sub.subscribe(res => {
 
@@ -351,7 +378,7 @@ export class StripeController {
       case 'invoice.payment_failed':
         // hacer pruebas de correo de error
         const p_failed = event.data.object;
-        console.log('p_failed: ', p_failed);
+        // console.log('p_failed: ', p_failed);
         if (p_failed.billing_reason === 'subscription_cycle') {
           const tracksub = this.utilsService.fetchStrapi('track-subscriptions', [`filters[subscription_id][$eq]=${p_failed.subscription}`, 'populate=*']).pipe(
             catchError((err, caught) => {
@@ -363,7 +390,7 @@ export class StripeController {
 
         tracksub.pipe(
           mergeMap(tracksub => {
-            console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
+            // console.log('tracksub.data.data[0]: ', tracksub.data.data[0]);
             const track = tracksub.data.data[0]?.attributes
             const phases = track?.phases.map(phase => {
 
@@ -398,10 +425,10 @@ export class StripeController {
             return this.utilsService.putStrapi(`track-subscriptions`, {...tracksub.data.data[0], phases, status: 'unpaid'}, tracksub.data.data[0]?.id, ['populate=*'])
           }),
           mergeMap(tracksub => {
-            console.log('tracksub: ', tracksub);
-            console.log('tracksub.data: ', tracksub.data);
+            // console.log('tracksub: ', tracksub);
+            // console.log('tracksub.data: ', tracksub.data);
             const track = tracksub.data.data?.attributes
-            console.log('track: ', track);
+            // console.log('track: ', track);
             
 
             return this.utilsService.postSelfWebhook('/email/send', {
