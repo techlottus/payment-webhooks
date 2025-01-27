@@ -255,7 +255,7 @@ export class StripeController {
                   "course": track.metadata?.name,
                   "first_name": track.metadata?.extra_fields?.name,
                   "payment_day": invoice.next_payment_attempt ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString() : '',
-                  "payment_amount": track.amount_total,
+                  "payment_amount": track.amount_due / 100,
                 },
                 to: [track.email],
                 from: "admisiones",
