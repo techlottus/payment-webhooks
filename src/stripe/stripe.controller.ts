@@ -167,7 +167,9 @@ export class StripeController {
                 send: {},
 
               }
-              if (data.payment.metadata.flow === 'EUONLINE') {
+            // if (data.payment.metadata.flow === 'EUONLINE' || data.payment.metadata.flow === 'ATR') {
+
+              if (data.payment.metadata.flow === 'EUONLINE' ) {
                 return this.utilsService.postSelfWebhook('/inscriptions/new', {
                   cs_id: res.payment.attributes.cs_id
                 })
