@@ -231,6 +231,7 @@ export class InscriptionsService {
                     last_name: res.track_payments?.attributes?.extra_fields.last_name,
                     second_last_name: res.track_payments?.attributes?.extra_fields.second_last_name,
                     gender: res.track_payments?.attributes?.extra_fields.gender,
+                    birthdate: res.track_payments?.attributes?.extra_fields.birthdate
                   };
             // console.log(inscription);
             const inscriptionObs =

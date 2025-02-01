@@ -134,7 +134,7 @@ export class EnrollmentController {
           password: responses[0].password,
           user: responses[0].user,
           scope: responses[0].scope,
-          email: request.body.email || responses[0].inscription.email,
+          email: request?.body?.email || responses[0].inscription.email,
           enrollment: responses[1].data
         }
         // console.dir(data.user);
@@ -189,7 +189,7 @@ export class EnrollmentController {
           name: responses.inscription?.name,
           last_name: responses.inscription?.last_name,
           phone: responses.inscription?.phone,
-          email: responses.email,
+          email: responses.inscription.email,
         }
         // console.log(data);
         
