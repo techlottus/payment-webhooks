@@ -224,10 +224,12 @@ export class InscriptionsService {
                 : {
                     cs_id,
                     submitted_at,
-                    residence: res.track_payments.residence,
+                    residence: res.track_payments.attributes.extra_fields.residence,
                     email: res.track_payments?.attributes?.email,
-                    name: res.track_payments.username,
+                    name: res.track_payments?.attributes?.extra_fields.name,
                     phone: res.track_payments?.attributes?.phone,
+                    last_name: res.track_payments?.attributes?.extra_fields.last_name,
+                    second_last_name: res.track_payments?.attributes?.extra_fields.second_last_name,
                   };
             // console.log(inscription);
             const inscriptionObs =
