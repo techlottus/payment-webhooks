@@ -103,9 +103,9 @@ export class EnrollmentController {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
         }
         // // log
-        console.log('responses.program.data: ', responses.program?.data);
-        console.log('responses.program.courses: ', responses.program?.courses);
-        console.log('responses.program.courses[0]: ', responses.program?.courses[0]);
+        // console.log('responses.program.data: ', responses.program?.data);
+        // console.log('responses.program.courses: ', responses.program?.data.courses);
+        // console.log('responses.program.courses[0]: ', responses.program?.data.courses[0]);
         // console.log(responses.user.exist);
         
         const password = responses.password
