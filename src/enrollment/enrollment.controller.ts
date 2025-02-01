@@ -94,7 +94,7 @@ export class EnrollmentController {
         
         const inscription = responses.inscription
         const payment = responses.payment
-        if (!!responses.user.data.exception) {
+        if (!!responses?.user?.data?.exception) {
           // console.log('responses.user.data: ', responses.user.data);
           
           return combineLatest([of({inscription, payment ,error: responses.user.data.message, scope: "User get or create"})])
@@ -103,9 +103,9 @@ export class EnrollmentController {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
         }
         // // log
-        console.log('responses.program.data: ', responses.program.data);
-        console.log('responses.program.courses: ', responses.program.courses);
-        console.log('responses.program.courses[0]: ', responses.program.courses[0]);
+        console.log('responses.program.data: ', responses.program?.data);
+        console.log('responses.program.courses: ', responses.program?.courses);
+        console.log('responses.program.courses[0]: ', responses.program?.courses[0]);
         // console.log(responses.user.exist);
         
         const password = responses.password
