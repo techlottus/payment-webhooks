@@ -230,6 +230,7 @@ export class InscriptionsService {
                     phone: res.track_payments?.attributes?.phone,
                     last_name: res.track_payments?.attributes?.extra_fields.last_name,
                     second_last_name: res.track_payments?.attributes?.extra_fields.second_last_name,
+                    gender: res.track_payments?.attributes?.extra_fields.gender,
                   };
             // console.log(inscription);
             const inscriptionObs =
