@@ -86,6 +86,7 @@ export class EnrollmentService {
     
     const url = provider && brands[provider] ? brands[provider].url : env.ENROLLMENT_URL
     const token = provider && brands[provider] ? brands[provider].token : env.ENROLLMENT_TOKEN
+    console.log('url: ', url);
 
     return this.http.post(url, {...req, wstoken: token,  moodlewsrestformat: 'json'}, {
       headers: {
