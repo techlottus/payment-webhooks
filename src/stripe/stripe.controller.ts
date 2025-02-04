@@ -93,7 +93,7 @@ export class StripeController {
                         "program": attrs.product_name,
                         "first_name": name,
                         "file_number": attrs.payment_id,
-                        "payment_date": attrs.date,
+                        "payment_date": new Date(attrs.date).toLocaleDateString(),
                         "provider": attrs.metadata.provider,
                         "card": attrs.card_last_4,
                         "total_payment": attrs.metadata.iterations,
