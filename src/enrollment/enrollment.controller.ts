@@ -163,10 +163,10 @@ export class EnrollmentController {
                 template_id: data.payment.metadata.enrollment_template,
                 params: {
                   "email": data.email,
-                  "campus": data.payment.metadata.SFcampus,
                   "password": !data.user.exist ? data.password : '',
                   "first_name": data.inscription.name,
-                  "start_date": data.payment.date.split('T')[0]
+                  "start_date": data.payment.date.split('T')[0],
+                  "course": data.payment.metadata.name,
                 },
                 to: [data.email],
                 cc: data.payment.metadata.backup_email ? [data.payment.metadata.backup_email] : [],
