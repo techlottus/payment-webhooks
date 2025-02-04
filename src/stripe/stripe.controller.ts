@@ -89,8 +89,8 @@ export class StripeController {
                       template_id: attrs.metadata.payment_template,
                       params: {
                         "amount": attrs.amount,
-                        "course": attrs.product_name,
-                        "program": attrs.product_name,
+                        "course": attrs.name,
+                        "program": attrs.name,
                         "first_name": name,
                         "file_number": attrs.payment_id,
                         "payment_date": new Date(attrs.date).toLocaleDateString(),
