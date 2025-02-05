@@ -13,7 +13,7 @@ export class InscriptionsService {
     public errorManager: ErrorManagerService
   ) {}
   async populateStrapi(body: any, response: any) {
-    console.log('body: ', body);
+    // console.log('body: ', body);
     const formResponse = body.form_response || null;
     const cs_id = formResponse?.hidden?.checkout_session_id || body.cs_id;
     const repeatedFields = ['RFC', 'CFDI_use', 'tax_regime'];
@@ -55,10 +55,10 @@ export class InscriptionsService {
                     res.inscription.data.data[0].attributes.last_name &&
                     res.inscription.data.data[0].attributes.birthdate,
                 };
-            console.log('res.payment: ', res.payment);
+            // console.log('res.payment: ', res.payment);
             const track_payments = res.payment.data.data[0];
-            console.log('formResponse: ', formResponse);
-            console.log('track payments: ', track_payments);
+            // console.log('formResponse: ', formResponse);
+            // console.log('track payments: ', track_payments);
 
             const answers = !formResponse
               ? null
@@ -127,19 +127,21 @@ export class InscriptionsService {
                 this.stripeService.getField(
                   track_payments?.attributes?.extra_fields,
                   'residencia',
+                  'residence'
                 )?.value,
               );
               username = this.utilsService.capitalizeText(
                 this.stripeService.getField(
                   track_payments?.attributes?.extra_fields,
                   'nombredelalumno',
+                  'name'
                 )?.value,
               );
             }
 
-            console.log('curp: ', curp);
-            console.log('residence: ', residence);
-            console.log('username: ', username);
+            // console.log('curp: ', curp);
+            // console.log('residence: ', residence);
+            // console.log('username: ', username);
 
             const curpObservable =
               !!curp && residence === 'Nacional' && !track_inscriptions.filled
@@ -159,7 +161,7 @@ export class InscriptionsService {
           }),
 
           mergeMap((res: any) => {
-            console.log('res: ', res);
+            // console.log('res: ', res);
 
             if (res.curp?.error || res.curp?.data?.errorType) {
               // console.log('res.curp?.response?.data: ', res.curp?.response?.data);
@@ -222,10 +224,14 @@ export class InscriptionsService {
                 : {
                     cs_id,
                     submitted_at,
-                    residence: res.track_payments.residence,
+                    residence: res.track_payments.attributes.extra_fields.residence,
                     email: res.track_payments?.attributes?.email,
-                    name: res.track_payments.username,
+                    name: res.track_payments?.attributes?.extra_fields.name,
                     phone: res.track_payments?.attributes?.phone,
+                    last_name: res.track_payments?.attributes?.extra_fields.last_name,
+                    second_last_name: res.track_payments?.attributes?.extra_fields.second_last_name,
+                    gender: res.track_payments?.attributes?.extra_fields.gender,
+                    birthdate: res.track_payments?.attributes?.extra_fields.birthdate
                   };
             // console.log(inscription);
             const inscriptionObs =
@@ -276,7 +282,7 @@ export class InscriptionsService {
             });
           }),
           mergeMap((res) => {
-            console.log('res: ', res);
+            // console.log('res: ', res);
             // console.log('res.inscription.data?.data[0]: ', res.inscription.data?.data[0]);
 
             if (

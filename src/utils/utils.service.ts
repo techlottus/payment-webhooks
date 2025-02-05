@@ -9,13 +9,12 @@ export class UtilsService {
   constructor(private readonly http: HttpService) {}
   StrapiTrackingConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_TRACKING_TOKEN }` } }
   StrapiTemplatesConfig = { headers: { Authorization: `Bearer ${ env.STRAPI_EMAIL_TEMPLATES_TOKEN }` } }
-  
 
   postStrapi (endpoint: string, data: any) {
     return this.http.post(`${env.STRAPI_TRACKING_URL}/api/${endpoint}`, { data }, this.StrapiTrackingConfig)
   }
-  putStrapi (endpoint: string, data: any, id:number) {
-    return this.http.put(`${env.STRAPI_TRACKING_URL}/api/${endpoint}/${id}`, { data }, this.StrapiTrackingConfig)
+  putStrapi (endpoint: string, data: any, id:number, params?: string[]) {
+    return this.http.put(`${env.STRAPI_TRACKING_URL}/api/${endpoint}/${id}${!!params?.length ? '?' + params.join('&'): ''}`, { data }, this.StrapiTrackingConfig)
   }
   fetchStrapi = (model: string, params: string[] ) => {
     return this.http.get(`${env.STRAPI_TRACKING_URL}/api/${model}${!!params.length && '?' + params.join('&')}`, this.StrapiTrackingConfig)

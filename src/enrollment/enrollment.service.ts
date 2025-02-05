@@ -66,13 +66,16 @@ export class EnrollmentService {
     return this.callEnrollmentService(req, provider)
 
   }
-  enrollStudent(user: number, course: number, provider: string) {
+  enrollStudent(user: number, course: number, provider: string, time_end?: string) {
     const wsfunction = 'enrol_manual_enrol_users'
     const req = {
       'enrolments[0][roleid]': 5, // 5: student roleId moodle
       'enrolments[0][userid]': user,
       'enrolments[0][courseid]': course,
       wsfunction
+    }
+    if (time_end) {
+      req['enrolments[0][timeend]'] = time_end
     }
     return this.callEnrollmentService(req, provider)
 
@@ -81,8 +84,9 @@ export class EnrollmentService {
     console.log('req: ', req);
 
     
-    const url = brands[provider].url || env.ENROLLMENT_URL
-    const token = brands[provider].token || env.ENROLLMENT_TOKEN
+    const url = provider && brands[provider] ? brands[provider].url : env.ENROLLMENT_URL
+    const token = provider && brands[provider] ? brands[provider].token : env.ENROLLMENT_TOKEN
+    console.log('url: ', url);
 
     return this.http.post(url, {...req, wstoken: token,  moodlewsrestformat: 'json'}, {
       headers: {

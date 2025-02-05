@@ -35,7 +35,7 @@ export class SalesforceController {
           const data = res['data']
           const err = res['error']
         
-          console.log('err: ', err);
+          // console.log('err: ', err);
           return err
             ? of({ data: data, error: true, errorData: err, inscription: false})
             : combineLatest({
@@ -50,7 +50,7 @@ export class SalesforceController {
             })
         })
       ).subscribe(res => {
-        console.log(`res: `, res);
+        // console.log(`res: `, res);
         const data = res.data
         // console.log(`res.error: `, res.error);
         // console.log(`res.data: `, res.data);
@@ -83,7 +83,7 @@ export class SalesforceController {
           if (data.track_payments?.attributes?.metadata?.flow !== "ATR" ) {
             // call enrollment webhook if not atr
             const data = res.data.email ? { cs_id: body.cs_id, email: res.data.email } : { cs_id: body.cs_id }
-            console.log('Enrollment data',data);
+            // console.log('Enrollment data',data);
             this.utilsService.postSelfWebhook('/enrollment/new', data).subscribe()
           }
         }
