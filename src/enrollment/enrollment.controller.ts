@@ -65,6 +65,8 @@ export class EnrollmentController {
         // console.log(password);
         // console.log('request.body.email || inscription.email: ', request.body.email || inscription.email);
         
+          console.log('payment.metadata.LMSprogram: ', payment.metadata.LMSprogram);
+          console.log('payment.metadata.provider: ', payment.metadata.provider);
         const createUserObs = this.enrollmentsService.UserCreate(request.body.email || inscription.email, inscription.name, inscription.last_name, password, payment.metadata.provider)
         const programObs = this.enrollmentsService.getProgram(payment.metadata.LMSprogram, payment.metadata.provider)
         const userObs = this.enrollmentsService.checkUser(request.body.email || inscription.email, payment.metadata.provider).pipe(switchMap(res=> {
@@ -103,9 +105,10 @@ export class EnrollmentController {
           return combineLatest([of({inscription, payment ,error: responses.error, scope: responses.scope})])
         }
         // // log
-        // console.log('responses.program.data: ', responses.program?.data);
-        // console.log('responses.program.courses: ', responses.program?.data.courses);
-        // console.log('responses.program.courses[0]: ', responses.program?.data.courses[0]);
+        console.log('responses.program: ', responses.program);
+        console.log('responses.program.data: ', responses.program?.data);
+        console.log('responses.program.courses: ', responses.program?.data.courses);
+        console.log('responses.program.courses[0]: ', responses.program?.data.courses[0]);
         // console.log(responses.user.exist);
         
         const password = responses.password
