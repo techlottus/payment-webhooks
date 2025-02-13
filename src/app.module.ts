@@ -11,6 +11,7 @@ import { EmailModule } from './email/email.module';
 import { CurpModule } from './curp/curp.module';
 import { CdSantanderModule } from './cd-santander/cd-santander.module';
 import { FlywireModule } from './flywire/flywire.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { FlywireModule } from './flywire/flywire.module';
     EmailModule,
     CurpModule,
     CdSantanderModule,
-    FlywireModule
+    FlywireModule,
+    EventsModule
   ],
   controllers: [ AppController ],
   providers: [ AppService ],
